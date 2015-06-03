@@ -1,0 +1,12 @@
+-js bin/script.js
+-cp src
+-cp test
+-cp examples
+-lib glaze-core
+-lib glaze-render
+-lib glaze-physics
+-lib glaze-eco
+-main GameTestA
+#-debug
+-D analyzer
+-cmd osascript bin/refreshTab

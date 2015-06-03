@@ -1,0 +1,11 @@
+tell application "Google Chrome"
+	activate
+	set i to 0
+	repeat with t in (tabs of (first window))
+		set i to i + 1
+		if title of t is "haxeproject" then
+			set (active tab index of (first window)) to i
+		end if
+	end repeat
+	reload active tab of window 1
+end tell

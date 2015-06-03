@@ -1,0 +1,754 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html>
+<head>
+<title>Physics</title>
+<script type="text/javascript" charset="utf-8">
+    var canvas;
+    
+    var mesh = [];
+    var entities = [];
+    
+    var showNormals;
+    var showCollisionHull;
+    var showBox;
+    
+    // Defines a point object
+    function Point(x, y) {
+        this.x = x;
+        this.y = y;
+        
+        this.magnitude = function() {
+            return Math.sqrt(this.x * this.x + this.y * this.y);
+        }
+        
+        this.normalize = function() {
+            var mag = this.magnitude();
+            return new Point(this.x / mag, this.y / mag);
+        }
+        
+        this.scale = function(s) {
+            return new Point(this.x * s, this.y * s);
+        }
+        
+        this.dot = function(point) {
+            return this.x * point.x + this.y * point.y;
+        }
+    }
+    
+    // Defines a line object. Ordering of the points matters, since it
+    // determines the direction of the normal. The direction of the normal is
+    // used for bouncing, reflecting, and determining whether or not to collide
+    // with a line (an object only collides with a line if it's moving
+    // towards it)
+    
+    // If the start point is left of the end point, the normal will point
+    // upwards. If start is right of end, normal will point downwards. If start
+    // is below end, normal will point leftwards. If start is above end, normal
+    // will point rightwards.
+    
+    // Yes, I know leftwards and rightwards aren't actually words. You know what
+    // I mean.
+    function Line(start, end) {
+        this.start = start;
+        this.end = end;
+        
+        this.normal = new Point(-(end.y - start.y), end.x - start.x);
+        this.normal = this.normal.normalize();
+        
+        this.midpoint = function() {
+            var x = (this.start.x + this.end.x) / 2;
+            var y = (this.start.y + this.end.y) / 2;
+            return new Point(x, y);
+        }
+        
+        this.slope = function() {
+            if(this.start.x == this.end.x) {
+                return "inf";
+            }
+            
+            if(Math.abs(this.start.y - this.end.y) < 0.03125) {
+                return 0;
+            }
+            
+            return (this.start.y - this.end.y) / (this.start.x - this.end.x);
+        }
+        
+        this.clone = function() {
+            return new Line(new Point(this.start.x, this.start.y), new Point(this.end.x, this.end.y));
+        }
+    }
+    
+    // Defines an entity object. An entity has a position, a velocity, a type
+    // (either point or box (ball support is incomplete)), an impactFunction
+    // (one of bounce, stop, or slide), an elasticity, and something to store
+    // information about the last line the entity collided with.
+    
+    // The impactFunction is used to determine what should happen when the
+    // entity collides with something. Stop is the simplest, the object will
+    // simply cease to move beyond the collision point. Bounce causes the
+    // object to reflect its velocity about the normal of the colliding segment,
+    // creating a bounce effect. Slide will make the object slide along the
+    // colliding segment.
+    function Entity() {
+        this.position = new Point(0, 0);
+        this.velocity = new Point(0, 0);
+        
+        this.type = "point";
+        this.impactFunction = "bounce";
+        this.elasticity = 1;
+        this.touchedSegment = null;
+    }
+    
+    // Gets the angle of a point
+    function thetaOfPoint(point) {
+        var theta = Math.asin(point.y);
+        
+        if(point.x < 0 && point.y >= 0) {
+            theta = Math.PI - theta;
+        } else if(point.x <= 0 && point.y < 0) {
+            theta = Math.PI + Math.abs(theta);
+        } else if(point.x > 0 && point.y < 0) {
+            theta = Math.PI * 2 - Math.abs(theta);
+        }
+        
+        return theta;
+    }
+    
+    // Find the intersection of two lines
+    // See http://local.wasp.uwa.edu.au/~pbourke/geometry/linepathLined/ if you
+    // want this function to make sense
+    function intersection(a, b) {
+        var x1 = a.start.x;
+        var x2 = a.end.x;
+        var x3 = b.start.x;
+        var x4 = b.end.x;
+        
+        var y1 = a.start.y;
+        var y2 = a.end.y;
+        var y3 = b.start.y;
+        var y4 = b.end.y;
+        
+        var uaNum = (x4 - x3) * (y1 - y3) - (y4 - y3) * (x1 - x3);
+        var ubNum = (x2 - x1) * (y1 - y3) - (y2 - y1) * (x1 - x3);
+        var uaDem = (y4 - y3) * (x2 - x1) - (x4 - x3) * (y2 - y1);
+        
+        if(uaDem == 0) {
+            return null; // Lines are parallel
+        }
+        
+        var ua = uaNum / uaDem;
+        var ub = ubNum / uaDem;
+        
+        if(ua < 0 || ua > 1 || ub < 0 || ub > 1) {
+            return null; // Intersection outside of bounds;
+        }
+        
+        var x = x1 + ua * (x2 - x1);
+        var y = y1 + ua * (y2 - y1);
+        
+        return new Point(x, y);
+    }
+    
+    // Finds the intersection of a circle and a line.
+    // See http://local.wasp.uwa.edu.au/~pbourke/geometry/sphereline/ if you
+    // want this function to make sense
+    
+    // This might not work all the way, I didn't complete ball collision
+    // functionality
+    function circleIntersection(x, y, r, line) {
+        var x1 = line.start.x;
+        var y1 = line.start.y;
+        var x2 = line.end.x;
+        var y2 = line.end.y;
+        var x3 = x;
+        var y3 = y;
+        
+        var a = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1);
+        var b = 2 * ((x2 - x1) * (x1 - x3) + (y2 - y1) * (y1 - y3));
+        var c = x3*x3 + y3*y3 + x1*x1 + y1*y1 - 2 * (x3*x1 + y3*y1) - r * r;
+        
+        var d = b * b - 4 * a * c;
+        if(d < 0) {
+            return null; // Line does not touch circle
+        }
+        
+        var u, u1, u2;
+        
+        u = (x3 - x1)*(x2 - x1) + (y3 - y1)*(y2 - y1);
+        u /= (x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1);
+        
+        if(u < 0 || u > 1) {
+            return null; // Intersection not in line segment
+        }
+        
+        if(d == 0) {
+            // Line hits ball once
+            u = -b / (2 * a);
+            
+            return new Point(x1 + u * (x2 - x1), y1 + u * (y2 - y1));
+        } else {
+            // Line hits ball twice, so take the intersection that's closer
+            // to the line's start point.
+            
+            // This logic may be wrong.
+            u1 = (-b + d) / (2 * a);
+            u2 = (-b - d) / (2 * a);
+            
+            var p1 = new Point(x1 + u1 * (x2 - x1), y1 + u1 * (y2 - y1));
+            var p2 = new Point(x1 + u2 * (x2 - x1), y1 + u2 * (y2 - y1));
+            
+            var d1 = Math.sqrt((p1.x - x1) * (p1.x - x1) + (p1.y - y1) * (p1.y - y1));
+            var d2 = Math.sqrt((p2.x - x1) * (p2.x - x1) + (p2.y - y1) * (p2.y - y1));
+            
+            return null;
+            return d1 < d2 ? p1 : p2;
+        }
+    }
+    
+    // These booleans and keyboard handling functions say Ball instead of Box
+    // because originally the keyboard controlled a Ball instead of a Box.
+    
+    // ... Yeah.
+    var pushBallLeft = false;
+    var pushBallRight = false;
+    var pushBallUp = false;
+    var pushBallDown = false;
+    
+    document.onkeydown = function(event) {
+        if(event.keyCode == 37) {
+            pushBallLeft = true;
+        } else if(event.keyCode == 38) {
+            pushBallUp = true;
+        } else if(event.keyCode == 39) {
+            pushBallRight = true;
+        } else if(event.keyCode == 40) {
+            pushBallDown = true;
+        }
+    }
+    
+    document.onkeyup = function(event) {
+        if(event.keyCode == 37) {
+            pushBallLeft = false;
+        } else if(event.keyCode == 38) {
+            pushBallUp = false;
+        } else if(event.keyCode == 39) {
+            pushBallRight = false;
+        } else if(event.keyCode == 40) {
+            pushBallDown = false;
+        }
+    }
+    
+    // Go through all entities, move them, handle collisions
+    function physicsPass() {
+        for(var i=0; i<entities.length; i++) {
+            var entity = entities[i];
+            /*
+            if(entity.type == "point") {
+                // Simulate gravity on points. This isn't something that should
+                // be put in this function, but meh.
+                entity.velocity.y -= 0.1;
+            } else if(entity.type == "box") {
+
+                // Set the velocity of box entities according to keyboard input.
+                // Again, this really shouldn't go in this function
+                if(pushBallLeft == false && pushBallRight == false) {
+                    entity.velocity.x = 0;
+                }
+                
+                if(pushBallUp == false && pushBallDown == false) {
+                    entity.velocity.y = 0;
+                }
+                if(pushBallLeft == true) {
+                    entity.velocity.x -= 0.2;
+                    entity.velocity.x = -5;
+                }
+                if(pushBallUp == true) {
+                    entity.velocity.y += 0.2;
+                    entity.velocity.y = 5;
+                }
+                if(pushBallRight == true) {
+                    entity.velocity.x += 0.2;
+                    entity.velocity.x = 5;
+                }
+                if(pushBallDown == true) {
+                    entity.velocity.y -= 0.2;
+                    entity.velocity.y = -5;
+                }
+            }
+            */
+            // If the entity isn't moving, let's not do physics.
+            if(entity.velocity.x == 0 && entity.velocity.y == 0) {
+                continue;
+            }           
+            
+            // Where does the entity want to go?
+            var destX = entity.position.x + entity.velocity.x;
+            var destY = entity.position.y + entity.velocity.y;
+            
+            // See what happens when we run a trace
+            var result = trace(entity, destX, destY);
+            
+            // Move the entity to the endPoint of the trace result
+            entity.position.x = result.endPoint.x;
+            entity.position.y = result.endPoint.y;
+            
+            // If we collided with something, follow our impact function
+            if(result.collisionSegment) {
+                if(entity.impactFunction == "bounce") {
+                    // Reflect the velocity about the normal of the collision
+                    // segment
+                    entity.touchedSegment = result.collisionSegment;
+                    var invVelocity = new Point(-entity.velocity.x, -entity.velocity.y);
+                    var velocityTheta = thetaOfPoint(invVelocity.normalize());
+                    var normalTheta = thetaOfPoint(result.collisionSegment.normal);
+                    var theta = (normalTheta - velocityTheta) + normalTheta;
+                    var magnitude = invVelocity.magnitude();
+                    entity.velocity.y = magnitude * Math.sin(theta) * entity.elasticity;
+                    entity.velocity.x = magnitude * Math.cos(theta) * entity.elasticity;
+                } else if(entity.impactFunction == "stop") {
+                    // Stop dead
+                    entity.velocity.x = 0;
+                    entity.velocity.y = 0;
+                } else if(entity.impactFunction == "slide") {
+                    // Try to slide along the collision segment, and do an extra
+                    // trace while sliding to ensure we don't slide right pass
+                    // another collision segment
+                    var segment = result.collisionSegment;
+                    var velocity = entity.velocity;
+                    var invVelocity = new Point(-velocity.x, -velocity.y).normalize();
+                    var dot = segment.normal.dot(invVelocity);
+                    if(dot >= 1) {
+                        entity.velocity.x = 0;
+                        entity.velocity.y = 0;
+                        continue;
+                    }
+                    var velocityTheta = thetaOfPoint(invVelocity);
+                    var normalTheta = thetaOfPoint(segment.normal);
+                    var mag = Math.sin(Math.acos(dot));
+                    
+                    var testTheta = normalTheta - velocityTheta;
+                    if(testTheta < 0) {
+                        testTheta += Math.PI * 2;
+                    } else if(testTheta > Math.PI * 2) {
+                        testTheta -= Math.PI * 2;
+                    }
+                    if(testTheta > Math.PI) {
+                        mag = -mag;
+                    }
+
+                    normalTheta += Math.PI * 0.5;
+
+                    var x = Math.cos(normalTheta) * mag * entity.velocity.magnitude();
+                    var y = Math.sin(normalTheta) * mag * entity.velocity.magnitude();
+
+                    var result = trace(entity, entity.position.x + x, entity.position.y + y);
+                    
+                    entity.position.x = result.endPoint.x;
+                    entity.position.y = result.endPoint.y;
+                }
+            }
+        }
+    }
+    
+    // This function takes an entity and its destination point, and then
+    // checks against all line segments to see if a collision occurs.
+    
+    // The secret to the trace function is to not simulate boxes or balls, but
+    // only points. Point against line collision is really easy. Box or ball
+    // against line collision is also really easy, but box or ball against
+    // multiple line collision has a ton of nasty edge cases that make it just
+    // an awful experience.
+    
+    // The way we handle this is by tweaking line segments at trace-time to
+    // allow us to actually do a point-line collision. It's kind of hard to
+    // explain, but if you turn on the "show collision hull" checkbox and move
+    // the box around, you'll see it doing this tweaking. The white dot in the
+    // middle of the box represents the point that it's actually doing collision
+    // tests with, the green lines represent the lines the point is testing
+    // against.
+    function trace(entity, destX, destY) {
+        var result = {
+            percent : 1,
+            endPoint : new Point(destX, destY),
+            collisionSegment : null
+        }
+        
+        // Create a line going from the entity's origin to its destination
+        var pathLine = new Line(entity.position, new Point(destX, destY));
+        
+        // Find the direction of movement
+        var theta = thetaOfPoint(new Point(destX - entity.position.x, destY - entity.position.y).normalize()) + Math.PI;
+        
+        // For every line segment
+        // (Optimizations could occur here. You may want to divide the world
+        // up into a large grid and only test for line segments in the parts of
+        // the grid that the entity wants to move in, for example. As is, this
+        // could get pretty nasty pretty quickly)
+        for(var i=0; i<mesh.length; i++) {
+            var line1 = mesh[i];
+            
+            // If the entity is not moving towards the line, then don't do this
+            // collision
+            if(entity.velocity.dot(line1.normal) > 0) {
+                continue;
+            }
+            
+            if(entity.type == "ball") {
+                // ... ignore this
+                var linet = line1.clone();
+                linet.start.x += linet.normal.x * entity.radius;
+                linet.end.x += linet.normal.x * entity.radius;
+                
+                linet.start.y += linet.normal.y * entity.radius;
+                linet.end.y += linet.normal.y * entity.radius;
+                
+                var point = intersection(linet, pathLine);
+                if(point == null) {
+                    continue;
+                    point = circleIntersection(line1.start.x, line1.start.y, entity.radius, pathLine);
+                    if(point == null) {
+                        point = circleIntersection(line1.end.x, line1.end.y, entity.radius, pathLine);
+                        if(point == null) {
+                            continue;
+                        }
+                    }
+                }
+            } else if(entity.type == "box") {
+                // Create a new line segment by pushing the current segment out
+                // by a certain amount.
+                
+                // Additionally, we'll create two more line segments to handle
+                // the box hitting the line from the side.
+                var halfWidth = entity.width * 0.5;
+                var halfHeight = entity.height * 0.5;
+                var width = entity.width;
+                var height = entity.height;
+                var linet = line1.clone();
+                var lineb, linec;
+                
+                canvas.strokeStyle = "green";
+                
+                if(linet.normal.y == 1) {
+                    linet.start.x -= halfWidth;
+                    linet.end.x += halfWidth;
+                    linet.start.y += halfHeight;
+                    linet.end.y += halfHeight;
+                    
+                    lineb = new Line(new Point(linet.start.x, linet.start.y - height), new Point(linet.start.x, linet.start.y));
+                    linec = new Line(new Point(linet.end.x, linet.start.y), new Point(linet.end.x, linet.start.y - height));
+                } else if(linet.normal.y == -1) {
+                    linet.start.x += halfWidth;
+                    linet.end.x -= halfWidth;
+                    linet.start.y -= halfHeight;
+                    linet.end.y -= halfHeight;
+                    
+                    lineb = new Line(new Point(linet.start.x, linet.start.y + height), new Point(linet.start.x, linet.start.y));
+                    linec = new Line(new Point(linet.end.x, linet.start.y), new Point(linet.end.x, linet.start.y + height));
+                } else if(linet.normal.x == 1) {
+                    linet.start.x += halfWidth;
+                    linet.end.x += halfWidth;
+                    linet.start.y += halfHeight;
+                    linet.end.y -= halfHeight;
+                    
+                    lineb = new Line(new Point(linet.start.x - width, linet.start.y), new Point(linet.start.x, linet.start.y));
+                    linec = new Line(new Point(linet.end.x, linet.end.y), new Point(linet.end.x - width, linet.end.y));
+                } else if(linet.normal.x == -1) {
+                    linet.start.x -= halfWidth;
+                    linet.end.x -= halfWidth;
+                    linet.start.y -= halfHeight;
+                    linet.end.y += halfHeight;
+                    
+                    lineb = new Line(new Point(linet.start.x + width, linet.start.y), new Point(linet.start.x, linet.start.y));
+                    linec = new Line(new Point(linet.end.x, linet.end.y), new Point(linet.end.x + width, linet.end.y));
+                } else {
+                    linet.start.y += linet.normal.y > 0 ? halfHeight : -halfHeight;
+                    linet.end.y += linet.normal.y > 0 ? halfHeight : -halfHeight;
+                    linet.start.x += linet.normal.x > 0 ? halfWidth : -halfWidth;
+                    linet.end.x += linet.normal.x > 0 ? halfWidth : -halfWidth;
+                    
+                    if(linet.normal.y > 0 && linet.normal.x > 0) {
+                        var x1 = linet.start.x - width;
+                        var y = linet.start.y;
+                        var x2 = linet.start.x;
+                        lineb = new Line(new Point(x1, y), new Point(x2, y));
+                        
+                        var x = linet.end.x;
+                        var y1 = linet.end.y;
+                        var y2 = linet.end.y - height;
+                        linec = new Line(new Point(x, y1), new Point(x, y2));
+                    } else if(linet.normal.y < 0 && linet.normal.x < 0) {
+                        var x1 = linet.start.x + width;
+                        var y = linet.start.y;
+                        var x2 = linet.start.x;
+                        lineb = new Line(new Point(x1, y), new Point(x2, y));
+                        
+                        var x = linet.end.x;
+                        var y1 = linet.end.y;
+                        var y2 = linet.end.y + height;
+                        linec = new Line(new Point(x, y1), new Point(x, y2));
+                    } else if(linet.normal.y > 0 && linet.normal.x < 0) {
+                        var x1 = linet.end.x;
+                        var y = linet.end.y;
+                        var x2 = linet.end.x + width;
+                        lineb = new Line(new Point(x1, y), new Point(x2, y));
+                        
+                        var x = linet.start.x;
+                        var y1 = linet.start.y - height;
+                        var y2 = linet.start.y;
+                        linec = new Line(new Point(x, y1), new Point(x, y2));
+                    } else {
+                        var x1 = linet.end.x;
+                        var y = linet.end.y;
+                        var x2 = linet.end.x - width;
+                        lineb = new Line(new Point(x1, y), new Point(x2, y));
+                        
+                        var x = linet.start.x;
+                        var y1 = linet.start.y + height;
+                        var y2 = linet.start.y;
+                        linec = new Line(new Point(x, y1), new Point(x, y2));
+                    }
+                }
+                
+                // Let's do drawing code inside a physics function! Yaaaaaay
+                // for good architecture!
+                if(showCollisionHull == true) {
+                    canvas.beginPath();
+                    canvas.moveTo(linet.start.x, 240 - linet.start.y);
+                    canvas.lineTo(linet.end.x, 240 - linet.end.y);
+                    canvas.stroke();
+
+                    if(showNormals == true) {
+                        canvas.beginPath();
+                        var mid = linet.midpoint();
+                        var scaled = linet.normal.scale(4);
+                        canvas.moveTo(mid.x, 240 - mid.y);
+                        canvas.lineTo(mid.x + scaled.x, 240 - (mid.y + scaled.y));
+                        canvas.stroke();
+                    }
+
+                    if(lineb) {
+                        canvas.beginPath();
+                        canvas.moveTo(lineb.start.x, 240 - lineb.start.y);
+                        canvas.lineTo(lineb.end.x, 240 - lineb.end.y);
+                        canvas.stroke();
+
+                        if(showNormals == true) {
+                            canvas.beginPath();
+                            var mid = lineb.midpoint();
+                            var scaled = lineb.normal.scale(4);
+                            canvas.moveTo(mid.x, 240 - mid.y);
+                            canvas.lineTo(mid.x + scaled.x, 240 - (mid.y + scaled.y));
+                            canvas.stroke();
+                        }
+                    }
+
+                    if(linec) {
+                        canvas.beginPath();
+                        canvas.moveTo(linec.start.x, 240 - linec.start.y);
+                        canvas.lineTo(linec.end.x, 240 - linec.end.y);
+                        canvas.stroke();
+
+                        if(showNormals == true) {
+                            canvas.beginPath();
+                            var mid = linec.midpoint();
+                            var scaled = linec.normal.scale(4);
+                            canvas.moveTo(mid.x, 240 - mid.y);
+                            canvas.lineTo(mid.x + scaled.x, 240 - (mid.y + scaled.y));
+                            canvas.stroke();
+                        }
+                    }
+                }
+                
+                // See if the entity collides with the line segment.
+                // If not, see if the entity collides with the line segment
+                // from either side. If not, the entity doesn't collide with
+                // this line segment
+                var point = intersection(linet, pathLine);
+                if(point == null) {
+                    line1 = lineb;
+                    point = intersection(lineb, pathLine);
+                    if(point == null) {
+                        line1 = linec;
+                        point = intersection(linec, pathLine);
+                        if(point == null) {
+                            continue;
+                        }
+                    }
+                }
+            } else {
+                // We're testing point collision, so just do an intersection
+                // test. Easy, no?
+                var point = intersection(line1, pathLine);
+                if(point == null) {
+                    continue;
+                }
+            }
+            
+            // Figure out how far along the desired path we moved
+            var percentX = (point.x - entity.position.x) / (destX - entity.position.x);
+            var percentY = (point.y - entity.position.y) / (destY - entity.position.y);
+            
+            var percent = (isNaN(percentX) || !isFinite(percentX)) ? percentY : percentX;
+            
+            // If we were blocked sooner than any other line segment blocked us
+            if(percent < result.percent) {
+                // Calculate the new endpoint
+                result.endPoint.x = entity.position.x + (destX - entity.position.x) * percent;
+                result.endPoint.y = entity.position.y + (destY - entity.position.y) * percent;
+                
+                // Backtrack by an epsilon (you don't want floating point
+                // rounding errors to accidently drop us on the wrong side of
+                // the line segment. That would be bad)
+                
+                // 0.03125 happens to be 1/32, and the epsilon used in Quake 3.
+                // I figure, if it's good enough for id, it's good enough for
+                // me.
+                result.endPoint.y += Math.sin(theta) * 0.03125;
+                result.endPoint.x += Math.cos(theta) * 0.03125;
+                
+                // Set the new percent and the new collision segment
+                result.percent = percent;
+                result.collisionSegment = line1;
+            }
+        }
+        
+        return result;
+    }
+    
+    // Draw the world
+    function drawMesh() {
+        canvas.strokeStyle = "red";
+        for(var i=0; i<mesh.length; i++) {
+            var line = mesh[i];
+            canvas.beginPath();
+            canvas.moveTo(line.start.x, 240 - line.start.y);
+            canvas.lineTo(line.end.x, 240 - line.end.y);
+            canvas.stroke();
+            
+            if(showNormals == true) {
+                canvas.beginPath();
+                var mid = line.midpoint();
+                var scaled = line.normal.scale(8);
+                canvas.moveTo(mid.x, 240 - mid.y);
+                canvas.lineTo(mid.x + scaled.x, 240 - (mid.y + scaled.y));
+                canvas.stroke();
+            }
+        }
+    }
+    
+    // Perform a step, which involves doing a physics pass and painting
+    // everything.
+    function step() {
+        canvas.fillStyle = "white";
+        canvas.fillRect(-10, -10, 340, 260);
+        
+        physicsPass();
+        
+        drawMesh();
+        
+        canvas.fillStyle = "blue";
+        for(var i=0; i<entities.length; i++) {
+            if(entities[i].type == "ball") {
+                canvas.beginPath();
+                canvas.arc(entities[i].position.x, 239.5 - entities[i].position.y, entities[i].radius, 0, Math.PI * 2, true);
+                canvas.fill();
+            } else if(entities[i].type == "box") {
+                if(showBox == true) {
+                    var entity = entities[i];
+                    var position = entity.position;
+                    canvas.fillRect(position.x - (entity.width / 2) - 0.5, 240.5 - (entity.height / 2) - position.y, entity.width, entity.height);
+
+                    if(showCollisionHull == true) {
+                        canvas.fillStyle = "white";
+                        canvas.beginPath();
+                        canvas.arc(entity.position.x, 239.5 - entity.position.y, 1.5, 0, Math.PI * 2, true);
+                        canvas.fill();
+                        canvas.fillStyle = "blue";
+                    }
+                }
+            } else {
+                canvas.fillRect(entities[i].position.x - 1.5, 238.5 - entities[i].position.y, 3, 3);
+            }
+        }
+    }
+    
+    function pageLoad() {
+        canvas = document.getElementById("canvas").getContext("2d");
+        canvas.translate(0.5, 0.5);
+        
+        // create the mesh
+        mesh.push(new Line(new Point(0, 10), new Point(64, 10)));
+        mesh.push(new Line(new Point(64, 10), new Point(64, 32)));
+        mesh.push(new Line(new Point(64, 32), new Point(110, 64)));
+        mesh.push(new Line(new Point(110, 64), new Point(140, 10)));
+        mesh.push(new Line(new Point(140, 10), new Point(180, 32)));
+        mesh.push(new Line(new Point(180, 32), new Point(220, 32)));
+        mesh.push(new Line(new Point(220, 32), new Point(256, 10)));
+        mesh.push(new Line(new Point(256, 10), new Point(320, 10)));
+        mesh.push(new Line(new Point(320, 10), new Point(320, 240)));
+        mesh.push(new Line(new Point(320, 240), new Point(64, 240)));
+        mesh.push(new Line(new Point(0, 128), new Point(0, 10)));
+        mesh.push(new Line(new Point(64, 240), new Point(0, 128)));
+        
+        mesh.push(new Line(new Point(110, 150), new Point(250, 150)));
+        mesh.push(new Line(new Point(250, 150), new Point(250, 90)));
+        mesh.push(new Line(new Point(250, 90), new Point(180, 120)));
+        mesh.push(new Line(new Point(180, 120), new Point(128, 100)));
+        mesh.push(new Line(new Point(128, 100), new Point(110, 150)));
+        
+        // Create a bunch of entities, and call them all player.
+        // The first three are just bouncy points, it's the last one that's
+        // actually the player
+        var player = new Entity();
+        player.position.x = 68;
+        player.position.y = 200;
+        player.velocity.x = 0;
+        player.velocity.y = 10;
+        player.elasticity = 0.9;
+        entities.push(player);
+        
+        player = new Entity();
+        player.position.x = 300;
+        player.position.y = 200;
+        player.velocity.x = -5;
+        player.velocity.y = 1000000;
+        player.elasticity = 0.9;
+        entities.push(player);
+        
+        player = new Entity();
+        player.position.x = 150;
+        player.position.y = 50;
+        player.velocity.x = 3;
+        player.velocity.y = 10;
+        player.elasticity = 0.9;
+        entities.push(player);
+        
+        player = new Entity();
+        player.type = "box";
+        player.width = 24;
+        player.height = 48;
+        player.impactFunction = "bounce";
+        player.position.x = 75;
+        player.position.y = 180;
+        player.elasticity = 0.9;
+         player.velocity.x = 3;
+        player.velocity.y = 10;
+        entities.push(player);
+        
+        // Run a step every 0.03 seconds. This thing doesn't do any framerate
+        // independent movement, but that's not terribly difficult compared to
+        // all this nasty physics code.
+        setInterval(step, 30);
+    }
+</script>
+</head>
+<body id="index" onload="pageLoad()">
+    <canvas width="321" height="241" id="canvas"></canvas><br>
+    <input id="showNormals" type="checkbox" onchange="showNormals = document.getElementById('showNormals').checked;">Show Normals</input><br>
+    <input id="showBox" type="checkbox" onchange="showBox = document.getElementById('showBox').checked;">Show Box</input><br>
+    <input id="showCollisionHull" type="checkbox" onchange="showCollisionHull = document.getElementById('showCollisionHull').checked;">Show Collision Hull</input>
+    <p id="debug1"></p>
+</body>
+</html>
