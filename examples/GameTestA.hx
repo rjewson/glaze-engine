@@ -1,15 +1,24 @@
 package;
 
 import glaze.engine.components.Display;
+import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Physics;
 import glaze.engine.components.Position;
 import glaze.eco.core.Engine;
+import glaze.engine.components.Script;
 import glaze.engine.core.GameEngine;
+import glaze.engine.systems.BehaviourSystem;
+import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.PhysicsSystem;
 import glaze.geom.Vector2;
 import glaze.engine.systems.RenderSystem;
+import glaze.particle.BlockSpriteParticleEngine;
+import glaze.particle.emitter.RandomSpray;
+import glaze.physics.collision.broadphase.BruteforceBroadphase;
 import glaze.physics.collision.Map;
 import glaze.physics.Material;
+import glaze.physics.systems.PhysicsCollisionSystem;
+import glaze.physics.systems.PhysicsUpdateSystem;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
 import glaze.tmx.TmxMap;
@@ -39,29 +48,10 @@ class GameTestA extends GameEngine {
 
         setupMap();
 
-        var phase = engine.createPhase();
+        var corephase = engine.createPhase();
+        var aiphase = engine.createPhase(1000);
+        var physicsPhase = engine.createPhase(1000/60);
 
-        phase.addSystem(new PhysicsSystem(new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs)));
-        var renderSystem = setupRenderSystem();
-        phase.addSystem(renderSystem);
-        
-        var player = engine.create([new Position(100,100),new Display("character1.png"),new Physics(30/2,72/2,new Material())]);
-        var playerBody = player.getComponent(Physics).body;
-
-        characterController = new CharacterController(input,playerBody);
-        playerBody.maxScalarVelocity = 0;
-        playerBody.maxVelocity.setTo(160,1000);
-
-        renderSystem.CameraTarget(player.getComponent(Position).coords);
-
-    }
-
-    function setupMap() {
-        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
-        tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
-    }
-
-    function setupRenderSystem() {
         var renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
@@ -80,7 +70,45 @@ class GameTestA extends GameEngine {
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
 
-        return renderSystem;
+
+
+        var blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
+        renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
+
+        // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs);
+        // physicsPhase.addSystem(new PhysicsUpdateSystem());
+        // physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
+        // physicsPhase.addSystem(new PhysicsUpdateSystem());
+
+
+        aiphase.addSystem(new BehaviourSystem());
+        corephase.addSystem(new PhysicsSystem(new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs)));
+        corephase.addSystem(new ParticleSystem(blockParticleEngine));
+        corephase.addSystem(renderSystem);
+        
+        var behavior = new glaze.ai.behaviortree.Sequence();
+        behavior.addChild(new glaze.engine.actions.LogAction());
+
+        var player = engine.create([
+            new Position(100,100),
+            new Display("character1.png"),
+            new Physics(30/2,72/2,new Material()),
+            new Script(behavior),
+            new ParticleEmitters([new RandomSpray(0,10)])
+        ]);
+        var playerBody = player.getComponent(Physics).body;
+
+        characterController = new CharacterController(input,playerBody);
+        playerBody.maxScalarVelocity = 0;
+        playerBody.maxVelocity.setTo(160,1000);
+
+        renderSystem.CameraTarget(player.getComponent(Position).coords);
+
+    }
+
+    function setupMap() {
+        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
+        tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     }
 
     override public function preUpdate() {

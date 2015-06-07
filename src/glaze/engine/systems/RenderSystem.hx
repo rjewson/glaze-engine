@@ -54,7 +54,7 @@ class RenderSystem extends System {
         camera.addChild(itemContainer);
     }
 
-    override public function entityAdded(entity:Entity,component:IComponent) {
+    override public function entityAdded(entity:Entity) {
         var position = entity.getComponent(Position);
         var display = entity.getComponent(Display);
         display.displayObject = createSprite("",display.textureID);
@@ -62,24 +62,14 @@ class RenderSystem extends System {
         itemContainer.addChild(display.displayObject);
     }
 
-    override public function entityRemoved(entity:Entity,component:IComponent) {
+    override public function entityRemoved(entity:Entity) {
         var display = entity.getComponent(Display);
         itemContainer.removeChild(display.displayObject);
     }
 
     override public function update(timestamp:Float,delta:Float) {
-        // for (entity in view.entities) {
-        //     var position = entity.getComponent(Position);
-        //     camera.Focus(cameraTarget.x,cameraTarget.y);
-
-        //     // position.coords.x++;
-        //     // var display = entity.getComponent(Display);
-        //     // display.displayObject.position.setTo(10,10);
-        //     // entity.getComponent(Display).displayObject.position.setTo(10,10);
-        // }
         camera.Focus(cameraTarget.x,cameraTarget.y);
         renderer.Render(camera.viewPortAABB);
-        // trace("render");
     }
 
     //Fixme

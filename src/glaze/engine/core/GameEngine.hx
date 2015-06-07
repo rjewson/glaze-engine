@@ -42,10 +42,13 @@ class GameEngine {
         input.Update(0,0);
         preUpdate();
         engine.update(now,delta);
-        // trace("gameEngine");
+        postUpdate();
     }
 
     public function preUpdate(){
+    }    
+
+    public function postUpdate(){
     }
 
 }
