@@ -28,8 +28,8 @@ class Body
     public var maxScalarVelocity:Float = 1000;
     public var maxVelocity:Vector2 = new Vector2();
 
-    public var aabb:AABB = new AABB();
-    public var bfproxy:BFProxy = new BFProxy();
+    // public var aabb:AABB = new AABB();
+    public var bfproxy:BFProxy;
     public var material:Material;
     public var filter:Filter;
 
@@ -61,6 +61,8 @@ class Body
         aabb.position = this.position;
         setMass(1);
 
+        bfproxy = new BFProxy(w,h);
+        //bfproxy.aabb.position = this.position;
         bfproxy.body = this;
         bfproxy.filter = this.filter;
         bfproxy.aabb = aabb;

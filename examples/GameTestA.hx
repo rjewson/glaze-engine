@@ -9,15 +9,19 @@ import glaze.engine.components.Script;
 import glaze.engine.core.GameEngine;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.ParticleSystem;
-import glaze.engine.systems.PhysicsSystem;
+// import glaze.engine.systems.PhysicsSystem;
 import glaze.geom.Vector2;
 import glaze.engine.systems.RenderSystem;
 import glaze.particle.BlockSpriteParticleEngine;
 import glaze.particle.emitter.RandomSpray;
+import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.BruteforceBroadphase;
 import glaze.physics.collision.Map;
+import glaze.physics.components.PhysicsBody;
+import glaze.physics.components.PhysicsCollision;
 import glaze.physics.Material;
 import glaze.physics.systems.PhysicsCollisionSystem;
+import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
@@ -70,19 +74,16 @@ class GameTestA extends GameEngine {
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
 
-
-
         var blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
 
-        // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs);
-        // physicsPhase.addSystem(new PhysicsUpdateSystem());
-        // physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
-        // physicsPhase.addSystem(new PhysicsUpdateSystem());
-
+        var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs);
+        physicsPhase.addSystem(new PhysicsUpdateSystem());
+        physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
+        physicsPhase.addSystem(new PhysicsPositionSystem());
 
         aiphase.addSystem(new BehaviourSystem());
-        corephase.addSystem(new PhysicsSystem(new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs)));
+        //corephase.addSystem(new PhysicsSystem(new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs)));
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
         corephase.addSystem(renderSystem);
         
@@ -92,11 +93,13 @@ class GameTestA extends GameEngine {
         var player = engine.create([
             new Position(100,100),
             new Display("character1.png"),
-            new Physics(30/2,72/2,new Material()),
+            // new Physics(30/2,72/2,new Material()),
+            new PhysicsBody(30/2,72/2,new Material()),
+            //new PhysicsCollision([new BFProxy(30/2,72/2)]),
             new Script(behavior),
             new ParticleEmitters([new RandomSpray(0,10)])
         ]);
-        var playerBody = player.getComponent(Physics).body;
+        var playerBody = player.getComponent(PhysicsBody).body;
 
         characterController = new CharacterController(input,playerBody);
         playerBody.maxScalarVelocity = 0;

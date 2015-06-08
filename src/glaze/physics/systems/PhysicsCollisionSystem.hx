@@ -18,11 +18,13 @@ class PhysicsCollisionSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
-        broadphase.addProxy(entity.getComponent(PhysicsCollision).proxy);
+        for (proxy in entity.getComponent(PhysicsCollision).proxies)
+            broadphase.addProxy(proxy);
     }
 
     override public function entityRemoved(entity:Entity) {
-        broadphase.removeProxy(entity.getComponent(PhysicsCollision).proxy);
+        for (proxy in entity.getComponent(PhysicsCollision).proxies)
+            broadphase.removeProxy(proxy);
     }
 
     override public function update(timestamp:Float,delta:Float) {

@@ -5,6 +5,6 @@ import glaze.physics.collision.BFProxy;
 
 class PhysicsCollision implements IComponent {
     
-    public var proxy:BFProxy;
+    public var proxies:Array<BFProxy>;
 
 }

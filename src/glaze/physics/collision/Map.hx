@@ -39,6 +39,7 @@ class Map
         contact = new Contact();
     }
 
+    //public function testCollision(body:Body) {
     public function testCollision(body:Body) {
 
         var startX = data.Index(Math.min(body.position.x,body.predictedPosition.x) - body.aabb.extents.x - CORRECTION);

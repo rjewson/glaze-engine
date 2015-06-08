@@ -5,6 +5,7 @@ import glaze.eco.core.System;
 import glaze.engine.components.Position;
 import glaze.geom.Vector2;
 import glaze.physics.components.PhysicsBody;
+import glaze.physics.components.PhysicsCollision;
 
 class PhysicsUpdateSystem extends System {
     
@@ -18,6 +19,8 @@ class PhysicsUpdateSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
+        var body = entity.getComponent(PhysicsBody).body;
+        entity.addComponent(new PhysicsCollision([body.bfproxy]));
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -25,7 +28,7 @@ class PhysicsUpdateSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
-            entity.getComponent(PhysicsBody).body.update(delta,globalForce,globalDamping);
+            entity.getComponent(PhysicsBody).body.update(delta/1000,globalForce,globalDamping);
         }
 
     }

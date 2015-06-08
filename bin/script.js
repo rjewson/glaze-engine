@@ -1,5 +1,4 @@
 (function (console) { "use strict";
-var $estr = function() { return js_Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -89,17 +88,17 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var map = new glaze_physics_collision_Map(this.tmxMap.getLayer("Tile Layer 1").tileGIDs);
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(new glaze_physics_collision_broadphase_BruteforceBroadphase(map,new glaze_physics_collision_Intersect())));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
+		physicsPhase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
 		aiphase.addSystem(new glaze_engine_systems_BehaviourSystem());
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(blockParticleEngine));
 		corephase.addSystem(renderSystem);
 		var behavior = new glaze_ai_behaviortree_Sequence();
 		var child = new glaze_engine_actions_LogAction();
 		behavior.children.add(child);
-		var player = this.engine.create([new glaze_engine_components_Position(100,100),new glaze_engine_components_Display("character1.png"),new glaze_engine_components_Physics(15.,36.,new glaze_physics_Material()),new glaze_engine_components_Script(behavior),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(0,10)])]);
+		var player = this.engine.create([new glaze_engine_components_Position(100,100),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(15.,36.,new glaze_physics_Material()),new glaze_engine_components_Script(behavior),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(0,10)])]);
 		var tmp4;
-		var value = player.map.Physics;
-		if((value instanceof glaze_engine_components_Physics)) tmp4 = value; else tmp4 = null;
+		var value = player.map.PhysicsBody;
+		if((value instanceof glaze_physics_components_PhysicsBody)) tmp4 = value; else tmp4 = null;
 		var playerBody = tmp4.body;
 		this.characterController = new util_CharacterController(this.input,playerBody);
 		playerBody.maxScalarVelocity = 0;
@@ -469,19 +468,14 @@ glaze_ai_behaviortree_BehaviorContext.prototype = {
 };
 var glaze_ai_behaviortree_BehaviorStatus = { __ename__ : true, __constructs__ : ["Invalid","Success","Running","Failure","Aborted"] };
 glaze_ai_behaviortree_BehaviorStatus.Invalid = ["Invalid",0];
-glaze_ai_behaviortree_BehaviorStatus.Invalid.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Invalid.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Success = ["Success",1];
-glaze_ai_behaviortree_BehaviorStatus.Success.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Success.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Running = ["Running",2];
-glaze_ai_behaviortree_BehaviorStatus.Running.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Running.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Failure = ["Failure",3];
-glaze_ai_behaviortree_BehaviorStatus.Failure.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Failure.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Aborted = ["Aborted",4];
-glaze_ai_behaviortree_BehaviorStatus.Aborted.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Aborted.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 var glaze_ai_behaviortree_Composite = function() {
 	glaze_ai_behaviortree_Behavior.call(this);
@@ -1810,7 +1804,6 @@ var glaze_physics_Body = function(w,h,material,filter) {
 	this.isBullet = false;
 	this.accumulatedForces = new glaze_geom_Vector2();
 	this.forces = new glaze_geom_Vector2();
-	this.bfproxy = new glaze_physics_collision_BFProxy();
 	this.aabb = new glaze_geom_AABB();
 	this.maxVelocity = new glaze_geom_Vector2();
 	this.maxScalarVelocity = 1000;
@@ -1830,6 +1823,7 @@ var glaze_physics_Body = function(w,h,material,filter) {
 	this.filter = filter;
 	this.aabb.position = this.position;
 	this.setMass(1);
+	this.bfproxy = new glaze_physics_collision_BFProxy(w,h);
 	this.bfproxy.body = this;
 	this.bfproxy.filter = this.filter;
 	this.bfproxy.aabb = this.aabb;
@@ -2037,21 +2031,23 @@ glaze_physics_Material.__name__ = ["glaze","physics","Material"];
 glaze_physics_Material.prototype = {
 	__class__: glaze_physics_Material
 };
-var glaze_physics_collision_BFProxy = function() {
+var glaze_physics_collision_BFProxy = function(width,height,isSensor) {
+	if(isSensor == null) isSensor = false;
 	this.contactCallback = null;
 	this.isSensor = false;
 	this.isStatic = false;
+	this.aabb = new glaze_geom_AABB();
+	var _this = this.aabb.extents;
+	_this.x = width;
+	_this.y = height;
 };
 glaze_physics_collision_BFProxy.__name__ = ["glaze","physics","collision","BFProxy"];
 glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh) {
-	var bfproxy = new glaze_physics_collision_BFProxy();
+	var bfproxy = new glaze_physics_collision_BFProxy(hw,hh);
 	bfproxy.aabb = new glaze_geom_AABB();
 	var _this = bfproxy.aabb.position;
 	_this.x = x;
 	_this.y = y;
-	var _this1 = bfproxy.aabb.extents;
-	_this1.x = hw;
-	_this1.y = hh;
 	bfproxy.isStatic = true;
 	return bfproxy;
 };
@@ -2564,16 +2560,16 @@ glaze_physics_collision_broadphase_BruteforceBroadphase.prototype = {
 	}
 	,__class__: glaze_physics_collision_broadphase_BruteforceBroadphase
 };
-var glaze_physics_components_PhysicsBody = function(body) {
-	this.body = body;
+var glaze_physics_components_PhysicsBody = function(width,height,material) {
+	this.body = new glaze_physics_Body(width,height,material);
 };
 glaze_physics_components_PhysicsBody.__name__ = ["glaze","physics","components","PhysicsBody"];
 glaze_physics_components_PhysicsBody.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_physics_components_PhysicsBody.prototype = {
 	__class__: glaze_physics_components_PhysicsBody
 };
-var glaze_physics_components_PhysicsCollision = function(proxy) {
-	this.proxy = proxy;
+var glaze_physics_components_PhysicsCollision = function(proxies) {
+	this.proxies = proxies;
 };
 glaze_physics_components_PhysicsCollision.__name__ = ["glaze","physics","components","PhysicsCollision"];
 glaze_physics_components_PhysicsCollision.__interfaces__ = [glaze_eco_core_IComponent];
@@ -2588,31 +2584,51 @@ glaze_physics_systems_PhysicsCollisionSystem.__name__ = ["glaze","physics","syst
 glaze_physics_systems_PhysicsCollisionSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsCollisionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
+		var _g = 0;
 		var tmp;
 		var value = entity.map.PhysicsCollision;
 		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		this.broadphase.addProxy(tmp.proxy);
+		var _g1 = tmp.proxies;
+		while(_g < _g1.length) {
+			var proxy = _g1[_g];
+			++_g;
+			this.broadphase.addProxy(proxy);
+		}
 	}
 	,entityRemoved: function(entity) {
+		var _g = 0;
 		var tmp;
 		var value = entity.map.PhysicsCollision;
 		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		this.broadphase.removeProxy(tmp.proxy);
+		var _g1 = tmp.proxies;
+		while(_g < _g1.length) {
+			var proxy = _g1[_g];
+			++_g;
+			this.broadphase.removeProxy(proxy);
+		}
 	}
 	,update: function(timestamp,delta) {
 		this.broadphase.collide();
 	}
 	,__class__: glaze_physics_systems_PhysicsCollisionSystem
 });
-var glaze_physics_systems_PhysicsUpdateSystem = function() {
+var glaze_physics_systems_PhysicsPositionSystem = function() {
 	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_physics_components_PhysicsBody]);
-	this.globalForce = new glaze_geom_Vector2(0,30);
-	this.globalDamping = 0.99;
 };
-glaze_physics_systems_PhysicsUpdateSystem.__name__ = ["glaze","physics","systems","PhysicsUpdateSystem"];
-glaze_physics_systems_PhysicsUpdateSystem.__super__ = glaze_eco_core_System;
-glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+glaze_physics_systems_PhysicsPositionSystem.__name__ = ["glaze","physics","systems","PhysicsPositionSystem"];
+glaze_physics_systems_PhysicsPositionSystem.__super__ = glaze_eco_core_System;
+glaze_physics_systems_PhysicsPositionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
+		console.log("pps added body");
+		var tmp;
+		var value = entity.map.Position;
+		if((value instanceof glaze_engine_components_Position)) tmp = value; else tmp = null;
+		var position = tmp;
+		var tmp1;
+		var value1 = entity.map.PhysicsBody;
+		if((value1 instanceof glaze_physics_components_PhysicsBody)) tmp1 = value1; else tmp1 = null;
+		var physics = tmp1;
+		physics.body.position = position.coords;
 	}
 	,entityRemoved: function(entity) {
 	}
@@ -2625,7 +2641,38 @@ glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_Sys
 			var tmp;
 			var value = entity.map.PhysicsBody;
 			if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
-			tmp.body.update(delta,this.globalForce,this.globalDamping);
+			tmp.body.updatePosition();
+		}
+	}
+	,__class__: glaze_physics_systems_PhysicsPositionSystem
+});
+var glaze_physics_systems_PhysicsUpdateSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_physics_components_PhysicsBody]);
+	this.globalForce = new glaze_geom_Vector2(0,30);
+	this.globalDamping = 0.99;
+};
+glaze_physics_systems_PhysicsUpdateSystem.__name__ = ["glaze","physics","systems","PhysicsUpdateSystem"];
+glaze_physics_systems_PhysicsUpdateSystem.__super__ = glaze_eco_core_System;
+glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+		var tmp;
+		var value = entity.map.PhysicsBody;
+		if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
+		var body = tmp.body;
+		entity.addComponent(new glaze_physics_components_PhysicsCollision([body.bfproxy]));
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var tmp;
+			var value = entity.map.PhysicsBody;
+			if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
+			tmp.body.update(delta / 1000,this.globalForce,this.globalDamping);
 		}
 	}
 	,__class__: glaze_physics_systems_PhysicsUpdateSystem
@@ -4871,15 +4918,12 @@ haxe_io_Eof.prototype = {
 };
 var haxe_io_Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe_io_Error.Blocked = ["Blocked",0];
-haxe_io_Error.Blocked.toString = $estr;
 haxe_io_Error.Blocked.__enum__ = haxe_io_Error;
 haxe_io_Error.Overflow = ["Overflow",1];
-haxe_io_Error.Overflow.toString = $estr;
 haxe_io_Error.Overflow.__enum__ = haxe_io_Error;
 haxe_io_Error.OutsideBounds = ["OutsideBounds",2];
-haxe_io_Error.OutsideBounds.toString = $estr;
 haxe_io_Error.OutsideBounds.__enum__ = haxe_io_Error;
-haxe_io_Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe_io_Error; $x.toString = $estr; return $x; };
+haxe_io_Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe_io_Error; return $x; };
 var haxe_io_FPHelper = function() { };
 haxe_io_FPHelper.__name__ = ["haxe","io","FPHelper"];
 haxe_io_FPHelper.i32ToFloat = function(i) {
@@ -5410,9 +5454,9 @@ haxe_xml_Parser.doParse = function(str,strict,p,parent) {
 	throw new js__$Boot_HaxeError("Unexpected end");
 };
 var haxe_zip_Huffman = { __ename__ : true, __constructs__ : ["Found","NeedBit","NeedBits"] };
-haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
-haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
-haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; return $x; };
+haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; return $x; };
+haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; return $x; };
 var haxe_zip_HuffTools = function() {
 };
 haxe_zip_HuffTools.__name__ = ["haxe","zip","HuffTools"];
@@ -5556,28 +5600,20 @@ haxe_zip__$InflateImpl_Window.prototype = {
 };
 var haxe_zip__$InflateImpl_State = { __ename__ : true, __constructs__ : ["Head","Block","CData","Flat","Crc","Dist","DistOne","Done"] };
 haxe_zip__$InflateImpl_State.Head = ["Head",0];
-haxe_zip__$InflateImpl_State.Head.toString = $estr;
 haxe_zip__$InflateImpl_State.Head.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Block = ["Block",1];
-haxe_zip__$InflateImpl_State.Block.toString = $estr;
 haxe_zip__$InflateImpl_State.Block.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.CData = ["CData",2];
-haxe_zip__$InflateImpl_State.CData.toString = $estr;
 haxe_zip__$InflateImpl_State.CData.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Flat = ["Flat",3];
-haxe_zip__$InflateImpl_State.Flat.toString = $estr;
 haxe_zip__$InflateImpl_State.Flat.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Crc = ["Crc",4];
-haxe_zip__$InflateImpl_State.Crc.toString = $estr;
 haxe_zip__$InflateImpl_State.Crc.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Dist = ["Dist",5];
-haxe_zip__$InflateImpl_State.Dist.toString = $estr;
 haxe_zip__$InflateImpl_State.Dist.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.DistOne = ["DistOne",6];
-haxe_zip__$InflateImpl_State.DistOne.toString = $estr;
 haxe_zip__$InflateImpl_State.DistOne.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Done = ["Done",7];
-haxe_zip__$InflateImpl_State.Done.toString = $estr;
 haxe_zip__$InflateImpl_State.Done.__enum__ = haxe_zip__$InflateImpl_State;
 var haxe_zip_InflateImpl = function(i,header,crc) {
 	if(crc == null) crc = true;

@@ -21,14 +21,17 @@ class BFProxy
 
     public var contactCallback :  BFProxy -> BFProxy -> Contact -> Void = null;
 
-    public function new() {
+    public function new(width:Float,height:Float,isSensor:Bool=false) {
+        aabb = new AABB();
+        aabb.extents.setTo(width,height);
+    //public function new() {
     }
 
     public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float):BFProxy {
-        var bfproxy = new BFProxy();
+        var bfproxy = new BFProxy(hw,hh);
         bfproxy.aabb = new AABB();
         bfproxy.aabb.position.setTo(x,y);
-        bfproxy.aabb.extents.setTo(hw,hh);
+        // bfproxy.aabb.extents.setTo(hw,hh);
         bfproxy.isStatic = true;
         return bfproxy;
     }
