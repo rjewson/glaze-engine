@@ -20,7 +20,7 @@ class PhysicsUpdateSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         var body = entity.getComponent(PhysicsBody).body;
-        entity.addComponent(new PhysicsCollision([body.bfproxy]));
+        entity.addComponent(new PhysicsCollision(body.bfproxy));
     }
 
     override public function entityRemoved(entity:Entity) {

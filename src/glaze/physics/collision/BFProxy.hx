@@ -17,21 +17,25 @@ class BFProxy
     public var isSensor:Bool = false;
 
     public var filter:Filter;
-    public var material:Material;
+    // public var material:Material;
 
     public var contactCallback :  BFProxy -> BFProxy -> Contact -> Void = null;
 
-    public function new(width:Float,height:Float,isSensor:Bool=false) {
+    public function new(width:Float,height:Float,filter:Filter,isSensor:Bool=false) {
         aabb = new AABB();
         aabb.extents.setTo(width,height);
-    //public function new() {
+        this.filter = filter;
     }
 
-    public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float):BFProxy {
-        var bfproxy = new BFProxy(hw,hh);
-        bfproxy.aabb = new AABB();
+    public function setBody(body:Body) {
+        this.body = body;
+        this.aabb.position = body.position;
+        isStatic = false; //bodies are always dynamic
+    }
+
+    public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float,filter:Filter):BFProxy {
+        var bfproxy = new BFProxy(hw,hh,filter);
         bfproxy.aabb.position.setTo(x,y);
-        // bfproxy.aabb.extents.setTo(hw,hh);
         bfproxy.isStatic = true;
         return bfproxy;
     }

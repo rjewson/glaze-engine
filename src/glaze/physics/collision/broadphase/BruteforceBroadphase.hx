@@ -39,7 +39,7 @@ class BruteforceBroadphase implements IBroadphase
             var dynamicProxy = dynamicProxies[i];
 
             //First test against map
-            map.testCollision( dynamicProxy.body );
+            map.testCollision( dynamicProxy );
 
             //Next test against all static proxies
             for (staticProxy in staticProxies) {

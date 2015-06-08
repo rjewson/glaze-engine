@@ -31,7 +31,7 @@ class Body
     // public var aabb:AABB = new AABB();
     public var bfproxy:BFProxy;
     public var material:Material;
-    public var filter:Filter;
+    //public var filter:Filter;
 
     public var forces:Vector2 = new Vector2();
     private var accumulatedForces:Vector2 = new Vector2();
@@ -55,18 +55,11 @@ class Body
     public var debug:Int = 0;    
 
     public function new(w:Float,h:Float,material:Material,filter:Filter=null) {
-        aabb.extents.setTo(w,h);
         this.material = material;
-        this.filter = filter;
-        aabb.position = this.position;
         setMass(1);
 
-        bfproxy = new BFProxy(w,h);
-        //bfproxy.aabb.position = this.position;
-        bfproxy.body = this;
-        bfproxy.filter = this.filter;
-        bfproxy.aabb = aabb;
-        bfproxy.isStatic = false;
+        bfproxy = new BFProxy(w,h,filter);
+        bfproxy.setBody(this);
     }
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {

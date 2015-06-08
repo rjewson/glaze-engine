@@ -1804,7 +1804,6 @@ var glaze_physics_Body = function(w,h,material,filter) {
 	this.isBullet = false;
 	this.accumulatedForces = new glaze_geom_Vector2();
 	this.forces = new glaze_geom_Vector2();
-	this.aabb = new glaze_geom_AABB();
 	this.maxVelocity = new glaze_geom_Vector2();
 	this.maxScalarVelocity = 1000;
 	this.stepContactCount = 0;
@@ -1816,18 +1815,10 @@ var glaze_physics_Body = function(w,h,material,filter) {
 	this.predictedPosition = new glaze_geom_Vector2();
 	this.positionCorrection = new glaze_geom_Vector2();
 	this.position = new glaze_geom_Vector2();
-	var _this = this.aabb.extents;
-	_this.x = w;
-	_this.y = h;
 	this.material = material;
-	this.filter = filter;
-	this.aabb.position = this.position;
 	this.setMass(1);
-	this.bfproxy = new glaze_physics_collision_BFProxy(w,h);
-	this.bfproxy.body = this;
-	this.bfproxy.filter = this.filter;
-	this.bfproxy.aabb = this.aabb;
-	this.bfproxy.isStatic = false;
+	this.bfproxy = new glaze_physics_collision_BFProxy(w,h,filter);
+	this.bfproxy.setBody(this);
 };
 glaze_physics_Body.__name__ = ["glaze","physics","Body"];
 glaze_physics_Body.prototype = {
@@ -2031,7 +2022,7 @@ glaze_physics_Material.__name__ = ["glaze","physics","Material"];
 glaze_physics_Material.prototype = {
 	__class__: glaze_physics_Material
 };
-var glaze_physics_collision_BFProxy = function(width,height,isSensor) {
+var glaze_physics_collision_BFProxy = function(width,height,filter,isSensor) {
 	if(isSensor == null) isSensor = false;
 	this.contactCallback = null;
 	this.isSensor = false;
@@ -2040,11 +2031,11 @@ var glaze_physics_collision_BFProxy = function(width,height,isSensor) {
 	var _this = this.aabb.extents;
 	_this.x = width;
 	_this.y = height;
+	this.filter = filter;
 };
 glaze_physics_collision_BFProxy.__name__ = ["glaze","physics","collision","BFProxy"];
-glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh) {
-	var bfproxy = new glaze_physics_collision_BFProxy(hw,hh);
-	bfproxy.aabb = new glaze_geom_AABB();
+glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh,filter) {
+	var bfproxy = new glaze_physics_collision_BFProxy(hw,hh,filter);
 	var _this = bfproxy.aabb.position;
 	_this.x = x;
 	_this.y = y;
@@ -2052,7 +2043,12 @@ glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh) {
 	return bfproxy;
 };
 glaze_physics_collision_BFProxy.prototype = {
-	__class__: glaze_physics_collision_BFProxy
+	setBody: function(body) {
+		this.body = body;
+		this.aabb.position = body.position;
+		this.isStatic = false;
+	}
+	,__class__: glaze_physics_collision_BFProxy
 };
 var glaze_physics_collision_Contact = function() {
 	this.sweepPosition = new glaze_geom_Vector2();
@@ -2269,21 +2265,22 @@ var glaze_physics_collision_Map = function(data) {
 };
 glaze_physics_collision_Map.__name__ = ["glaze","physics","collision","Map"];
 glaze_physics_collision_Map.prototype = {
-	testCollision: function(body) {
+	testCollision: function(proxy) {
+		var body = proxy.body;
 		var tmp;
-		var value = Math.min(body.position.x,body.predictedPosition.x) - body.aabb.extents.x;
+		var value = Math.min(body.position.x,body.predictedPosition.x) - proxy.aabb.extents.x;
 		tmp = value * this.data.invCellSize | 0;
 		var startX = tmp;
 		var tmp1;
-		var value1 = Math.min(body.position.y,body.predictedPosition.y) - body.aabb.extents.y;
+		var value1 = Math.min(body.position.y,body.predictedPosition.y) - proxy.aabb.extents.y;
 		tmp1 = value1 * this.data.invCellSize | 0;
 		var startY = tmp1;
 		var tmp2;
-		var value2 = Math.max(body.position.x,body.predictedPosition.x) + body.aabb.extents.x - .01;
+		var value2 = Math.max(body.position.x,body.predictedPosition.x) + proxy.aabb.extents.x - .01;
 		tmp2 = value2 * this.data.invCellSize | 0;
 		var endX = tmp2 + 1;
 		var tmp3;
-		var value3 = Math.max(body.position.y,body.predictedPosition.y) + body.aabb.extents.y;
+		var value3 = Math.max(body.position.y,body.predictedPosition.y) + proxy.aabb.extents.y;
 		tmp3 = value3 * this.data.invCellSize | 0;
 		var endY = tmp3 + 1;
 		this.plane.setFromSegment(body.predictedPosition,body.position);
@@ -2302,9 +2299,9 @@ glaze_physics_collision_Map.prototype = {
 					this.tilePosition.y = y * this.tileSize + this.tileHalfSize;
 					if(body.isBullet) {
 						if(Math.abs(this.plane.distancePoint(this.tilePosition)) < 40) {
-							if(glaze_physics_collision_Intersect.StaticAABBvsSweeptAABB(this.tilePosition,this.tileExtents,body.position,body.aabb.extents,body.delta,this.contact) == true) body.respondBulletCollision(this.contact);
+							if(glaze_physics_collision_Intersect.StaticAABBvsSweeptAABB(this.tilePosition,this.tileExtents,body.position,proxy.aabb.extents,body.delta,this.contact) == true) body.respondBulletCollision(this.contact);
 						}
-					} else if(glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(body.position,body.aabb.extents,this.tilePosition,this.tileExtents,this.contact) == true) {
+					} else if(glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,this.tilePosition,this.tileExtents,this.contact) == true) {
 						var nextX = x + (this.contact.normal.x | 0);
 						var nextY = y + (this.contact.normal.y | 0);
 						var tmp5;
@@ -2487,7 +2484,7 @@ glaze_physics_collision_broadphase_BruteforceBroadphase.prototype = {
 		while(_g < count) {
 			var i = _g++;
 			var dynamicProxy = this.dynamicProxies[i];
-			this.map.testCollision(dynamicProxy.body);
+			this.map.testCollision(dynamicProxy);
 			var _g1 = 0;
 			var _g2 = this.staticProxies;
 			while(_g1 < _g2.length) {
@@ -2568,8 +2565,8 @@ glaze_physics_components_PhysicsBody.__interfaces__ = [glaze_eco_core_IComponent
 glaze_physics_components_PhysicsBody.prototype = {
 	__class__: glaze_physics_components_PhysicsBody
 };
-var glaze_physics_components_PhysicsCollision = function(proxies) {
-	this.proxies = proxies;
+var glaze_physics_components_PhysicsCollision = function(proxy) {
+	this.proxy = proxy;
 };
 glaze_physics_components_PhysicsCollision.__name__ = ["glaze","physics","components","PhysicsCollision"];
 glaze_physics_components_PhysicsCollision.__interfaces__ = [glaze_eco_core_IComponent];
@@ -2584,28 +2581,16 @@ glaze_physics_systems_PhysicsCollisionSystem.__name__ = ["glaze","physics","syst
 glaze_physics_systems_PhysicsCollisionSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsCollisionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		var _g = 0;
 		var tmp;
 		var value = entity.map.PhysicsCollision;
 		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		var _g1 = tmp.proxies;
-		while(_g < _g1.length) {
-			var proxy = _g1[_g];
-			++_g;
-			this.broadphase.addProxy(proxy);
-		}
+		this.broadphase.addProxy(tmp.proxy);
 	}
 	,entityRemoved: function(entity) {
-		var _g = 0;
 		var tmp;
 		var value = entity.map.PhysicsCollision;
 		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		var _g1 = tmp.proxies;
-		while(_g < _g1.length) {
-			var proxy = _g1[_g];
-			++_g;
-			this.broadphase.removeProxy(proxy);
-		}
+		this.broadphase.removeProxy(tmp.proxy);
 	}
 	,update: function(timestamp,delta) {
 		this.broadphase.collide();
@@ -2659,7 +2644,7 @@ glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_Sys
 		var value = entity.map.PhysicsBody;
 		if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
 		var body = tmp.body;
-		entity.addComponent(new glaze_physics_components_PhysicsCollision([body.bfproxy]));
+		entity.addComponent(new glaze_physics_components_PhysicsCollision(body.bfproxy));
 	}
 	,entityRemoved: function(entity) {
 	}

@@ -4,6 +4,7 @@ package glaze.physics.collision;
 import glaze.ds.Bytes2D;
 import glaze.geom.Plane;
 import glaze.geom.Vector2;
+import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.collision.Intersect;
 import glaze.physics.collision.Ray;
@@ -39,14 +40,16 @@ class Map
         contact = new Contact();
     }
 
+    public function testCollision(proxy:BFProxy) {
     //public function testCollision(body:Body) {
-    public function testCollision(body:Body) {
 
-        var startX = data.Index(Math.min(body.position.x,body.predictedPosition.x) - body.aabb.extents.x - CORRECTION);
-        var startY = data.Index(Math.min(body.position.y,body.predictedPosition.y) - body.aabb.extents.y - CORRECTION);
+        var body = proxy.body;
 
-        var endX = data.Index(Math.max(body.position.x,body.predictedPosition.x) + body.aabb.extents.x + CORRECTION - ROUNDDOWN) + 1;
-        var endY = data.Index(Math.max(body.position.y,body.predictedPosition.y) + body.aabb.extents.y + CORRECTION ) + 1;
+        var startX = data.Index(Math.min(body.position.x,body.predictedPosition.x) - proxy.aabb.extents.x - CORRECTION);
+        var startY = data.Index(Math.min(body.position.y,body.predictedPosition.y) - proxy.aabb.extents.y - CORRECTION);
+
+        var endX = data.Index(Math.max(body.position.x,body.predictedPosition.x) + proxy.aabb.extents.x + CORRECTION - ROUNDDOWN) + 1;
+        var endY = data.Index(Math.max(body.position.y,body.predictedPosition.y) + proxy.aabb.extents.y + CORRECTION ) + 1;
 
         plane.setFromSegment(body.predictedPosition,body.position);
 
@@ -58,12 +61,12 @@ class Map
                     tilePosition.y = (y*tileSize)+tileHalfSize;
                     if (body.isBullet) {
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
-                            if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,body.aabb.extents,body.delta,contact)==true) {
+                            if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
                                 body.respondBulletCollision(contact);
                             }                            
                         }
                     } else {
-                        if (Intersect.AABBvsStaticSolidAABB(body.position,body.aabb.extents,tilePosition,tileExtents,contact)==true) {
+                        if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,contact)==true) {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
                             var nextCell = data.get(nextX,nextY,0);
