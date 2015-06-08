@@ -83,19 +83,21 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsPositionSystem());
 
         aiphase.addSystem(new BehaviourSystem());
-        //corephase.addSystem(new PhysicsSystem(new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs)));
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
         corephase.addSystem(renderSystem);
         
         var behavior = new glaze.ai.behaviortree.Sequence();
         behavior.addChild(new glaze.engine.actions.LogAction());
 
+        var body = new glaze.physics.Body(new Material());
+        var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,null);
+        proxy.setBody(body);
+
         var player = engine.create([
             new Position(100,100),
             new Display("character1.png"),
-            // new Physics(30/2,72/2,new Material()),
-            new PhysicsBody(30/2,72/2,new Material()),
-            //new PhysicsCollision([new BFProxy(30/2,72/2)]),
+            new PhysicsBody(body),
+            new PhysicsCollision(proxy),
             new Script(behavior),
             new ParticleEmitters([new RandomSpray(0,10)])
         ]);

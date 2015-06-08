@@ -95,20 +95,17 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var behavior = new glaze_ai_behaviortree_Sequence();
 		var child = new glaze_engine_actions_LogAction();
 		behavior.children.add(child);
-		var player = this.engine.create([new glaze_engine_components_Position(100,100),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(15.,36.,new glaze_physics_Material()),new glaze_engine_components_Script(behavior),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(0,10)])]);
-		var tmp4;
-		var value = player.map.PhysicsBody;
-		if((value instanceof glaze_physics_components_PhysicsBody)) tmp4 = value; else tmp4 = null;
-		var playerBody = tmp4.body;
+		var body = new glaze_physics_Body(new glaze_physics_Material());
+		var proxy = new glaze_physics_collision_BFProxy(15.,36.,null);
+		proxy.setBody(body);
+		var player = this.engine.create([new glaze_engine_components_Position(100,100),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy),new glaze_engine_components_Script(behavior),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(0,10)])]);
+		var playerBody = player.map.PhysicsBody.body;
 		this.characterController = new util_CharacterController(this.input,playerBody);
 		playerBody.maxScalarVelocity = 0;
 		var _this4 = playerBody.maxVelocity;
 		_this4.x = 160;
 		_this4.y = 1000;
-		var tmp5;
-		var value1 = player.map.Position;
-		if((value1 instanceof glaze_engine_components_Position)) tmp5 = value1; else tmp5 = null;
-		renderSystem.CameraTarget(tmp5.coords);
+		renderSystem.CameraTarget(player.map.Position.coords);
 	}
 	,setupMap: function() {
 		var tmp;
@@ -1022,8 +1019,8 @@ glaze_engine_components_ParticleEmitters.__interfaces__ = [glaze_eco_core_ICompo
 glaze_engine_components_ParticleEmitters.prototype = {
 	__class__: glaze_engine_components_ParticleEmitters
 };
-var glaze_engine_components_Physics = function(width,height,material) {
-	this.body = new glaze_physics_Body(width,height,material);
+var glaze_engine_components_Physics = function(body) {
+	this.body = body;
 };
 glaze_engine_components_Physics.__name__ = ["glaze","engine","components","Physics"];
 glaze_engine_components_Physics.__interfaces__ = [glaze_eco_core_IComponent];
@@ -1053,10 +1050,7 @@ glaze_engine_systems_BehaviourSystem.__name__ = ["glaze","engine","systems","Beh
 glaze_engine_systems_BehaviourSystem.__super__ = glaze_eco_core_System;
 glaze_engine_systems_BehaviourSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		var tmp;
-		var value = entity.map.Script;
-		if((value instanceof glaze_engine_components_Script)) tmp = value; else tmp = null;
-		var script = tmp;
+		var script = entity.map.Script;
 		script.context = new glaze_ai_behaviortree_BehaviorContext(entity);
 	}
 	,entityRemoved: function(entity) {
@@ -1067,10 +1061,7 @@ glaze_engine_systems_BehaviourSystem.prototype = $extend(glaze_eco_core_System.p
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
-			var tmp;
-			var value = entity.map.Script;
-			if((value instanceof glaze_engine_components_Script)) tmp = value; else tmp = null;
-			var script = tmp;
+			var script = entity.map.Script;
 			script.behavior.tick(script.context);
 		}
 	}
@@ -1094,17 +1085,11 @@ glaze_engine_systems_ParticleSystem.prototype = $extend(glaze_eco_core_System.pr
 			var entity = _g1[_g];
 			++_g;
 			var _g2 = 0;
-			var tmp;
-			var value = entity.map.ParticleEmitters;
-			if((value instanceof glaze_engine_components_ParticleEmitters)) tmp = value; else tmp = null;
-			var _g3 = tmp.emitters;
+			var _g3 = entity.map.ParticleEmitters.emitters;
 			while(_g2 < _g3.length) {
 				var emitter = _g3[_g2];
 				++_g2;
-				var tmp1;
-				var value1 = entity.map.Position;
-				if((value1 instanceof glaze_engine_components_Position)) tmp1 = value1; else tmp1 = null;
-				emitter.update(timestamp,tmp1.coords,this.particleEngine);
+				emitter.update(timestamp,entity.map.Position.coords,this.particleEngine);
 			}
 		}
 		this.particleEngine.Update();
@@ -1133,23 +1118,14 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 		this.camera.addChild(this.itemContainer);
 	}
 	,entityAdded: function(entity) {
-		var tmp;
-		var value = entity.map.Position;
-		if((value instanceof glaze_engine_components_Position)) tmp = value; else tmp = null;
-		var position = tmp;
-		var tmp1;
-		var value1 = entity.map.Display;
-		if((value1 instanceof glaze_engine_components_Display)) tmp1 = value1; else tmp1 = null;
-		var display = tmp1;
+		var position = entity.map.Position;
+		var display = entity.map.Display;
 		display.displayObject = this.createSprite("",display.textureID);
 		display.displayObject.position = position.coords;
 		this.itemContainer.addChild(display.displayObject);
 	}
 	,entityRemoved: function(entity) {
-		var tmp;
-		var value = entity.map.Display;
-		if((value instanceof glaze_engine_components_Display)) tmp = value; else tmp = null;
-		var display = tmp;
+		var display = entity.map.Display;
 		this.itemContainer.removeChild(display.displayObject);
 	}
 	,update: function(timestamp,delta) {
@@ -1791,7 +1767,7 @@ glaze_particle_emitter_RandomSpray.prototype = {
 	}
 	,__class__: glaze_particle_emitter_RandomSpray
 };
-var glaze_physics_Body = function(w,h,material,filter) {
+var glaze_physics_Body = function(material) {
 	this.debug = 0;
 	this.bounceCount = 0;
 	this.totalBounceCount = 0;
@@ -1817,8 +1793,6 @@ var glaze_physics_Body = function(w,h,material,filter) {
 	this.position = new glaze_geom_Vector2();
 	this.material = material;
 	this.setMass(1);
-	this.bfproxy = new glaze_physics_collision_BFProxy(w,h,filter);
-	this.bfproxy.setBody(this);
 };
 glaze_physics_Body.__name__ = ["glaze","physics","Body"];
 glaze_physics_Body.prototype = {
@@ -2557,8 +2531,8 @@ glaze_physics_collision_broadphase_BruteforceBroadphase.prototype = {
 	}
 	,__class__: glaze_physics_collision_broadphase_BruteforceBroadphase
 };
-var glaze_physics_components_PhysicsBody = function(width,height,material) {
-	this.body = new glaze_physics_Body(width,height,material);
+var glaze_physics_components_PhysicsBody = function(body) {
+	this.body = body;
 };
 glaze_physics_components_PhysicsBody.__name__ = ["glaze","physics","components","PhysicsBody"];
 glaze_physics_components_PhysicsBody.__interfaces__ = [glaze_eco_core_IComponent];
@@ -2581,16 +2555,10 @@ glaze_physics_systems_PhysicsCollisionSystem.__name__ = ["glaze","physics","syst
 glaze_physics_systems_PhysicsCollisionSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsCollisionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		var tmp;
-		var value = entity.map.PhysicsCollision;
-		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		this.broadphase.addProxy(tmp.proxy);
+		this.broadphase.addProxy(entity.map.PhysicsCollision.proxy);
 	}
 	,entityRemoved: function(entity) {
-		var tmp;
-		var value = entity.map.PhysicsCollision;
-		if((value instanceof glaze_physics_components_PhysicsCollision)) tmp = value; else tmp = null;
-		this.broadphase.removeProxy(tmp.proxy);
+		this.broadphase.removeProxy(entity.map.PhysicsCollision.proxy);
 	}
 	,update: function(timestamp,delta) {
 		this.broadphase.collide();
@@ -2604,16 +2572,6 @@ glaze_physics_systems_PhysicsPositionSystem.__name__ = ["glaze","physics","syste
 glaze_physics_systems_PhysicsPositionSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsPositionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		console.log("pps added body");
-		var tmp;
-		var value = entity.map.Position;
-		if((value instanceof glaze_engine_components_Position)) tmp = value; else tmp = null;
-		var position = tmp;
-		var tmp1;
-		var value1 = entity.map.PhysicsBody;
-		if((value1 instanceof glaze_physics_components_PhysicsBody)) tmp1 = value1; else tmp1 = null;
-		var physics = tmp1;
-		physics.body.position = position.coords;
 	}
 	,entityRemoved: function(entity) {
 	}
@@ -2623,10 +2581,7 @@ glaze_physics_systems_PhysicsPositionSystem.prototype = $extend(glaze_eco_core_S
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
-			var tmp;
-			var value = entity.map.PhysicsBody;
-			if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
-			tmp.body.updatePosition();
+			entity.map.PhysicsBody.body.updatePosition();
 		}
 	}
 	,__class__: glaze_physics_systems_PhysicsPositionSystem
@@ -2640,11 +2595,9 @@ glaze_physics_systems_PhysicsUpdateSystem.__name__ = ["glaze","physics","systems
 glaze_physics_systems_PhysicsUpdateSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		var tmp;
-		var value = entity.map.PhysicsBody;
-		if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
-		var body = tmp.body;
-		entity.addComponent(new glaze_physics_components_PhysicsCollision(body.bfproxy));
+		var position = entity.map.Position;
+		var physics = entity.map.PhysicsBody;
+		physics.body.position = position.coords;
 	}
 	,entityRemoved: function(entity) {
 	}
@@ -2654,10 +2607,7 @@ glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_Sys
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
-			var tmp;
-			var value = entity.map.PhysicsBody;
-			if((value instanceof glaze_physics_components_PhysicsBody)) tmp = value; else tmp = null;
-			tmp.body.update(delta / 1000,this.globalForce,this.globalDamping);
+			entity.map.PhysicsBody.body.update(delta / 1000,this.globalForce,this.globalDamping);
 		}
 	}
 	,__class__: glaze_physics_systems_PhysicsUpdateSystem

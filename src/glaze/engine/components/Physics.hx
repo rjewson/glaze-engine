@@ -8,8 +8,8 @@ class Physics implements IComponent {
     
     public var body:Body;
 
-    public function new(width:Float,height:Float,material:Material) {
-        body = new Body(width,height,material);
-    }
+    // public function new(width:Float,height:Float,material:Material) {
+    //     body = new Body(width,height,material);
+    // }
 
 }

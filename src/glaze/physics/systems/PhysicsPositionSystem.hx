@@ -13,10 +13,6 @@ class PhysicsPositionSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
-        trace("pps added body");
-        var position = entity.getComponent(Position);
-        var physics = entity.getComponent(PhysicsBody);
-        physics.body.position = position.coords;
     }
 
     override public function entityRemoved(entity:Entity) {

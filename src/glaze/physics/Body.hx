@@ -28,10 +28,7 @@ class Body
     public var maxScalarVelocity:Float = 1000;
     public var maxVelocity:Vector2 = new Vector2();
 
-    // public var aabb:AABB = new AABB();
-    public var bfproxy:BFProxy;
     public var material:Material;
-    //public var filter:Filter;
 
     public var forces:Vector2 = new Vector2();
     private var accumulatedForces:Vector2 = new Vector2();
@@ -54,12 +51,9 @@ class Body
 
     public var debug:Int = 0;    
 
-    public function new(w:Float,h:Float,material:Material,filter:Filter=null) {
+    public function new(material:Material) {
         this.material = material;
         setMass(1);
-
-        bfproxy = new BFProxy(w,h,filter);
-        bfproxy.setBody(this);
     }
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {
