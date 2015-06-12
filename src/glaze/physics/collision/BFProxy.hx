@@ -17,7 +17,6 @@ class BFProxy
     public var isSensor:Bool = false;
 
     public var filter:Filter;
-    // public var material:Material;
 
     public var contactCallback :  BFProxy -> BFProxy -> Contact -> Void = null;
 

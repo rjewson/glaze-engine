@@ -22,7 +22,7 @@ class PhysicsCollisionSystem extends System {
         //     broadphase.addProxy(proxy);
         broadphase.addProxy(entity.getComponent(PhysicsCollision).proxy);
     }
-
+    
     override public function entityRemoved(entity:Entity) {
         // for (proxy in entity.getComponent(PhysicsCollision).proxies)
         //     broadphase.removeProxy(proxy);

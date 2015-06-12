@@ -1,8 +1,8 @@
 package;
 
+import glaze.eco.core.Entity;
 import glaze.engine.components.Display;
 import glaze.engine.components.ParticleEmitters;
-import glaze.engine.components.Physics;
 import glaze.engine.components.Position;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
@@ -12,10 +12,13 @@ import glaze.engine.systems.ParticleSystem;
 // import glaze.engine.systems.PhysicsSystem;
 import glaze.geom.Vector2;
 import glaze.engine.systems.RenderSystem;
+import glaze.lighting.components.FloodLight;
 import glaze.particle.BlockSpriteParticleEngine;
 import glaze.particle.emitter.RandomSpray;
+import glaze.physics.Body;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.BruteforceBroadphase;
+import glaze.physics.collision.Filter;
 import glaze.physics.collision.Map;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
@@ -42,6 +45,9 @@ class GameTestA extends GameEngine {
 
     var tmxMap:TmxMap;
     var characterController:CharacterController;
+    var player:Entity;
+    var playerFilter:Filter;
+    var renderSystem:RenderSystem;
 
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
@@ -53,10 +59,10 @@ class GameTestA extends GameEngine {
         setupMap();
 
         var corephase = engine.createPhase();
-        var aiphase = engine.createPhase(1000);
+        var aiphase = engine.createPhase(1000/30);
         var physicsPhase = engine.createPhase(1000/60);
 
-        var renderSystem = new RenderSystem(canvas);
+        renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         
@@ -82,32 +88,39 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
         physicsPhase.addSystem(new PhysicsPositionSystem());
 
+        var lightSystem = new glaze.lighting.systems.FloodLightingSystem(map);
+        renderSystem.renderer.AddRenderer(lightSystem.renderer);
+
         aiphase.addSystem(new BehaviourSystem());
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
+        corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);
         
-        var behavior = new glaze.ai.behaviortree.Sequence();
-        behavior.addChild(new glaze.engine.actions.LogAction());
+        playerFilter = new Filter();
+        playerFilter.groupIndex = 1;
 
         var body = new glaze.physics.Body(new Material());
-        var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,null);
+        body.maxScalarVelocity = 0;
+        body.maxVelocity.setTo(160,1000);
+        var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,playerFilter);
         proxy.setBody(body);
+        characterController = new CharacterController(input,body);
 
-        var player = engine.create([
+        player = engine.createEntity([
             new Position(100,100),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(proxy),
-            new Script(behavior),
-            new ParticleEmitters([new RandomSpray(0,10)])
+            new PhysicsCollision(proxy)
         ]);
-        var playerBody = player.getComponent(PhysicsBody).body;
-
-        characterController = new CharacterController(input,playerBody);
-        playerBody.maxScalarVelocity = 0;
-        playerBody.maxVelocity.setTo(160,1000);
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);
+
+        var light = engine.createEntity(
+            [
+            player.getComponent(Position),
+            //new Position(100,100),
+            new FloodLight(256)
+            ]);
 
     }
 
@@ -116,8 +129,57 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     }
 
+
+    public function fireBullet():Void
+    {
+        var bulletBody = new Body(new Material());
+        bulletBody.setMass(0.03);
+        bulletBody.setBounces(3);
+        bulletBody.isBullet = true;
+        bulletBody.maxScalarVelocity = 3000;
+
+        var bulletProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
+        bulletProxy.setBody(bulletBody);
+
+        var pos = player.getComponent(Position).coords.clone();
+        
+        var vel = input.mousePosition.clone();
+        vel.minusEquals(pos);
+        vel.normalize();
+        vel.multEquals(3000);
+        bulletBody.velocity.setTo(vel.x,vel.y);
+
+        var behavior = new glaze.ai.behaviortree.Sequence();
+        behavior.addChild(new glaze.engine.actions.Delay(1000));
+        behavior.addChild(new glaze.engine.actions.DestroyEntity());
+
+        var bullet = engine.createEntity([
+            new Position(pos.x,pos.y),
+            new Display("projectile1.png"),
+            new PhysicsBody(bulletBody),
+            new PhysicsCollision(bulletProxy),
+            // new ParticleEmitters([new RandomSpray(0,30)])
+            new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
+            new Script(behavior),
+            new FloodLight(128)
+        ]);
+
+    }
+
     override public function preUpdate() {
+
+        //TODO find somewhere better for this
         characterController.update();
+
+        var fire = input.JustPressed(32);
+        var search = input.JustPressed(71);
+        var debug = input.Pressed(72);
+        var ray = input.Pressed(82);
+        
+        if (fire) fireBullet();
+
+        input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
+
     }
 
     public static function main() {

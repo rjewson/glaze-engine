@@ -13,6 +13,7 @@ class PhysicsPositionSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
+        trace("added");
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -20,7 +21,12 @@ class PhysicsPositionSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
-            entity.getComponent(PhysicsBody).body.updatePosition();
+            //entity.getComponent(PhysicsBody).body.updatePosition();
+            var body = entity.getComponent(PhysicsBody).body;
+            var position = entity.getComponent(Position);
+            body.updatePosition();
+            position.update(body.position);
+            // position.copy(body.position);
         }
     }
 }

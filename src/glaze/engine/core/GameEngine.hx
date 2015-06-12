@@ -39,7 +39,6 @@ class GameEngine {
     }
 
     public function update(delta:Float,now:Int) {
-        input.Update(0,0);
         preUpdate();
         engine.update(now,delta);
         postUpdate();

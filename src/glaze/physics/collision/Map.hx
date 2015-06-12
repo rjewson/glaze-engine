@@ -30,7 +30,7 @@ class Map
 
     public var contact:Contact;
 
-    public var debug:Int->Int->Void;
+    public var debug:Int->Int->Void; 
 
     public function new(data:Bytes2D) {
         this.data = data;
@@ -41,7 +41,6 @@ class Map
     }
 
     public function testCollision(proxy:BFProxy) {
-    //public function testCollision(body:Body) {
 
         var body = proxy.body;
 
@@ -59,6 +58,7 @@ class Map
                 if (cell&COLLIDABLE==1) {
                     tilePosition.x = (x*tileSize)+tileHalfSize;
                     tilePosition.y = (y*tileSize)+tileHalfSize;
+
                     if (body.isBullet) {
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
                             if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {

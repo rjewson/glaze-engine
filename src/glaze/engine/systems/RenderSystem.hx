@@ -85,6 +85,7 @@ class RenderSystem extends System {
         s.position.y = 0;
         s.pivot.x = s.texture.frame.width * s.texture.pivot.x;
         s.pivot.y = s.texture.frame.height * s.texture.pivot.y;
+        // s.scale.setTo(10,10);
         return s;
     }
 

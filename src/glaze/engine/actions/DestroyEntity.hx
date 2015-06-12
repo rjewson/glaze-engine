@@ -4,14 +4,15 @@ import glaze.ai.behaviortree.Behavior;
 import glaze.ai.behaviortree.BehaviorContext;
 import glaze.ai.behaviortree.BehaviorStatus;
 
-class LogAction extends Behavior {
+class DestroyEntity extends Behavior {
 
-    public function new() {   
-        super(); 
+
+    public function new() {
+        super();
     }
 
     override private function update(context:BehaviorContext):BehaviorStatus { 
-        trace("tick");
+        context.entity.engine.destroyEntity(context.entity);
         return Success;
     }
 
