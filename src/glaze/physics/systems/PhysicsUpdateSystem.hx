@@ -22,7 +22,6 @@ class PhysicsUpdateSystem extends System {
         var position = entity.getComponent(Position);
         var physics = entity.getComponent(PhysicsBody);
         physics.body.position.copy(position.coords);
-        // physics.body.position = position.coords;
     }
 
     override public function entityRemoved(entity:Entity) {

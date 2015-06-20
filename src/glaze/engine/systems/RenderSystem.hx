@@ -44,7 +44,7 @@ class RenderSystem extends System {
 
         stage.addChild(camera);
 
-        renderer = new WebGLRenderer(stage,camera,canvas,800,600);
+        renderer = new WebGLRenderer(stage,camera,canvas,800,640);
         camera.Resize(renderer.width,renderer.height);
 
         textureManager  = new TextureManager(renderer.gl);

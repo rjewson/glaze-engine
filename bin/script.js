@@ -88,7 +88,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(new glaze_physics_collision_broadphase_BruteforceBroadphase(map,new glaze_physics_collision_Intersect())));
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
-		var lightSystem = new glaze_lighting_systems_FloodLightingSystem(map);
+		var lightSystem = new glaze_lighting_systems_PointLightingSystem(map);
 		this.renderSystem.renderer.AddRenderer(lightSystem.renderer);
 		aiphase.addSystem(new glaze_engine_systems_BehaviourSystem());
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(blockParticleEngine));
@@ -104,9 +104,9 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var proxy = new glaze_physics_collision_BFProxy(15.,36.,this.playerFilter);
 		proxy.setBody(body);
 		this.characterController = new util_CharacterController(this.input,body);
-		this.player = this.engine.createEntity([new glaze_engine_components_Position(100,100),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy)]);
+		this.player = this.engine.createEntity([new glaze_engine_components_Position(300,180),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy)]);
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
-		var light = this.engine.createEntity([this.player.map.Position,new glaze_lighting_components_FloodLight(256)]);
+		var light = this.engine.createEntity([this.player.map.Position,new glaze_lighting_components_Light(256,1,1,0)]);
 	}
 	,setupMap: function() {
 		var tmp;
@@ -127,12 +127,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var bulletProxy = new glaze_physics_collision_BFProxy(3,3,this.playerFilter);
 		bulletProxy.setBody(bulletBody);
 		var pos = this.player.map.Position.coords.clone();
-		var vel = this.input.mousePosition.clone();
+		var vel = this.input.ViewCorrectedMousePosition();
 		vel.x -= pos.x;
 		vel.y -= pos.y;
 		vel.normalize();
-		vel.x *= 3000;
-		vel.y *= 3000;
+		vel.x *= 1000;
+		vel.y *= 1000;
 		var _this = bulletBody.velocity;
 		_this.x = vel.x;
 		_this.y = vel.y;
@@ -141,7 +141,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		behavior.children.add(child);
 		var child1 = new glaze_engine_actions_DestroyEntity();
 		behavior.children.add(child1);
-		this.engine.createEntity([new glaze_engine_components_Position(pos.x,pos.y),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_physics_components_PhysicsCollision(bulletProxy),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_FloodLight(128)]);
+		this.engine.createEntity([new glaze_engine_components_Position(pos.x,pos.y),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_physics_components_PhysicsCollision(bulletProxy),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1)]);
 	}
 	,preUpdate: function() {
 		this.characterController.update();
@@ -568,6 +568,13 @@ glaze_core_DigitalInput.prototype = {
 		target.addEventListener("mouseup",$bind(this,this.MouseUp),false);
 		target.addEventListener("mousemove",$bind(this,this.MouseMove),false);
 		this.inputCorrection = inputCorrection;
+	}
+	,ViewCorrectedMousePosition: function() {
+		var pos = this.mousePosition.clone();
+		var v = this.mouseOffset;
+		pos.x += v.x;
+		pos.y += v.y;
+		return pos;
 	}
 	,Update: function(x,y) {
 		this.mouseOffset.x = x;
@@ -1177,7 +1184,7 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 		this.camera.worldExtentsAABB = new glaze_geom_AABB2(0,4096,4096,0);
 		this.camera.worldExtentsAABB.expand(-16);
 		this.stage.addChild(this.camera);
-		this.renderer = new glaze_render_renderers_webgl_WebGLRenderer(this.stage,this.camera,this.canvas,800,600);
+		this.renderer = new glaze_render_renderers_webgl_WebGLRenderer(this.stage,this.camera,this.canvas,800,640);
 		this.camera.Resize(this.renderer.width,this.renderer.height);
 		this.textureManager = new glaze_render_texture_TextureManager(this.renderer.gl);
 		this.itemContainer = new glaze_render_display_DisplayObjectContainer();
@@ -1704,113 +1711,51 @@ glaze_geom_Vector2.prototype = {
 	}
 	,__class__: glaze_geom_Vector2
 };
-var glaze_lighting_components_FloodLight = function(range) {
+var glaze_lighting_components_Light = function(range,attenuation,intensity,flicker) {
 	this.range = range;
+	this.attenuation = attenuation;
+	this.intensity = intensity;
+	this.flicker = flicker;
 };
-glaze_lighting_components_FloodLight.__name__ = ["glaze","lighting","components","FloodLight"];
-glaze_lighting_components_FloodLight.__interfaces__ = [glaze_eco_core_IComponent];
-glaze_lighting_components_FloodLight.prototype = {
-	__class__: glaze_lighting_components_FloodLight
+glaze_lighting_components_Light.__name__ = ["glaze","lighting","components","Light"];
+glaze_lighting_components_Light.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_lighting_components_Light.prototype = {
+	__class__: glaze_lighting_components_Light
 };
-var glaze_lighting_systems_FloodLightingSystem = function(map) {
-	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_lighting_components_FloodLight]);
+var glaze_lighting_systems_PointLightingSystem = function(map) {
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_lighting_components_Light]);
 	this.map = map;
-	this.renderer = new glaze_render_renderers_webgl_PointSpriteLightMapRenderer();
-	this.renderer.ResizeBatch(1024);
-	this.lightGrid = new glaze_ds_Bytes2D(32,32,32,1);
+	this.renderer = new glaze_render_renderers_webgl_FBOLighting();
 };
-glaze_lighting_systems_FloodLightingSystem.__name__ = ["glaze","lighting","systems","FloodLightingSystem"];
-glaze_lighting_systems_FloodLightingSystem.__super__ = glaze_eco_core_System;
-glaze_lighting_systems_FloodLightingSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+glaze_lighting_systems_PointLightingSystem.__name__ = ["glaze","lighting","systems","PointLightingSystem"];
+glaze_lighting_systems_PointLightingSystem.__super__ = glaze_eco_core_System;
+glaze_lighting_systems_PointLightingSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		console.log("added light");
 	}
 	,entityRemoved: function(entity) {
 	}
 	,update: function(timestamp,delta) {
-		this.reset();
-		this.renderLightsToLightGrid();
-		this.renderLightGridToSprites();
-	}
-	,reset: function() {
-		this.renderer.ResetBatch();
-		var _g1 = 0;
-		var _g = this.lightGrid.data.length;
-		while(_g1 < _g) {
-			var i = _g1++;
-			this.lightGrid.data.b[i] = 255;
-		}
-	}
-	,renderLightsToLightGrid: function() {
+		this.renderer.reset();
 		var _g = 0;
 		var _g1 = this.view.entities;
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
 			var position = entity.map.Position;
-			var light = entity.map.FloodLight;
-			this.renderFunc1(position.coords,light.range);
+			var light = entity.map.Light;
+			if(light.flicker > 0) {
+				light.intensity = this.nexLightIntensity(light.intensity);
+				this.renderer.addLight(position.coords.x + (Math.random() * 6 + -3),position.coords.y + (Math.random() * 6 + -3),light.range * light.intensity);
+			} else this.renderer.addLight(position.coords.x,position.coords.y,light.range * light.intensity);
 		}
 	}
-	,renderFunc1: function(position,range) {
+	,nexLightIntensity: function(lastIntensity) {
 		var tmp;
-		var value = Math.max(0,position.x - range);
-		tmp = value * this.lightGrid.invCellSize | 0;
-		var startX = tmp;
-		var tmp1;
-		var value1 = Math.max(0,position.y - range);
-		tmp1 = value1 * this.lightGrid.invCellSize | 0;
-		var startY = tmp1;
-		var tmp2;
-		var value2 = Math.min(992,position.x + range);
-		tmp2 = value2 * this.lightGrid.invCellSize | 0;
-		var endX = tmp2 + 1;
-		var tmp3;
-		var value3 = Math.min(992,position.y + range);
-		tmp3 = value3 * this.lightGrid.invCellSize | 0;
-		var endY = tmp3 + 1;
-		var _g = startX;
-		while(_g < endX) {
-			var xpos = _g++;
-			var _g1 = startY;
-			while(_g1 < endY) {
-				var ypos = _g1++;
-				var dX = position.x - xpos * 32 + 16;
-				var dY = position.y - ypos * 32 + 16;
-				var pcent = (dX * dX + dY * dY) / (range * range);
-				if(pcent >= 1) continue;
-				var tmp4;
-				var x = Math.min(Math.max(pcent * 255,0),255);
-				tmp4 = x | 0;
-				var iv = tmp4;
-				var tmp5;
-				var _this = this.lightGrid;
-				tmp5 = _this.data.b[ypos * _this.internalWidth + xpos * _this.bytesPerCell];
-				var currentLight = tmp5;
-				if(currentLight < iv) continue;
-				var _this1 = this.lightGrid;
-				_this1.data.b[ypos * _this1.internalWidth + xpos * _this1.bytesPerCell] = iv & 255;
-			}
-		}
+		var value = lastIntensity + (Math.random() - 0.3) / 10;
+		tmp = Math.min(Math.max(value,0),1);
+		return tmp;
 	}
-	,renderLightGridToSprites: function() {
-		var _g1 = 0;
-		var _g = this.lightGrid.height - 1;
-		while(_g1 < _g) {
-			var y = _g1++;
-			var _g3 = 0;
-			var _g2 = this.lightGrid.width - 1;
-			while(_g3 < _g2) {
-				var x = _g3++;
-				var tmp;
-				var _this = this.lightGrid;
-				tmp = _this.data.b[y * _this.internalWidth + x * _this.bytesPerCell];
-				var v = tmp;
-				this.renderer.AddSpriteToBatch(x * 32,y * 32,32,v,0,0,0);
-			}
-		}
-	}
-	,__class__: glaze_lighting_systems_FloodLightingSystem
+	,__class__: glaze_lighting_systems_PointLightingSystem
 });
 var glaze_particle_BlockSpriteParticle = function() {
 };
@@ -3296,6 +3241,82 @@ glaze_render_renderers_webgl_IRenderer.__name__ = ["glaze","render","renderers",
 glaze_render_renderers_webgl_IRenderer.prototype = {
 	__class__: glaze_render_renderers_webgl_IRenderer
 };
+var glaze_render_renderers_webgl_FBOLighting = function() {
+	this.fullReset = true;
+	this.maxLights = 32;
+};
+glaze_render_renderers_webgl_FBOLighting.__name__ = ["glaze","render","renderers","webgl","FBOLighting"];
+glaze_render_renderers_webgl_FBOLighting.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
+glaze_render_renderers_webgl_FBOLighting.prototype = {
+	Init: function(gl,camera) {
+		this.gl = gl;
+		this.camera = camera;
+		this.gridSize = 4;
+		this.viewportSize = new glaze_geom_Vector2();
+		this.scaledViewportSize = new Float32Array(2);
+		this.quadVertBuffer = gl.createBuffer();
+		gl.bindBuffer(34962,this.quadVertBuffer);
+		var quadVerts = new Float32Array([-1,1,1,1,1,-1,1,-1,-1,-1,-1,1]);
+		gl.bufferData(34962,quadVerts,35044);
+		gl.bufferData(34962,quadVerts,35044);
+		this.screenShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER));
+		this.surfaceShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER));
+		this.surface = new glaze_render_texture_BaseTexture(gl,800 / this.gridSize | 0,640 / this.gridSize | 0);
+		this.lightData = new Float32Array(this.maxLights * 4 * 4);
+		this.lightDataTexture = new glaze_render_texture_BaseTexture(gl,this.lightData.length,1,true);
+		this.reset();
+	}
+	,Resize: function(width,height) {
+		this.viewportSize.x = width;
+		this.viewportSize.y = height;
+	}
+	,reset: function() {
+		this.indexRun = 0;
+	}
+	,addLight: function(x,y,intensity) {
+		this.lightData[this.indexRun++] = x;
+		this.lightData[this.indexRun++] = y;
+		this.lightData[this.indexRun++] = intensity;
+		this.lightData[this.indexRun++] = 0;
+	}
+	,drawSurface: function() {
+		this.addLight(0,0,0);
+		var x = this.camera.position.x;
+		var y = this.camera.position.y;
+		this.lightDataTexture.bind(0);
+		this.gl.texImage2D(3553,0,6408,8,8,0,6408,5126,this.lightData);
+		this.gl.clearColor(0,0,0,0);
+		this.gl.clear(16384);
+		this.gl.colorMask(true,true,true,true);
+		this.gl.useProgram(this.surfaceShader.program);
+		this.gl.uniform2fv(this.surfaceShader.uniform.viewportSize,this.scaledViewportSize);
+		this.gl.uniform2f(this.surfaceShader.uniform.resolution,800,640);
+		this.gl.uniform2f(this.surfaceShader.uniform.viewOffset,-x,-y);
+		this.gl.uniform2f(this.surfaceShader.uniform.gridSize,this.gridSize,this.gridSize);
+		this.gl.uniform1i(this.surfaceShader.uniform.numLights,this.maxLights);
+		this.gl.uniform1i(this.surfaceShader.uniform.texture,0);
+		this.gl.bindBuffer(34962,this.quadVertBuffer);
+		this.gl.vertexAttribPointer(this.surfaceShader.attribute.position,2,5126,false,0,0);
+		this.gl.drawArrays(4,0,6);
+	}
+	,Render: function(clip) {
+		var x = this.camera.position.x;
+		var y = this.camera.position.y;
+		this.surface.drawTo($bind(this,this.drawSurface));
+		this.gl.useProgram(this.screenShader.program);
+		this.gl.uniform2fv(this.screenShader.uniform.viewportSize,this.scaledViewportSize);
+		this.gl.uniform2f(this.screenShader.uniform.resolution,800,640);
+		this.gl.uniform2f(this.screenShader.uniform.textureOffset,-x % this.gridSize,-y % this.gridSize);
+		this.surface.bind(0);
+		this.gl.uniform1i(this.screenShader.uniform.texture,0);
+		this.gl.bindBuffer(34962,this.quadVertBuffer);
+		this.gl.vertexAttribPointer(this.screenShader.attribute.position,2,5126,false,0,0);
+		this.gl.drawArrays(4,0,6);
+		this.surface.unbind(0);
+		this.gl.disable(3042);
+	}
+	,__class__: glaze_render_renderers_webgl_FBOLighting
+};
 var glaze_render_renderers_webgl_PointSpriteLightMapRenderer = function() {
 };
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.__name__ = ["glaze","render","renderers","webgl","PointSpriteLightMapRenderer"];
@@ -3805,6 +3826,7 @@ glaze_render_renderers_webgl_WebGLRenderer.prototype = {
 		this.gl.enable(3042);
 		this.gl.colorMask(true,true,true,this.contextAttributes.alpha);
 		this.gl.clearColor(0,0,0,1);
+		if(!this.gl.getExtension("OES_texture_float")) console.log("New browser time: Float textures not supported");
 	}
 	,Resize: function(width,height) {
 		this.width = width;
@@ -3874,30 +3896,62 @@ glaze_render_renderers_webgl_WebGLShaders.CompileProgram = function(gl,vertexSrc
 	}
 	return shaderProgram;
 };
-var glaze_render_texture_BaseTexture = function(source) {
-	this.source = source;
+var glaze_render_texture_BaseTexture = function(gl,width,height,floatingPoint) {
+	if(floatingPoint == null) floatingPoint = false;
+	this.gl = gl;
 	this.powerOfTwo = false;
-	this.resolution = 1;
-	this.width = source.width;
-	this.height = source.width;
+	this.width = width;
+	this.height = height;
+	this.RegisterTexture(floatingPoint);
 };
 glaze_render_texture_BaseTexture.__name__ = ["glaze","render","texture","BaseTexture"];
+glaze_render_texture_BaseTexture.FromImage = function(gl,image) {
+	var texture = new glaze_render_texture_BaseTexture(gl,image.width,image.height);
+	gl.texImage2D(3553,0,6408,6408,5121,image);
+	return texture;
+};
 glaze_render_texture_BaseTexture.prototype = {
-	RegisterTexture: function(gl) {
-		if(this.texture == null) this.texture = gl.createTexture();
-		gl.bindTexture(3553,this.texture);
-		gl.pixelStorei(37441,1);
-		gl.texImage2D(3553,0,6408,6408,5121,this.source);
-		gl.texParameteri(3553,10240,9728);
-		gl.texParameteri(3553,10241,9728);
+	RegisterTexture: function(fp) {
+		if(this.texture == null) this.texture = this.gl.createTexture();
+		this.gl.bindTexture(3553,this.texture);
+		this.gl.pixelStorei(37441,0);
+		this.gl.texParameteri(3553,10240,9728);
+		this.gl.texParameteri(3553,10241,9728);
 		if(this.powerOfTwo) {
-			gl.texParameteri(3553,10242,10497);
-			gl.texParameteri(3553,10243,10497);
+			this.gl.texParameteri(3553,10242,10497);
+			this.gl.texParameteri(3553,10243,10497);
 		} else {
-			gl.texParameteri(3553,10242,33071);
-			gl.texParameteri(3553,10243,33071);
+			this.gl.texParameteri(3553,10242,33071);
+			this.gl.texParameteri(3553,10243,33071);
 		}
-		gl.bindTexture(3553,null);
+		this.gl.texImage2D(3553,0,6408,this.width,this.height,0,6408,fp?5126:5121,null);
+	}
+	,bind: function(unit) {
+		this.gl.activeTexture(33984 + unit);
+		this.gl.bindTexture(3553,this.texture);
+	}
+	,unbind: function(unit) {
+		this.gl.activeTexture(33984 + unit);
+		this.gl.bindTexture(3553,null);
+	}
+	,drawTo: function(callback) {
+		if(this.framebuffer == null) this.framebuffer = this.gl.createFramebuffer();
+		if(this.renderbuffer == null) this.renderbuffer = this.gl.createRenderbuffer();
+		this.gl.bindFramebuffer(36160,this.framebuffer);
+		this.gl.bindRenderbuffer(36161,this.renderbuffer);
+		if(this.width != (this.renderbuffer.width || this.height != this.renderbuffer.height)) {
+			this.renderbuffer.width = this.width;
+			this.renderbuffer.height = this.height;
+			this.gl.renderbufferStorage(36161,33189,this.width,this.height);
+			console.log("resize");
+		}
+		this.gl.framebufferTexture2D(36160,36064,3553,this.texture,0);
+		this.gl.framebufferRenderbuffer(36160,36096,36161,this.renderbuffer);
+		this.gl.viewport(0,0,this.width,this.height);
+		callback();
+		this.gl.bindFramebuffer(36160,null);
+		this.gl.bindRenderbuffer(36161,null);
+		this.gl.viewport(0,0,800,640);
 	}
 	,UnregisterTexture: function(gl) {
 	}
@@ -3939,8 +3993,7 @@ var glaze_render_texture_TextureManager = function(gl) {
 glaze_render_texture_TextureManager.__name__ = ["glaze","render","texture","TextureManager"];
 glaze_render_texture_TextureManager.prototype = {
 	AddTexture: function(id,image) {
-		var baseTexture = new glaze_render_texture_BaseTexture(image);
-		baseTexture.RegisterTexture(this.gl);
+		var baseTexture = glaze_render_texture_BaseTexture.FromImage(this.gl,image);
 		var _this = this.baseTextures;
 		if(__map_reserved[id] != null) _this.setReserved(id,baseTexture); else _this.h[id] = baseTexture;
 		return baseTexture;
@@ -4778,6 +4831,24 @@ glaze_util_BlobAsset.prototype = {
 		return this.xhr.response;
 	}
 	,__class__: glaze_util_BlobAsset
+};
+var glaze_util_Maths = function() { };
+glaze_util_Maths.__name__ = ["glaze","util","Maths"];
+glaze_util_Maths.toRad = function(deg) {
+	return deg * 0.0174532925199432955;
+};
+glaze_util_Maths.toDeg = function(rad) {
+	return rad * 57.2957795130823229;
+};
+glaze_util_Maths.Clamp = function(value,min,max) {
+	return Math.min(Math.max(value,min),max);
+};
+glaze_util_Maths.ScaleRectangleWithRatio = function(containerRect,itemRect) {
+	var sX = containerRect.x / itemRect.x;
+	var sY = containerRect.y / itemRect.y;
+	var rD = containerRect.x / containerRect.y;
+	var rR = itemRect.x / itemRect.y;
+	return rD < rR?sX:sY;
 };
 var glaze_util_Random = function() { };
 glaze_util_Random.__name__ = ["glaze","util","Random"];
@@ -6514,7 +6585,7 @@ glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
 glaze_engine_components_Position.NAME = "Position";
 glaze_engine_components_Script.NAME = "Script";
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
-glaze_lighting_components_FloodLight.NAME = "FloodLight";
+glaze_lighting_components_Light.NAME = "Light";
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_physics_collision_Intersect.epsilon = 1e-8;
 glaze_physics_collision_Map.COLLIDABLE = 1;
@@ -6524,6 +6595,10 @@ glaze_physics_collision_Map.ROUNDDOWN = .01;
 glaze_physics_collision_Map.ROUNDUP = .5;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
+glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
+glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER = ["precision mediump float;","precision mediump int;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 viewOffset;","uniform vec2 gridSize;","uniform int maxLights;","float accumulatedLight = 0.0;","void applyLight(vec2 tilePos,vec4 light)","{","   vec2 dist = tilePos-light.xy;","   float intensity = 1.0 - (dist.x*dist.x+dist.y*dist.y)/(light.z*light.z);","   intensity = clamp(intensity,0.0,1.0);","   intensity = intensity * intensity;","   accumulatedLight = max(accumulatedLight,intensity);","}","void main(void) {","   vec2 tilePos = viewOffset + (gl_FragCoord.xy * gridSize) + gridSize/2.0;","   float index = 0.0;","   for (int i=0; i<32; i++) {","       vec4 lightData = texture2D(texture,vec2(index,0.0));","       if (lightData.z==0.0) break;","       applyLight(tilePos,lightData);","       index+=1.0/32.0;","   }","   gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0-accumulatedLight);","}"];
+glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
+glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER = ["precision mediump float;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 textureOffset;","void main(void) {","    vec2 uv = (gl_FragCoord.xy)/(resolution.xy);","    uv.y = 1.0-uv.y;","    gl_FragColor = texture2D(texture,uv);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( position.x / projectionVector.x -1.0, position.y / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];
@@ -6531,6 +6606,16 @@ glaze_render_renderers_webgl_SpriteRenderer.SPRITE_FRAGMENT_SHADER = ["precision
 glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","attribute vec2 texture;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform vec2 viewOffset;","uniform vec2 viewportSize;","uniform vec2 inverseTileTextureSize;","uniform float inverseTileSize;","void main(void) {","   pixelCoord = (texture * viewportSize) + viewOffset;","   texCoord = pixelCoord * inverseTileTextureSize * inverseTileSize;","   gl_Position = vec4(position, 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform sampler2D tiles;","uniform sampler2D sprites;","uniform vec2 inverseTileTextureSize;","uniform vec2 inverseSpriteTextureSize;","uniform float tileSize;","void main(void) {","   vec4 tile = texture2D(tiles, texCoord);","   if(tile.x == 1.0 && tile.y == 1.0) { discard; }","   vec2 spriteOffset = floor(tile.xy * 256.0) * tileSize;","   vec2 spriteCoord = mod(pixelCoord, tileSize);","   gl_FragColor = texture2D(sprites, (spriteOffset + spriteCoord) * inverseSpriteTextureSize);","}"];
 glaze_tmx_TmxLayer.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
+glaze_util_Maths.ZERO_TOLERANCE = 1e-08;
+glaze_util_Maths.RAD_DEG = 57.2957795130823229;
+glaze_util_Maths.DEG_RAD = 0.0174532925199432955;
+glaze_util_Maths.LN2 = 0.6931471805599453;
+glaze_util_Maths.LN10 = 2.302585092994046;
+glaze_util_Maths.PIHALF = 1.5707963267948966;
+glaze_util_Maths.PI = 3.141592653589793;
+glaze_util_Maths.PI2 = 6.283185307179586;
+glaze_util_Maths.EPS = 1e-6;
+glaze_util_Maths.SQRT2 = 1.414213562373095;
 glaze_util_Random.PseudoRandomSeed = 3489752;
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
