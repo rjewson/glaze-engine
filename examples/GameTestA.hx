@@ -2,14 +2,17 @@ package;
 
 import glaze.eco.core.Entity;
 import glaze.engine.components.Display;
+import glaze.engine.components.Extents;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
+import glaze.engine.components.Viewable;
 import glaze.engine.core.GameEngine;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.ParticleSystem;
 // import glaze.engine.systems.PhysicsSystem;
+import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.engine.systems.RenderSystem; 
 import glaze.lighting.components.Light;
@@ -47,6 +50,7 @@ class GameTestA extends GameEngine {
     var tmxMap:TmxMap;
     var characterController:CharacterController; 
     var player:Entity;
+    var playerLight:Entity;
     var playerFilter:Filter;
     var renderSystem:RenderSystem;    
 
@@ -102,6 +106,8 @@ class GameTestA extends GameEngine {
 
         aiphase.addSystem(new BehaviourSystem());                                                   
 
+        corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
+
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
         corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);
@@ -120,18 +126,40 @@ class GameTestA extends GameEngine {
             new Position(300,180),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(proxy) 
-        ]); 
+            new PhysicsCollision(proxy)
+        ],"player"); 
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);
  
-        var light = engine.createEntity( 
+        playerLight = engine.createEntity( 
             [  
             player.getComponent(Position), 
-            //new Position(100,100),
-            new Light(256,1,1,0)
-            ]); 
+            new Light(256,1,1,0,255,255,255)
+            ,new Viewable()
+            ],"player light"); 
              
+        engine.createEntity( 
+            [  
+            new Position(128,672),
+            new Light(256,1,1,0,255,0,0),
+            new Extents(128,128)
+            ],"light1"); 
+
+        engine.createEntity( 
+            [  
+            new Position(256,672),
+            new Light(256,1,1,0,0,255,0),
+            new Extents(128,128)
+            ],"light2"); 
+        engine.createEntity( 
+            [  
+            new Position(192,640),
+            new Light(256,1,1,0,0,0,255),
+            new Extents(128,128)
+            ],"light3"); 
+
+        loop.start();
+
     } 
 
     function setupMap() {
@@ -157,9 +185,9 @@ class GameTestA extends GameEngine {
         var vel = input.ViewCorrectedMousePosition() ;
         vel.minusEquals(pos);
         vel.normalize();
-        vel.multEquals(1000); 
+        vel.multEquals(2000); 
         bulletBody.velocity.setTo(vel.x,vel.y);
-            
+                   
         var behavior = new glaze.ai.behaviortree.Sequence();
         behavior.addChild(new glaze.engine.actions.Delay(1000));
         behavior.addChild(new glaze.engine.actions.DestroyEntity());
@@ -169,14 +197,14 @@ class GameTestA extends GameEngine {
             new Display("projectile1.png"), 
             new PhysicsBody(bulletBody), 
             new PhysicsCollision(bulletProxy),  
-            // new ParticleEmitters([new RandomSpray(0,30)])
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
             new Script(behavior),
-            new Light(64,1,1,1)         
-        ]);              
-         
-    }  
-  
+            new Light(64,1,1,1,255,0,0),
+            new Viewable()
+        ],"player bullet");              
+                
+    }    
+    
     override public function preUpdate() {
       
         //TODO find somewhere better for this 
@@ -186,6 +214,14 @@ class GameTestA extends GameEngine {
         var search = input.JustPressed(71);
         var debug = input.Pressed(72); 
         var ray = input.Pressed(82);
+
+        if (input.JustPressed(84)) {
+            var lightActive = playerLight.getComponent(Viewable);
+            if (lightActive!=null)
+                playerLight.removeComponent(lightActive);
+            else
+                playerLight.addComponent(new Viewable());
+        }
         
         if (fire) fireBullet();
 
@@ -195,13 +231,19 @@ class GameTestA extends GameEngine {
 
     public static function main() {
         var game = new GameTestA();
+        glaze.debug.DebugEngine.gameEngine = game;
 
         Browser.document.getElementById("stopbutton").addEventListener("click",function(event){
             game.loop.stop();
         });
         Browser.document.getElementById("startbutton").addEventListener("click",function(event){
             game.loop.start();
+        });        
+        Browser.document.getElementById("entities").addEventListener("click",function(event){
+            var result = glaze.debug.DebugEngine.GetAllEntities();
+            untyped Browser.window.writeResult(result);
         });
+
     }   
 
 }

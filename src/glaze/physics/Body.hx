@@ -2,11 +2,7 @@
 package glaze.physics;
 
 import glaze.geom.Vector2;
-import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
-import glaze.geom.AABB;
-import glaze.geom.AABB2;
-import glaze.physics.collision.Filter;
 
 class Body 
 {

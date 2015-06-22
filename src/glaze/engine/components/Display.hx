@@ -12,5 +12,5 @@ class Display implements IComponent {
     public function new(textureID:String) {
         this.textureID = textureID;
     }
-
+ 
 }

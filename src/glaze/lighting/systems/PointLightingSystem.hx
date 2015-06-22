@@ -4,6 +4,8 @@ import glaze.ds.Bytes2D;
 import glaze.eco.core.System;
 import glaze.engine.components.Position;
 import glaze.eco.core.Entity;
+import glaze.engine.components.Viewable;
+import glaze.engine.managers.space.ISpaceManager;
 import glaze.geom.Vector2;
 import glaze.lighting.components.Light;
 import glaze.physics.collision.Map;
@@ -17,7 +19,7 @@ class PointLightingSystem extends System {
     public var map:Map;
 
     public function new(map:Map) {
-        super([Position,Light]);
+        super([Position,Light,Viewable]);
         this.map = map;
         renderer = new FBOLighting();
     }
@@ -35,12 +37,12 @@ class PointLightingSystem extends System {
             var light = entity.getComponent(Light);
             if (light.flicker>0) {
                 light.intensity = nexLightIntensity(light.intensity);
-                renderer.addLight(position.coords.x+glaze.util.Random.RandomFloat(-3,3),position.coords.y+glaze.util.Random.RandomFloat(-3,3),light.range*light.intensity);
+                renderer.addLight(position.coords.x+glaze.util.Random.RandomFloat(-3,3),position.coords.y+glaze.util.Random.RandomFloat(-3,3),light.range*light.intensity,light.red,light.green,light.blue);
             } else {
-                renderer.addLight(position.coords.x,position.coords.y,light.range*light.intensity);
+                renderer.addLight(position.coords.x,position.coords.y,light.range*light.intensity,light.red,light.green,light.blue);
             }
-            
         } 
+        // trace("Rendered "+view.entities.length+" lights");
     }
 
     function nexLightIntensity(lastIntensity:Float) {

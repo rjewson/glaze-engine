@@ -13,4 +13,8 @@ class Light implements IComponent {
 
     public var flicker:Float;
 
+    public var red:Int;
+    public var green:Int;
+    public var blue:Int;
+
 }

@@ -5,9 +5,25 @@
     <title>haxeproject</title>
     <meta name="description" content="" />
     <style type="text/css">
+
+        * {
+            font-family: "Courier New", Courier, monospace;
+        }
+
+        body {
+            /*width:1200px;*/
+            font-size: 16px;
+        }
+
+        button {
+            font-size: 12px;
+        }
+
         #viewContainer {
             float:left;
             position: relative;
+            min-width: 800px;
+            min-height: 600px;
         }
         #view {
             /*transform:scale(2);*/
@@ -19,19 +35,32 @@
             left:0px;
         }
         #controlPanel {
+            float:left;
+            margin: 5px;
+            width:400px;
         }
         #playControls {
 
         }
-        .panel {
-            margin-bottom: 10px;
+        #dataList {
+            max-height: 600px;
         }
+        .panel {
+            padding: 10px;
+            outline: 1px solid black;
+        }
+        #instructions {
+            clear:both;
+        }
+
     </style>
 </head>
 <body>
+    <!-- <h1>glaze engine tech demo</h1> -->
+    <!-- <h2><a href="https://github.com/rjewson/glaze-engine">Github</a></h2> -->
     <div id="viewContainer">
         <canvas id="view"></canvas>
-        <canvas id="viewDebug"></canvas>    
+        <!-- <canvas id="viewDebug"></canvas>     -->
     </div>
     <div id="controlPanel">
         <div id="playControls" class="panel">
@@ -40,11 +69,22 @@
             <button id="debugbutton">Debug</button>                    
         </div>
         <div id="actionControls" class="panel">
-            <button id="action1">Action 1</button>
-            <button id="action2">Action 2</button>                    
+            <button id="entities">Entities</button>
+            <button id="systems">Systems</button>                    
         </div>
-
+        <div id="dataList" class="panel">
+        </div>
     </div>
+    <div id="instructions">
+        <h3>Instructions</h3>
+        <p>'WASD':Movement 'Space':Fire 'T':Player light</p>
+    </div>
+    <script type="text/javascript">
+        function writeResult(result) {
+            var target = document.getElementById("dataList");
+            target.innerHTML = result;
+        }
+    </script>
     <script>document.write("<script src=\"script.js?"+Date.now()+"\"></"+"script>");</script>
 </body>
 </html>

@@ -1,4 +1,7 @@
-(function (console) { "use strict";
+(function (console, $hx_exports) { "use strict";
+$hx_exports.glaze = $hx_exports.glaze || {};
+$hx_exports.glaze.debug = $hx_exports.glaze.debug || {};
+$hx_exports.glaze.debug.DebugEngine = $hx_exports.glaze.debug.DebugEngine || {};
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -42,11 +45,16 @@ var GameTestA = function() {
 GameTestA.__name__ = ["GameTestA"];
 GameTestA.main = function() {
 	var game = new GameTestA();
+	glaze_debug_DebugEngine.gameEngine = game;
 	window.document.getElementById("stopbutton").addEventListener("click",function(event) {
 		game.loop.stop();
 	});
 	window.document.getElementById("startbutton").addEventListener("click",function(event1) {
 		game.loop.start();
+	});
+	window.document.getElementById("entities").addEventListener("click",function(event2) {
+		var result = glaze_debug_DebugEngine.GetAllEntities();
+		window.writeResult(result);
 	});
 };
 GameTestA.__super__ = glaze_engine_core_GameEngine;
@@ -91,6 +99,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var lightSystem = new glaze_lighting_systems_PointLightingSystem(map);
 		this.renderSystem.renderer.AddRenderer(lightSystem.renderer);
 		aiphase.addSystem(new glaze_engine_systems_BehaviourSystem());
+		corephase.addSystem(new glaze_engine_systems_ViewManagementSystem(this.renderSystem.camera));
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(blockParticleEngine));
 		corephase.addSystem(lightSystem);
 		corephase.addSystem(this.renderSystem);
@@ -104,9 +113,13 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var proxy = new glaze_physics_collision_BFProxy(15.,36.,this.playerFilter);
 		proxy.setBody(body);
 		this.characterController = new util_CharacterController(this.input,body);
-		this.player = this.engine.createEntity([new glaze_engine_components_Position(300,180),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy)]);
+		this.player = this.engine.createEntity([new glaze_engine_components_Position(300,180),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy)],"player");
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
-		var light = this.engine.createEntity([this.player.map.Position,new glaze_lighting_components_Light(256,1,1,0)]);
+		this.playerLight = this.engine.createEntity([this.player.map.Position,new glaze_lighting_components_Light(256,1,1,0,255,255,255),new glaze_engine_components_Viewable()],"player light");
+		this.engine.createEntity([new glaze_engine_components_Position(128,672),new glaze_lighting_components_Light(256,1,1,0,255,0,0),new glaze_engine_components_Extents(128,128)],"light1");
+		this.engine.createEntity([new glaze_engine_components_Position(256,672),new glaze_lighting_components_Light(256,1,1,0,0,255,0),new glaze_engine_components_Extents(128,128)],"light2");
+		this.engine.createEntity([new glaze_engine_components_Position(192,640),new glaze_lighting_components_Light(256,1,1,0,0,0,255),new glaze_engine_components_Extents(128,128)],"light3");
+		this.loop.start();
 	}
 	,setupMap: function() {
 		var tmp;
@@ -131,8 +144,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		vel.x -= pos.x;
 		vel.y -= pos.y;
 		vel.normalize();
-		vel.x *= 1000;
-		vel.y *= 1000;
+		vel.x *= 2000;
+		vel.y *= 2000;
 		var _this = bulletBody.velocity;
 		_this.x = vel.x;
 		_this.y = vel.y;
@@ -141,7 +154,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		behavior.children.add(child);
 		var child1 = new glaze_engine_actions_DestroyEntity();
 		behavior.children.add(child1);
-		this.engine.createEntity([new glaze_engine_components_Position(pos.x,pos.y),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_physics_components_PhysicsCollision(bulletProxy),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1)]);
+		this.engine.createEntity([new glaze_engine_components_Position(pos.x,pos.y),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_physics_components_PhysicsCollision(bulletProxy),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1,255,0,0),new glaze_engine_components_Viewable()],"player bullet");
 	}
 	,preUpdate: function() {
 		this.characterController.update();
@@ -151,6 +164,13 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var fire = tmp;
 		var _this1 = this.input;
 		_this1.keyMap[71] == _this1.frameRef - 1;
+		var tmp1;
+		var _this2 = this.input;
+		tmp1 = _this2.keyMap[84] == _this2.frameRef - 1;
+		if(tmp1) {
+			var lightActive = this.playerLight.map.Viewable;
+			if(lightActive != null) this.playerLight.removeComponent(lightActive); else this.playerLight.addComponent(new glaze_engine_components_Viewable());
+		}
 		if(fire) this.fireBullet();
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 	}
@@ -644,6 +664,69 @@ glaze_core_GameLoop.prototype = {
 	}
 	,__class__: glaze_core_GameLoop
 };
+var glaze_debug_DebugEngine = function() { };
+glaze_debug_DebugEngine.__name__ = ["glaze","debug","DebugEngine"];
+glaze_debug_DebugEngine.GetAllEntities = function() {
+	var result = "<table width='100%'>";
+	result += "<col style='width:10%'>";
+	result += "<col style='width:70%'>";
+	result += "<col style='width:20%'>";
+	var _g = 0;
+	var _g1 = glaze_debug_DebugEngine.gameEngine.engine.entities;
+	while(_g < _g1.length) {
+		var entity = _g1[_g];
+		++_g;
+		var ehtml = "<tr>";
+		ehtml += "<td>" + entity.id + "</td>";
+		ehtml += "<td>" + entity.name + "</td>";
+		ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpEntity(" + entity.id + ");' value='" + entity.id + "'>Inspect</button></td>";
+		ehtml += "</tr>";
+		result += ehtml;
+	}
+	result += "</table>";
+	return result;
+};
+glaze_debug_DebugEngine.DumpEntity = $hx_exports.glaze.debug.DebugEngine.DumpEntity = function(id) {
+	var _g = 0;
+	var _g1 = glaze_debug_DebugEngine.gameEngine.engine.entities;
+	while(_g < _g1.length) {
+		var entity = _g1[_g];
+		++_g;
+		if(entity.id == id) haxe_Log.trace(entity,{ fileName : "DebugEngine.hx", lineNumber : 32, className : "glaze.debug.DebugEngine", methodName : "DumpEntity"});
+	}
+};
+var glaze_ds_Array2D = function(gridWidth,gridHeight,cellSize) {
+	this.initalize(gridWidth,gridHeight,cellSize);
+};
+glaze_ds_Array2D.__name__ = ["glaze","ds","Array2D"];
+glaze_ds_Array2D.prototype = {
+	initalize: function(gridWidth,gridHeight,cellSize) {
+		this.gridWidth = gridWidth;
+		this.gridHeight = gridHeight;
+		this.cellSize = cellSize;
+		this.invCellSize = 1 / cellSize;
+		this.data = [];
+	}
+	,get: function(x,y) {
+		return this.data[y * this.gridWidth + x];
+	}
+	,getSafe: function(x,y) {
+		return x >= this.gridWidth || y >= this.gridHeight || x < 0 || y < 0?null:this.data[y * this.gridWidth + x];
+	}
+	,set: function(x,y,value) {
+		this.data[y * this.gridWidth + x] = value;
+	}
+	,Index: function(value) {
+		return value * this.invCellSize | 0;
+	}
+	,Width: function() {
+		return this.gridWidth * this.cellSize;
+	}
+	,Height: function() {
+		return this.gridHeight * this.cellSize;
+	}
+	,__class__: glaze_ds_Array2D
+};
 var glaze_ds_Bytes2D = function(width,height,cellSize,bytesPerCell,data) {
 	this.initalize(width,height,cellSize,bytesPerCell,data);
 };
@@ -726,11 +809,14 @@ var glaze_eco_core_Engine = function() {
 	this.systemAdded = new glaze_signals_Signal1();
 	this.systemAdded.add($bind(this,this.onSystemAdded));
 	this.viewManager = new glaze_eco_core_ViewManager(this);
+	this.idCount = 0;
 };
 glaze_eco_core_Engine.__name__ = ["glaze","eco","core","Engine"];
 glaze_eco_core_Engine.prototype = {
-	createEntity: function(components) {
+	createEntity: function(components,name) {
 		var entity = new glaze_eco_core_Entity(this,components);
+		if(name != null) entity.name = name;
+		entity.id = this.idCount++;
 		this.entities.push(entity);
 		return entity;
 	}
@@ -1082,6 +1168,14 @@ glaze_engine_components_Display.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Display.prototype = {
 	__class__: glaze_engine_components_Display
 };
+var glaze_engine_components_Extents = function(width,height) {
+	this.halfWidths = new glaze_geom_Vector2(width,height);
+};
+glaze_engine_components_Extents.__name__ = ["glaze","engine","components","Extents"];
+glaze_engine_components_Extents.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_Extents.prototype = {
+	__class__: glaze_engine_components_Extents
+};
 var glaze_engine_components_ParticleEmitters = function(emitters) {
 	this.emitters = emitters;
 };
@@ -1115,6 +1209,119 @@ glaze_engine_components_Script.__name__ = ["glaze","engine","components","Script
 glaze_engine_components_Script.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Script.prototype = {
 	__class__: glaze_engine_components_Script
+};
+var glaze_engine_components_Viewable = function() {
+};
+glaze_engine_components_Viewable.__name__ = ["glaze","engine","components","Viewable"];
+glaze_engine_components_Viewable.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_Viewable.prototype = {
+	__class__: glaze_engine_components_Viewable
+};
+var glaze_engine_managers_space_ISpaceManager = function() { };
+glaze_engine_managers_space_ISpaceManager.__name__ = ["glaze","engine","managers","space","ISpaceManager"];
+glaze_engine_managers_space_ISpaceManager.prototype = {
+	__class__: glaze_engine_managers_space_ISpaceManager
+};
+var glaze_engine_managers_space_RegularGridSpaceManager = function(gridWidth,gridHeight,gridCellSize) {
+	this.grid = new glaze_ds_Array2D(gridWidth,gridHeight,gridCellSize);
+	var _g1 = 0;
+	var _g = this.grid.gridWidth;
+	while(_g1 < _g) {
+		_g1++;
+		var _g3 = 0;
+		var _g2 = this.grid.gridHeight;
+		while(_g3 < _g2) {
+			_g3++;
+			this.grid.data.push(new glaze_engine_managers_space_Cell());
+		}
+	}
+};
+glaze_engine_managers_space_RegularGridSpaceManager.__name__ = ["glaze","engine","managers","space","RegularGridSpaceManager"];
+glaze_engine_managers_space_RegularGridSpaceManager.__interfaces__ = [glaze_engine_managers_space_ISpaceManager];
+glaze_engine_managers_space_RegularGridSpaceManager.prototype = {
+	addEntity: function(entity) {
+		var proxy = new glaze_engine_managers_space_SpaceManagerProxy();
+		proxy.aabb.position = entity.map.Position.coords;
+		proxy.aabb.extents = entity.map.Extents.halfWidths;
+		proxy.isStatic = true;
+		proxy.entity = entity;
+		this.hashProxy(proxy);
+	}
+	,hashProxy: function(proxy) {
+		var startX = (proxy.aabb.position.x - proxy.aabb.extents.x) * this.grid.invCellSize | 0;
+		var startY = (proxy.aabb.position.y - proxy.aabb.extents.y) * this.grid.invCellSize | 0;
+		var endX = ((proxy.aabb.position.x + proxy.aabb.extents.x) * this.grid.invCellSize | 0) + 1;
+		var endY = ((proxy.aabb.position.y + proxy.aabb.extents.y) * this.grid.invCellSize | 0) + 1;
+		var _g = startX;
+		while(_g < endX) {
+			var x = _g++;
+			var _g1 = startY;
+			while(_g1 < endY) {
+				var y = _g1++;
+				var tmp;
+				var _this = this.grid;
+				tmp = _this.data[y * _this.gridWidth + x];
+				var cell = tmp;
+				haxe_Log.trace("added to:",{ fileName : "RegularGridSpaceManager.hx", lineNumber : 41, className : "glaze.engine.managers.space.RegularGridSpaceManager", methodName : "hashProxy", customParams : [x,y]});
+				cell.proxies.push(proxy);
+			}
+		}
+	}
+	,search: function(viewAABB,callback) {
+		var startX = (viewAABB.position.x - viewAABB.extents.x) * this.grid.invCellSize | 0;
+		var startY = (viewAABB.position.y - viewAABB.extents.y) * this.grid.invCellSize | 0;
+		var endX = ((viewAABB.position.x + viewAABB.extents.x) * this.grid.invCellSize | 0) + 1;
+		var endY = ((viewAABB.position.y + viewAABB.extents.y) * this.grid.invCellSize | 0) + 1;
+		var _g = startX;
+		while(_g < endX) {
+			var x = _g++;
+			var _g1 = startY;
+			while(_g1 < endY) {
+				var y = _g1++;
+				var tmp;
+				var _this = this.grid;
+				tmp = _this.data[y * _this.gridWidth + x];
+				var cell = tmp;
+				var _g2 = 0;
+				var _g3 = cell.proxies;
+				while(_g2 < _g3.length) {
+					var proxy = _g3[_g2];
+					++_g2;
+					var tmp1;
+					var _this1 = proxy.aabb;
+					if(Math.abs(_this1.position.x - viewAABB.position.x) > _this1.extents.x + viewAABB.extents.x) tmp1 = false; else if(Math.abs(_this1.position.y - viewAABB.position.y) > _this1.extents.y + viewAABB.extents.y) tmp1 = false; else tmp1 = true;
+					var overlap = tmp1;
+					if(overlap) {
+						if(!proxy.active) {
+							callback(proxy.entity,true);
+							proxy.active = true;
+						}
+					} else if(proxy.active) {
+						callback(proxy.entity,false);
+						proxy.active = false;
+					}
+				}
+			}
+		}
+	}
+	,__class__: glaze_engine_managers_space_RegularGridSpaceManager
+};
+var glaze_engine_managers_space_Cell = function() {
+	this.proxies = [];
+};
+glaze_engine_managers_space_Cell.__name__ = ["glaze","engine","managers","space","Cell"];
+glaze_engine_managers_space_Cell.prototype = {
+	__class__: glaze_engine_managers_space_Cell
+};
+var glaze_engine_managers_space_SpaceManagerProxy = function() {
+	this.active = false;
+	this.entity = null;
+	this.isStatic = false;
+	this.aabb = new glaze_geom_AABB();
+};
+glaze_engine_managers_space_SpaceManagerProxy.__name__ = ["glaze","engine","managers","space","SpaceManagerProxy"];
+glaze_engine_managers_space_SpaceManagerProxy.prototype = {
+	__class__: glaze_engine_managers_space_SpaceManagerProxy
 };
 var glaze_engine_systems_BehaviourSystem = function() {
 	glaze_eco_core_System.call(this,[glaze_engine_components_Script]);
@@ -1223,6 +1430,41 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 		return s;
 	}
 	,__class__: glaze_engine_systems_RenderSystem
+});
+var glaze_engine_systems_ViewManagementSystem = function(camera) {
+	this.camera = camera;
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_engine_components_Extents]);
+	this.spaceManager = new glaze_engine_managers_space_RegularGridSpaceManager(10,10,500);
+	this.activeSpaceAABB = new glaze_geom_AABB();
+	var _this = this.activeSpaceAABB.extents;
+	_this.x = 400.;
+	_this.y = 300.;
+};
+glaze_engine_systems_ViewManagementSystem.__name__ = ["glaze","engine","systems","ViewManagementSystem"];
+glaze_engine_systems_ViewManagementSystem.__super__ = glaze_eco_core_System;
+glaze_engine_systems_ViewManagementSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+		this.spaceManager.addEntity(entity);
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+		var _this = this.activeSpaceAABB.position;
+		var v = this.camera.realPosition;
+		_this.x = v.x;
+		_this.y = v.y;
+		this.spaceManager.search(this.activeSpaceAABB,$bind(this,this.setEntityStatus));
+	}
+	,setEntityStatus: function(entity,status) {
+		if(status == true) {
+			entity.addComponent(new glaze_engine_components_Viewable());
+			haxe_Log.trace(entity.name + " is viewable",{ fileName : "ViewManagementSystem.hx", lineNumber : 41, className : "glaze.engine.systems.ViewManagementSystem", methodName : "setEntityStatus"});
+		} else {
+			entity.removeComponent(entity.map.Viewable);
+			haxe_Log.trace(entity.name + " is not viewable now",{ fileName : "ViewManagementSystem.hx", lineNumber : 45, className : "glaze.engine.systems.ViewManagementSystem", methodName : "setEntityStatus"});
+		}
+	}
+	,__class__: glaze_engine_systems_ViewManagementSystem
 });
 var glaze_geom_AABB = function() {
 	this.extents = new glaze_geom_Vector2();
@@ -1711,11 +1953,14 @@ glaze_geom_Vector2.prototype = {
 	}
 	,__class__: glaze_geom_Vector2
 };
-var glaze_lighting_components_Light = function(range,attenuation,intensity,flicker) {
+var glaze_lighting_components_Light = function(range,attenuation,intensity,flicker,red,green,blue) {
 	this.range = range;
 	this.attenuation = attenuation;
 	this.intensity = intensity;
 	this.flicker = flicker;
+	this.red = red;
+	this.green = green;
+	this.blue = blue;
 };
 glaze_lighting_components_Light.__name__ = ["glaze","lighting","components","Light"];
 glaze_lighting_components_Light.__interfaces__ = [glaze_eco_core_IComponent];
@@ -1723,7 +1968,7 @@ glaze_lighting_components_Light.prototype = {
 	__class__: glaze_lighting_components_Light
 };
 var glaze_lighting_systems_PointLightingSystem = function(map) {
-	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_lighting_components_Light]);
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_lighting_components_Light,glaze_engine_components_Viewable]);
 	this.map = map;
 	this.renderer = new glaze_render_renderers_webgl_FBOLighting();
 };
@@ -1745,8 +1990,8 @@ glaze_lighting_systems_PointLightingSystem.prototype = $extend(glaze_eco_core_Sy
 			var light = entity.map.Light;
 			if(light.flicker > 0) {
 				light.intensity = this.nexLightIntensity(light.intensity);
-				this.renderer.addLight(position.coords.x + (Math.random() * 6 + -3),position.coords.y + (Math.random() * 6 + -3),light.range * light.intensity);
-			} else this.renderer.addLight(position.coords.x,position.coords.y,light.range * light.intensity);
+				this.renderer.addLight(position.coords.x + (Math.random() * 6 + -3),position.coords.y + (Math.random() * 6 + -3),light.range * light.intensity,light.red,light.green,light.blue);
+			} else this.renderer.addLight(position.coords.x,position.coords.y,light.range * light.intensity,light.red,light.green,light.blue);
 		}
 	}
 	,nexLightIntensity: function(lastIntensity) {
@@ -2052,7 +2297,7 @@ glaze_physics_Body.prototype = {
 	}
 	,t: function(msg) {
 		if(this.debug > 0) {
-			console.log(msg);
+			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 128, className : "glaze.physics.Body", methodName : "t"});
 			this.debug--;
 		}
 	}
@@ -2584,7 +2829,7 @@ glaze_physics_collision_Ray.prototype = {
 	,report: function(distX,distY,normalX,normalY,proxy) {
 		if(this.callback != null && proxy != null) {
 			if(this.callback(proxy) < 0) {
-				console.log("filtered");
+				haxe_Log.trace("filtered",{ fileName : "Ray.hx", lineNumber : 59, className : "glaze.physics.collision.Ray", methodName : "report"});
 				return;
 			}
 		}
@@ -2744,7 +2989,7 @@ glaze_physics_systems_PhysicsPositionSystem.__name__ = ["glaze","physics","syste
 glaze_physics_systems_PhysicsPositionSystem.__super__ = glaze_eco_core_System;
 glaze_physics_systems_PhysicsPositionSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
-		console.log("added");
+		haxe_Log.trace("added",{ fileName : "PhysicsPositionSystem.hx", lineNumber : 16, className : "glaze.physics.systems.PhysicsPositionSystem", methodName : "entityAdded"});
 	}
 	,entityRemoved: function(entity) {
 	}
@@ -2976,7 +3221,7 @@ glaze_render_display_DisplayObjectContainer.prototype = $extend(glaze_render_dis
 	}
 	,removeChildAt: function(index) {
 		var child = this.findChildByIndex(index);
-		console.log(child);
+		haxe_Log.trace(child,{ fileName : "DisplayObjectContainer.hx", lineNumber : 69, className : "glaze.render.display.DisplayObjectContainer", methodName : "removeChildAt"});
 		this.removeChild(child);
 		this.debug();
 		return child;
@@ -3084,7 +3329,7 @@ glaze_render_display_DisplayObjectContainer.prototype = $extend(glaze_render_dis
 	,debug: function() {
 		var child = this.head;
 		while(child != null) {
-			console.log(child.id);
+			haxe_Log.trace(child.id,{ fileName : "DisplayObjectContainer.hx", lineNumber : 169, className : "glaze.render.display.DisplayObjectContainer", methodName : "debug"});
 			child = child.next;
 		}
 	}
@@ -3273,19 +3518,19 @@ glaze_render_renderers_webgl_FBOLighting.prototype = {
 	,reset: function() {
 		this.indexRun = 0;
 	}
-	,addLight: function(x,y,intensity) {
+	,addLight: function(x,y,intensity,red,green,blue) {
 		this.lightData[this.indexRun++] = x;
 		this.lightData[this.indexRun++] = y;
 		this.lightData[this.indexRun++] = intensity;
-		this.lightData[this.indexRun++] = 0;
+		this.lightData[this.indexRun++] = (red << 16 | green << 8 | blue) / 16777216;
 	}
 	,drawSurface: function() {
-		this.addLight(0,0,0);
+		this.addLight(0,0,0,0,0,0);
 		var x = this.camera.position.x;
 		var y = this.camera.position.y;
 		this.lightDataTexture.bind(0);
 		this.gl.texImage2D(3553,0,6408,8,8,0,6408,5126,this.lightData);
-		this.gl.clearColor(0,0,0,0);
+		this.gl.clearColor(1,1,1,1);
 		this.gl.clear(16384);
 		this.gl.colorMask(true,true,true,true);
 		this.gl.useProgram(this.surfaceShader.program);
@@ -3303,6 +3548,8 @@ glaze_render_renderers_webgl_FBOLighting.prototype = {
 		var x = this.camera.position.x;
 		var y = this.camera.position.y;
 		this.surface.drawTo($bind(this,this.drawSurface));
+		this.gl.enable(3042);
+		this.gl.blendFunc(774,0);
 		this.gl.useProgram(this.screenShader.program);
 		this.gl.uniform2fv(this.screenShader.uniform.viewportSize,this.scaledViewportSize);
 		this.gl.uniform2f(this.screenShader.uniform.resolution,800,640);
@@ -3826,7 +4073,7 @@ glaze_render_renderers_webgl_WebGLRenderer.prototype = {
 		this.gl.enable(3042);
 		this.gl.colorMask(true,true,true,this.contextAttributes.alpha);
 		this.gl.clearColor(0,0,0,1);
-		if(!this.gl.getExtension("OES_texture_float")) console.log("New browser time: Float textures not supported");
+		if(!this.gl.getExtension("OES_texture_float")) haxe_Log.trace("New browser time: Float textures not supported",{ fileName : "WebGLRenderer.hx", lineNumber : 65, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "InitalizeWebGlContext"});
 	}
 	,Resize: function(width,height) {
 		this.width = width;
@@ -3854,11 +4101,11 @@ glaze_render_renderers_webgl_WebGLRenderer.prototype = {
 	}
 	,onContextLost: function(event) {
 		this.contextLost = true;
-		console.log("webGL Context Lost");
+		haxe_Log.trace("webGL Context Lost",{ fileName : "WebGLRenderer.hx", lineNumber : 98, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextLost"});
 	}
 	,onContextRestored: function(event) {
 		this.contextLost = false;
-		console.log("webGL Context Restored");
+		haxe_Log.trace("webGL Context Restored",{ fileName : "WebGLRenderer.hx", lineNumber : 103, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextRestored"});
 	}
 	,__class__: glaze_render_renderers_webgl_WebGLRenderer
 };
@@ -3890,9 +4137,9 @@ glaze_render_renderers_webgl_WebGLShaders.CompileProgram = function(gl,vertexSrc
 	gl.linkProgram(shaderProgram);
 	if(!gl.getProgramParameter(shaderProgram,35714)) {
 		js_Browser.alert("Could not initialize program");
-		console.log(vertexSrc);
-		console.log(fragmentSrc);
-		console.log(gl.getProgramInfoLog(shaderProgram));
+		haxe_Log.trace(vertexSrc,{ fileName : "WebGLShaders.hx", lineNumber : 42, className : "glaze.render.renderers.webgl.WebGLShaders", methodName : "CompileProgram"});
+		haxe_Log.trace(fragmentSrc,{ fileName : "WebGLShaders.hx", lineNumber : 43, className : "glaze.render.renderers.webgl.WebGLShaders", methodName : "CompileProgram"});
+		haxe_Log.trace(gl.getProgramInfoLog(shaderProgram),{ fileName : "WebGLShaders.hx", lineNumber : 44, className : "glaze.render.renderers.webgl.WebGLShaders", methodName : "CompileProgram"});
 	}
 	return shaderProgram;
 };
@@ -3943,7 +4190,7 @@ glaze_render_texture_BaseTexture.prototype = {
 			this.renderbuffer.width = this.width;
 			this.renderbuffer.height = this.height;
 			this.gl.renderbufferStorage(36161,33189,this.width,this.height);
-			console.log("resize");
+			haxe_Log.trace("resize",{ fileName : "BaseTexture.hx", lineNumber : 84, className : "glaze.render.texture.BaseTexture", methodName : "drawTo"});
 		}
 		this.gl.framebufferTexture2D(36160,36064,3553,this.texture,0);
 		this.gl.framebufferRenderbuffer(36160,36096,36161,this.renderbuffer);
@@ -4882,6 +5129,11 @@ var haxe__$Int64__$_$_$Int64 = function(high,low) {
 haxe__$Int64__$_$_$Int64.__name__ = ["haxe","_Int64","___Int64"];
 haxe__$Int64__$_$_$Int64.prototype = {
 	__class__: haxe__$Int64__$_$_$Int64
+};
+var haxe_Log = function() { };
+haxe_Log.__name__ = ["haxe","Log"];
+haxe_Log.trace = function(v,infos) {
+	js_Boot.__trace(v,infos);
 };
 var haxe_crypto_Adler32 = function() {
 	this.a1 = 1;
@@ -6154,6 +6406,24 @@ js__$Boot_HaxeError.prototype = $extend(Error.prototype,{
 });
 var js_Boot = function() { };
 js_Boot.__name__ = ["js","Boot"];
+js_Boot.__unhtml = function(s) {
+	return s.split("&").join("&amp;").split("<").join("&lt;").split(">").join("&gt;");
+};
+js_Boot.__trace = function(v,i) {
+	var msg = i != null?i.fileName + ":" + i.lineNumber + ": ":"";
+	msg += js_Boot.__string_rec(v,"");
+	if(i != null && i.customParams != null) {
+		var _g = 0;
+		var _g1 = i.customParams;
+		while(_g < _g1.length) {
+			var v1 = _g1[_g];
+			++_g;
+			msg += "," + js_Boot.__string_rec(v1,"");
+		}
+	}
+	var d;
+	if(typeof(document) != "undefined" && (d = document.getElementById("haxe:trace")) != null) d.innerHTML += js_Boot.__unhtml(msg) + "<br/>"; else if(typeof console != "undefined" && console.log != null) console.log(msg);
+};
 js_Boot.getClass = function(o) {
 	if((o instanceof Array) && o.__enum__ == null) return Array; else {
 		var cl = o.__class__;
@@ -6581,9 +6851,11 @@ Xml.Document = 6;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_Display.NAME = "Display";
+glaze_engine_components_Extents.NAME = "Extents";
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
 glaze_engine_components_Position.NAME = "Position";
 glaze_engine_components_Script.NAME = "Script";
+glaze_engine_components_Viewable.NAME = "Viewable";
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
@@ -6596,7 +6868,7 @@ glaze_physics_collision_Map.ROUNDUP = .5;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
 glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
-glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER = ["precision mediump float;","precision mediump int;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 viewOffset;","uniform vec2 gridSize;","uniform int maxLights;","float accumulatedLight = 0.0;","void applyLight(vec2 tilePos,vec4 light)","{","   vec2 dist = tilePos-light.xy;","   float intensity = 1.0 - (dist.x*dist.x+dist.y*dist.y)/(light.z*light.z);","   intensity = clamp(intensity,0.0,1.0);","   intensity = intensity * intensity;","   accumulatedLight = max(accumulatedLight,intensity);","}","void main(void) {","   vec2 tilePos = viewOffset + (gl_FragCoord.xy * gridSize) + gridSize/2.0;","   float index = 0.0;","   for (int i=0; i<32; i++) {","       vec4 lightData = texture2D(texture,vec2(index,0.0));","       if (lightData.z==0.0) break;","       applyLight(tilePos,lightData);","       index+=1.0/32.0;","   }","   gl_FragColor = vec4 (0.0, 0.0, 0.0, 1.0-accumulatedLight);","}"];
+glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER = ["precision mediump float;","precision mediump int;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 viewOffset;","uniform vec2 gridSize;","uniform int maxLights;","vec4 accumulatedLight = vec4(0.0,0.0,0.0,1.0);","void applyLight(vec2 tilePos,vec4 light)","{","   vec2 dist = tilePos-light.xy;","   float intensity = 1.0 - (dist.x*dist.x+dist.y*dist.y)/(light.z*light.z);","   intensity = clamp(intensity,0.0,1.0);","   intensity = intensity * intensity;","   vec3 unpackedValues = vec3(1.0, 256.0, 65536.0);","   unpackedValues = fract(unpackedValues * light.w);","   accumulatedLight.xyz =  max(unpackedValues*intensity,accumulatedLight.xyz);","}","void main(void) {","   vec2 tilePos = viewOffset + (gl_FragCoord.xy * gridSize) + gridSize/2.0;","   float index = 0.0;","   for (int i=0; i<32; i++) {","       vec4 lightData = texture2D(texture,vec2(index,0.0));","       if (lightData.z==0.0) break;","       applyLight(tilePos,lightData);","       index+=1.0/32.0;","   }","   gl_FragColor = accumulatedLight;","}"];
 glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER = ["precision mediump float;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 textureOffset;","void main(void) {","    vec2 uv = (gl_FragCoord.xy)/(resolution.xy);","    uv.y = 1.0-uv.y;","    gl_FragColor = texture2D(texture,uv);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( position.x / projectionVector.x -1.0, position.y / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
@@ -6648,4 +6920,4 @@ util_CharacterController.AIR_CONTROL_FORCE = 10;
 util_CharacterController.JUMP_FORCE = 1000;
 util_CharacterController.MAX_AIR_HORIZONTAL_VELOCITY = 500;
 GameTestA.main();
-})(typeof console != "undefined" ? console : {log:function(){}});
+})(typeof console != "undefined" ? console : {log:function(){}}, typeof window != "undefined" ? window : exports);
