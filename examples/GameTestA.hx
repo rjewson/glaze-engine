@@ -9,6 +9,9 @@ import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
 import glaze.engine.components.Viewable;
 import glaze.engine.core.GameEngine;
+import glaze.engine.factories.ComponentFactory;
+import glaze.engine.factories.tmx.LightFactory;
+import glaze.engine.factories.TMXFactory;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.ParticleSystem;
 // import glaze.engine.systems.PhysicsSystem;
@@ -72,7 +75,7 @@ class GameTestA extends GameEngine {
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
-        
+
         var tileMap = new TileMap();
         renderSystem.renderer.AddRenderer(tileMap);
         tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
@@ -138,6 +141,11 @@ class GameTestA extends GameEngine {
             ,new Viewable()
             ],"player light"); 
              
+
+        var tmxFactory = new TMXFactory(engine,tmxMap);
+        tmxFactory.registerFactory(LightFactory);
+        tmxFactory.parseObjectGroup("Objects");
+    
         engine.createEntity( 
             [  
             new Position(128,672),
@@ -226,7 +234,7 @@ class GameTestA extends GameEngine {
         if (fire) fireBullet();
 
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
-
+  
     }
 
     public static function main() {
@@ -240,8 +248,10 @@ class GameTestA extends GameEngine {
             game.loop.start();
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
-            var result = glaze.debug.DebugEngine.GetAllEntities();
-            untyped Browser.window.writeResult(result);
+            untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());
+        });
+        Browser.document.getElementById("systems").addEventListener("click",function(event){
+            untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllSystems());
         });
 
     }   

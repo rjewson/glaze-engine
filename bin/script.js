@@ -53,8 +53,10 @@ GameTestA.main = function() {
 		game.loop.start();
 	});
 	window.document.getElementById("entities").addEventListener("click",function(event2) {
-		var result = glaze_debug_DebugEngine.GetAllEntities();
-		window.writeResult(result);
+		window.writeResult(glaze_debug_DebugEngine.GetAllEntities());
+	});
+	window.document.getElementById("systems").addEventListener("click",function(event3) {
+		window.writeResult(glaze_debug_DebugEngine.GetAllSystems());
 	});
 };
 GameTestA.__super__ = glaze_engine_core_GameEngine;
@@ -116,6 +118,9 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.player = this.engine.createEntity([new glaze_engine_components_Position(300,180),new glaze_engine_components_Display("character1.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(proxy)],"player");
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
 		this.playerLight = this.engine.createEntity([this.player.map.Position,new glaze_lighting_components_Light(256,1,1,0,255,255,255),new glaze_engine_components_Viewable()],"player light");
+		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
+		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
+		tmxFactory.parseObjectGroup("Objects");
 		this.engine.createEntity([new glaze_engine_components_Position(128,672),new glaze_lighting_components_Light(256,1,1,0,255,0,0),new glaze_engine_components_Extents(128,128)],"light1");
 		this.engine.createEntity([new glaze_engine_components_Position(256,672),new glaze_lighting_components_Light(256,1,1,0,0,255,0),new glaze_engine_components_Extents(128,128)],"light2");
 		this.engine.createEntity([new glaze_engine_components_Position(192,640),new glaze_lighting_components_Light(256,1,1,0,0,0,255),new glaze_engine_components_Extents(128,128)],"light3");
@@ -368,6 +373,32 @@ Type.getClassName = function(c) {
 	var a = c.__name__;
 	if(a == null) return null;
 	return a.join(".");
+};
+Type.createInstance = function(cl,args) {
+	var _g = args.length;
+	switch(_g) {
+	case 0:
+		return new cl();
+	case 1:
+		return new cl(args[0]);
+	case 2:
+		return new cl(args[0],args[1]);
+	case 3:
+		return new cl(args[0],args[1],args[2]);
+	case 4:
+		return new cl(args[0],args[1],args[2],args[3]);
+	case 5:
+		return new cl(args[0],args[1],args[2],args[3],args[4]);
+	case 6:
+		return new cl(args[0],args[1],args[2],args[3],args[4],args[5]);
+	case 7:
+		return new cl(args[0],args[1],args[2],args[3],args[4],args[5],args[6]);
+	case 8:
+		return new cl(args[0],args[1],args[2],args[3],args[4],args[5],args[6],args[7]);
+	default:
+		throw new js__$Boot_HaxeError("Too many arguments");
+	}
+	return null;
 };
 var Xml = function(nodeType) {
 	this.nodeType = nodeType;
@@ -679,7 +710,28 @@ glaze_debug_DebugEngine.GetAllEntities = function() {
 		var ehtml = "<tr>";
 		ehtml += "<td>" + entity.id + "</td>";
 		ehtml += "<td>" + entity.name + "</td>";
-		ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpEntity(" + entity.id + ");' value='" + entity.id + "'>Inspect</button></td>";
+		ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpEntity(" + entity.id + ");'>Inspect</button></td>";
+		ehtml += "</tr>";
+		result += ehtml;
+	}
+	result += "</table>";
+	return result;
+};
+glaze_debug_DebugEngine.GetAllSystems = function() {
+	var result = "<table width='100%'>";
+	result += "<col style='width:10%'>";
+	result += "<col style='width:70%'>";
+	result += "<col style='width:20%'>";
+	var _g = 0;
+	var _g1 = glaze_debug_DebugEngine.gameEngine.engine.systems;
+	while(_g < _g1.length) {
+		var system = _g1[_g];
+		++_g;
+		var name = Type.getClassName(system == null?null:js_Boot.getClass(system));
+		var ehtml = "<tr>";
+		ehtml += "<td>" + name.split(".").pop() + "</td>";
+		ehtml += "<td></td>";
+		ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpSystem(\"" + name + "\");'>Inspect</button></td>";
 		ehtml += "</tr>";
 		result += ehtml;
 	}
@@ -692,8 +744,20 @@ glaze_debug_DebugEngine.DumpEntity = $hx_exports.glaze.debug.DebugEngine.DumpEnt
 	while(_g < _g1.length) {
 		var entity = _g1[_g];
 		++_g;
-		if(entity.id == id) haxe_Log.trace(entity,{ fileName : "DebugEngine.hx", lineNumber : 32, className : "glaze.debug.DebugEngine", methodName : "DumpEntity"});
+		if(entity.id == id) {
+			window.console.dir(entity);
+			return;
+		}
 	}
+};
+glaze_debug_DebugEngine.DumpSystem = $hx_exports.glaze.debug.DebugEngine.DumpSystem = function(className) {
+	debugger;
+	window.console.dir((function($this) {
+		var $r;
+		var _this = glaze_debug_DebugEngine.gameEngine.engine.systemMap;
+		$r = __map_reserved[className] != null?_this.getReserved(className):_this.h[className];
+		return $r;
+	}(this)));
 };
 var glaze_ds_Array2D = function(gridWidth,gridHeight,cellSize) {
 	this.initalize(gridWidth,gridHeight,cellSize);
@@ -1217,6 +1281,175 @@ glaze_engine_components_Viewable.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Viewable.prototype = {
 	__class__: glaze_engine_components_Viewable
 };
+var glaze_engine_factories_IEntityFactory = function() { };
+glaze_engine_factories_IEntityFactory.__name__ = ["glaze","engine","factories","IEntityFactory"];
+glaze_engine_factories_IEntityFactory.prototype = {
+	__class__: glaze_engine_factories_IEntityFactory
+};
+var glaze_engine_factories_BaseEntityFactory = function() {
+};
+glaze_engine_factories_BaseEntityFactory.__name__ = ["glaze","engine","factories","BaseEntityFactory"];
+glaze_engine_factories_BaseEntityFactory.__interfaces__ = [glaze_engine_factories_IEntityFactory];
+glaze_engine_factories_BaseEntityFactory.getCSVParams = function(csv) {
+	var params = csv.split(",");
+	var parsedParams = [];
+	var _g = 0;
+	while(_g < params.length) {
+		var param = params[_g];
+		++_g;
+		var i = Std.parseInt(param);
+		if(i != null) {
+			parsedParams.push(i);
+			continue;
+		}
+		var f = parseFloat(param);
+		if(f != null) {
+			parsedParams.push(f);
+			continue;
+		}
+		parsedParams.push(param);
+	}
+	return parsedParams;
+};
+glaze_engine_factories_BaseEntityFactory.prototype = {
+	createEntity: function(data,engine) {
+	}
+	,get_mapping: function() {
+		return "";
+	}
+	,CreateEntityFromCSV: function(componentClass,csv) {
+		var params = glaze_engine_factories_BaseEntityFactory.getCSVParams(csv);
+		return Type.createInstance(componentClass,params);
+	}
+	,__class__: glaze_engine_factories_BaseEntityFactory
+};
+var glaze_engine_factories_ComponentFactory = function() {
+	this.map = new haxe_ds_StringMap();
+};
+glaze_engine_factories_ComponentFactory.__name__ = ["glaze","engine","factories","ComponentFactory"];
+glaze_engine_factories_ComponentFactory.CSVFactory = function(cl,csv) {
+	var params = csv.split(",");
+	var parsedParams = [];
+	var _g = 0;
+	while(_g < params.length) {
+		var param = params[_g];
+		++_g;
+		var i = Std.parseInt(param);
+		if(i != null) {
+			parsedParams.push(i);
+			continue;
+		}
+		var f = parseFloat(param);
+		if(f != null) {
+			parsedParams.push(f);
+			continue;
+		}
+		parsedParams.push(param);
+	}
+	return Type.createInstance(cl,parsedParams);
+};
+glaze_engine_factories_ComponentFactory.prototype = {
+	registerComponent: function(registeredName,cl,factoryFunction) {
+		var value = new glaze_engine_factories_FactoryBinding(cl,factoryFunction);
+		var _this = this.map;
+		if(__map_reserved[registeredName] != null) _this.setReserved(registeredName,value); else _this.h[registeredName] = value;
+	}
+	,createComponent: function(name,data) {
+		var tmp;
+		var _this = this.map;
+		if(__map_reserved[name] != null) tmp = _this.getReserved(name); else tmp = _this.h[name];
+		var binding = tmp;
+		if(binding == null) return null;
+		return binding.factoryFunction(binding.cl,data);
+	}
+	,__class__: glaze_engine_factories_ComponentFactory
+};
+var glaze_engine_factories_FactoryBinding = function(cl,factoryFunction) {
+	this.cl = cl;
+	this.factoryFunction = factoryFunction;
+};
+glaze_engine_factories_FactoryBinding.__name__ = ["glaze","engine","factories","FactoryBinding"];
+glaze_engine_factories_FactoryBinding.prototype = {
+	__class__: glaze_engine_factories_FactoryBinding
+};
+var glaze_engine_factories_TMXFactory = function(engine,tmxMap) {
+	this.engine = engine;
+	this.tmxMap = tmxMap;
+	this.map = new haxe_ds_StringMap();
+};
+glaze_engine_factories_TMXFactory.__name__ = ["glaze","engine","factories","TMXFactory"];
+glaze_engine_factories_TMXFactory.prototype = {
+	parseObjectGroup: function(groupName) {
+		var objs = this.tmxMap.getObjectGroup(groupName);
+		var _g = 0;
+		var _g1 = objs.objects;
+		while(_g < _g1.length) {
+			var obj = _g1[_g];
+			++_g;
+			debugger;
+			var tmp;
+			var _this = this.map;
+			var key = obj.type;
+			if(__map_reserved[key] != null) tmp = _this.getReserved(key); else tmp = _this.h[key];
+			var factory = tmp;
+			if(factory != null) factory.createEntity(obj,this.engine);
+		}
+	}
+	,registerFactory: function(factory) {
+		var factoryInstance = Type.createInstance(factory,[]);
+		var key = factoryInstance.get_mapping();
+		var _this = this.map;
+		if(__map_reserved[key] != null) _this.setReserved(key,factoryInstance); else _this.h[key] = factoryInstance;
+	}
+	,__class__: glaze_engine_factories_TMXFactory
+};
+var glaze_engine_factories_tmx_TMXEntityFactory = function() {
+	glaze_engine_factories_BaseEntityFactory.call(this);
+};
+glaze_engine_factories_tmx_TMXEntityFactory.__name__ = ["glaze","engine","factories","tmx","TMXEntityFactory"];
+glaze_engine_factories_tmx_TMXEntityFactory.getEmptyComponentArray = function() {
+	return [];
+};
+glaze_engine_factories_tmx_TMXEntityFactory.getPosition = function(tmxObject) {
+	return new glaze_engine_components_Position(glaze_engine_factories_tmx_TMXEntityFactory.SCALE(tmxObject.x + tmxObject.width / 2),glaze_engine_factories_tmx_TMXEntityFactory.SCALE(tmxObject.y + tmxObject.height / 2));
+};
+glaze_engine_factories_tmx_TMXEntityFactory.getExtents = function(tmxObject) {
+	return new glaze_engine_components_Extents(glaze_engine_factories_tmx_TMXEntityFactory.SCALE(tmxObject.width / 2),glaze_engine_factories_tmx_TMXEntityFactory.SCALE(tmxObject.height / 2));
+};
+glaze_engine_factories_tmx_TMXEntityFactory.SCALE = function(v) {
+	return v * 2;
+};
+glaze_engine_factories_tmx_TMXEntityFactory.__super__ = glaze_engine_factories_BaseEntityFactory;
+glaze_engine_factories_tmx_TMXEntityFactory.prototype = $extend(glaze_engine_factories_BaseEntityFactory.prototype,{
+	setTmxObject: function(data) {
+		this.tmxObject = data;
+	}
+	,__class__: glaze_engine_factories_tmx_TMXEntityFactory
+});
+var glaze_engine_factories_tmx_LightFactory = function() {
+	glaze_engine_factories_tmx_TMXEntityFactory.call(this);
+};
+glaze_engine_factories_tmx_LightFactory.__name__ = ["glaze","engine","factories","tmx","LightFactory"];
+glaze_engine_factories_tmx_LightFactory.__super__ = glaze_engine_factories_tmx_TMXEntityFactory;
+glaze_engine_factories_tmx_LightFactory.prototype = $extend(glaze_engine_factories_tmx_TMXEntityFactory.prototype,{
+	get_mapping: function() {
+		return "Light";
+	}
+	,createEntity: function(data,engine) {
+		this.setTmxObject(data);
+		var components = glaze_engine_factories_tmx_TMXEntityFactory.getEmptyComponentArray();
+		components.push(glaze_engine_factories_tmx_TMXEntityFactory.getPosition(this.tmxObject));
+		var tmp;
+		var _this = this.tmxObject.combined;
+		if(__map_reserved.Light != null) tmp = _this.getReserved("Light"); else tmp = _this.h["Light"];
+		var light = this.CreateEntityFromCSV(glaze_lighting_components_Light,tmp);
+		components.push(light);
+		var extents = new glaze_engine_components_Extents(light.range / 2,light.range / 2);
+		components.push(extents);
+		engine.createEntity(components,this.tmxObject.name);
+	}
+	,__class__: glaze_engine_factories_tmx_LightFactory
+});
 var glaze_engine_managers_space_ISpaceManager = function() { };
 glaze_engine_managers_space_ISpaceManager.__name__ = ["glaze","engine","managers","space","ISpaceManager"];
 glaze_engine_managers_space_ISpaceManager.prototype = {
@@ -1990,7 +2223,7 @@ glaze_lighting_systems_PointLightingSystem.prototype = $extend(glaze_eco_core_Sy
 			var light = entity.map.Light;
 			if(light.flicker > 0) {
 				light.intensity = this.nexLightIntensity(light.intensity);
-				this.renderer.addLight(position.coords.x + (Math.random() * 6 + -3),position.coords.y + (Math.random() * 6 + -3),light.range * light.intensity,light.red,light.green,light.blue);
+				this.renderer.addLight(position.coords.x + (Math.random() * 20 + -10),position.coords.y + (Math.random() * 20 + -10),light.range * light.intensity,light.red,light.green,light.blue);
 			} else this.renderer.addLight(position.coords.x,position.coords.y,light.range * light.intensity,light.red,light.green,light.blue);
 		}
 	}
@@ -4757,10 +4990,21 @@ var glaze_tmx_TmxObject = function(source,parent) {
 		var node = tmp;
 		this.custom.extend(node);
 	}
+	this.combined = new haxe_ds_StringMap();
+	if(this.shared != null) this.extend(this.combined,this.shared.keys);
+	this.extend(this.combined,this.custom.keys);
 };
 glaze_tmx_TmxObject.__name__ = ["glaze","tmx","TmxObject"];
 glaze_tmx_TmxObject.prototype = {
-	__class__: glaze_tmx_TmxObject
+	extend: function(dest,source) {
+		var $it0 = source.keys();
+		while( $it0.hasNext() ) {
+			var key = $it0.next();
+			var value = __map_reserved[key] != null?source.getReserved(key):source.h[key];
+			if(__map_reserved[key] != null) dest.setReserved(key,value); else dest.h[key] = value;
+		}
+	}
+	,__class__: glaze_tmx_TmxObject
 };
 var glaze_tmx_TmxObjectGroup = function(source,parent) {
 	this.properties = new glaze_tmx_TmxPropertySet();
@@ -5315,6 +5559,24 @@ haxe_ds_StringMap.prototype = {
 			delete(this.h[key]);
 			return true;
 		}
+	}
+	,keys: function() {
+		var tmp;
+		var _this = this.arrayKeys();
+		tmp = HxOverrides.iter(_this);
+		return tmp;
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) out.push(key);
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) out.push(key.substr(1));
+			}
+		}
+		return out;
 	}
 	,__class__: haxe_ds_StringMap
 };

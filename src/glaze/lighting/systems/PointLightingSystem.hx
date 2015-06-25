@@ -37,7 +37,7 @@ class PointLightingSystem extends System {
             var light = entity.getComponent(Light);
             if (light.flicker>0) {
                 light.intensity = nexLightIntensity(light.intensity);
-                renderer.addLight(position.coords.x+glaze.util.Random.RandomFloat(-3,3),position.coords.y+glaze.util.Random.RandomFloat(-3,3),light.range*light.intensity,light.red,light.green,light.blue);
+                renderer.addLight(position.coords.x+glaze.util.Random.RandomFloat(-10,10),position.coords.y+glaze.util.Random.RandomFloat(-10,10),light.range*light.intensity,light.red,light.green,light.blue);
             } else {
                 renderer.addLight(position.coords.x,position.coords.y,light.range*light.intensity,light.red,light.green,light.blue);
             }
