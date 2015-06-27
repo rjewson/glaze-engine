@@ -96,6 +96,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
 		var map = new glaze_physics_collision_Map(this.tmxMap.getLayer("Tile Layer 1").tileGIDs);
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
+		physicsPhase.addSystem(new glaze_ai_steering_systems_SteeringSystem());
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(new glaze_physics_collision_broadphase_BruteforceBroadphase(map,new glaze_physics_collision_Intersect())));
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
 		var lightSystem = new glaze_lighting_systems_PointLightingSystem(map);
@@ -121,9 +122,6 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
 		tmxFactory.parseObjectGroup("Objects");
-		this.engine.createEntity([new glaze_engine_components_Position(128,672),new glaze_lighting_components_Light(256,1,1,0,255,0,0),new glaze_engine_components_Extents(128,128)],"light1");
-		this.engine.createEntity([new glaze_engine_components_Position(256,672),new glaze_lighting_components_Light(256,1,1,0,0,255,0),new glaze_engine_components_Extents(128,128)],"light2");
-		this.engine.createEntity([new glaze_engine_components_Position(192,640),new glaze_lighting_components_Light(256,1,1,0,0,0,255),new glaze_engine_components_Extents(128,128)],"light3");
 		this.loop.start();
 	}
 	,setupMap: function() {
@@ -136,12 +134,27 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		if(__map_reserved["data/spelunky-tiles.png"] != null) tmp1 = _this1.getReserved("data/spelunky-tiles.png"); else tmp1 = _this1.h["data/spelunky-tiles.png"];
 		this.tmxMap.tilesets[0].set_image(tmp1);
 	}
+	,createBee: function() {
+		var beeBody = new glaze_physics_Body(new glaze_physics_Material());
+		beeBody.setMass(0.03);
+		beeBody.setBounces(0);
+		beeBody.globalForceFactor = 0;
+		beeBody.maxScalarVelocity = 100;
+		var beeProxy = new glaze_physics_collision_BFProxy(3,3,this.playerFilter);
+		beeProxy.setBody(beeBody);
+		var pos = this.player.map.Position.coords.clone();
+		var behavior = new glaze_ai_behaviortree_Sequence();
+		var child = new glaze_engine_actions_Delay(10000);
+		behavior.children.add(child);
+		var child1 = new glaze_engine_actions_DestroyEntity();
+		behavior.children.add(child1);
+		this.engine.createEntity([new glaze_engine_components_Position(pos.x,pos.y),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_physics_components_PhysicsCollision(beeProxy),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_engine_components_Viewable(),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()])],"bee");
+	}
 	,fireBullet: function() {
 		var bulletBody = new glaze_physics_Body(new glaze_physics_Material());
 		bulletBody.setMass(0.03);
 		bulletBody.setBounces(3);
-		bulletBody.isBullet = true;
-		bulletBody.maxScalarVelocity = 3000;
+		bulletBody.maxScalarVelocity = 1000;
 		var bulletProxy = new glaze_physics_collision_BFProxy(3,3,this.playerFilter);
 		bulletProxy.setBody(bulletBody);
 		var pos = this.player.map.Position.coords.clone();
@@ -149,8 +162,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		vel.x -= pos.x;
 		vel.y -= pos.y;
 		vel.normalize();
-		vel.x *= 2000;
-		vel.y *= 2000;
+		vel.x *= 1000;
+		vel.y *= 1000;
 		var _this = bulletBody.velocity;
 		_this.x = vel.x;
 		_this.y = vel.y;
@@ -176,6 +189,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			var lightActive = this.playerLight.map.Viewable;
 			if(lightActive != null) this.playerLight.removeComponent(lightActive); else this.playerLight.addComponent(new glaze_engine_components_Viewable());
 		}
+		var tmp2;
+		var _this3 = this.input;
+		tmp2 = _this3.keyMap[85] == _this3.frameRef - 1;
+		if(tmp2) this.createBee();
 		if(fire) this.fireBullet();
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 	}
@@ -597,6 +614,273 @@ glaze_ai_behaviortree_Sequence.prototype = $extend(glaze_ai_behaviortree_Composi
 	}
 	,__class__: glaze_ai_behaviortree_Sequence
 });
+var glaze_ai_steering_SteeringAgentParameters = function() {
+	this.maxAcceleration = 2;
+};
+glaze_ai_steering_SteeringAgentParameters.__name__ = ["glaze","ai","steering","SteeringAgentParameters"];
+glaze_ai_steering_SteeringAgentParameters.prototype = {
+	__class__: glaze_ai_steering_SteeringAgentParameters
+};
+var glaze_ai_steering_SteeringBehavior = function(agentParameters,calculationMethod) {
+	if(calculationMethod == null) calculationMethod = 0;
+	this.agentParameters = agentParameters;
+	this.calculateMethod = calculationMethod;
+	this.force = new glaze_geom_Vector2();
+	this.behaviorForce = new glaze_geom_Vector2();
+	this.behaviors = [];
+};
+glaze_ai_steering_SteeringBehavior.__name__ = ["glaze","ai","steering","SteeringBehavior"];
+glaze_ai_steering_SteeringBehavior.prototype = {
+	addBehavior: function(behavior) {
+		this.behaviors.push(behavior);
+		behavior.steering = this;
+		this.hasChanged = true;
+	}
+	,removeBehaviour: function(behavior) {
+		HxOverrides.remove(this.behaviors,behavior);
+	}
+	,calculate: function(agent) {
+		if(this.hasChanged) {
+			this.sort();
+			this.hasChanged = false;
+		}
+		this.force.x = 0;
+		this.force.y = 0;
+		var _g = this.calculateMethod;
+		switch(_g) {
+		case 0:
+			this.runningSum(agent);
+			break;
+		case 1:
+			this.prioritizedDithering();
+			break;
+		case 2:
+			this.wtrsWithPriorization();
+			break;
+		}
+		agent.addForce(this.force);
+		return this.force;
+	}
+	,prioritizedDithering: function() {
+	}
+	,wtrsWithPriorization: function() {
+	}
+	,runningSum: function(agent) {
+		var _g = 0;
+		var _g1 = this.behaviors;
+		while(_g < _g1.length) {
+			var behavior = _g1[_g];
+			++_g;
+			behavior.calculate(agent,this.behaviorForce);
+			var _this = this.behaviorForce;
+			var s = behavior.weight;
+			_this.x *= s;
+			_this.y *= s;
+			var _this1 = this.force;
+			var v = this.behaviorForce;
+			_this1.x += v.x;
+			_this1.y += v.y;
+		}
+		this.force.clampScalar(this.agentParameters.maxAcceleration);
+	}
+	,accumulateForce: function(a_runningTotal,a_forceToAdd) {
+		return false;
+	}
+	,sort: function() {
+		this.behaviors.sort($bind(this,this.behaviorsCompare));
+	}
+	,behaviorsCompare: function(a,b) {
+		if(a.priority < b.priority) return -1;
+		if(a.priority == b.priority) return 0;
+		return 1;
+	}
+	,__class__: glaze_ai_steering_SteeringBehavior
+};
+var glaze_ai_steering_SteeringSettings = function() { };
+glaze_ai_steering_SteeringSettings.__name__ = ["glaze","ai","steering","SteeringSettings"];
+var glaze_ai_steering_behaviors_Behavior = function(weight,priority,probability) {
+	if(probability == null) probability = 1;
+	if(priority == null) priority = 1;
+	if(weight == null) weight = 1.0;
+	this.weight = weight;
+	this.priority = priority;
+	this.probability = probability;
+};
+glaze_ai_steering_behaviors_Behavior.__name__ = ["glaze","ai","steering","behaviors","Behavior"];
+glaze_ai_steering_behaviors_Behavior.prototype = {
+	calculate: function(agent,result) {
+	}
+	,__class__: glaze_ai_steering_behaviors_Behavior
+};
+var glaze_ai_steering_behaviors_Seek = function(target,seekDistSq) {
+	if(seekDistSq == null) seekDistSq = 0;
+	glaze_ai_steering_behaviors_Behavior.call(this,1,70);
+	this.target = target;
+	this.seekDistSq = seekDistSq;
+};
+glaze_ai_steering_behaviors_Seek.__name__ = ["glaze","ai","steering","behaviors","Seek"];
+glaze_ai_steering_behaviors_Seek.calc = function(agent,result,target,seekDistSq) {
+	if(seekDistSq == null) seekDistSq = 0;
+	var dX = target.x - agent.position.x;
+	var dY = target.y - agent.position.y;
+	var d = dX * dX + dY * dY;
+	if(seekDistSq < 0 && d < -seekDistSq || seekDistSq > 0 && d > seekDistSq) return;
+	var t = Math.sqrt(d);
+	result.x = dX / t;
+	result.x *= 10;
+	result.x -= agent.velocity.x * 0.016;
+	result.y = dY / t;
+	result.y *= 10;
+	result.y -= agent.velocity.y * 0.016;
+};
+glaze_ai_steering_behaviors_Seek.__super__ = glaze_ai_steering_behaviors_Behavior;
+glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
+	calculate: function(agent,result) {
+		var target = this.target;
+		var seekDistSq = this.seekDistSq;
+		var dX = target.x - agent.position.x;
+		var dY = target.y - agent.position.y;
+		var d = dX * dX + dY * dY;
+		if(seekDistSq < 0 && d < -seekDistSq || seekDistSq > 0 && d > seekDistSq) {
+		} else {
+			var t = Math.sqrt(d);
+			result.x = dX / t;
+			result.x *= 10;
+			result.x -= agent.velocity.x * 0.016;
+			result.y = dY / t;
+			result.y *= 10;
+			result.y -= agent.velocity.y * 0.016;
+		}
+	}
+	,__class__: glaze_ai_steering_behaviors_Seek
+});
+var glaze_ai_steering_behaviors_Wander = function() {
+	glaze_ai_steering_behaviors_Behavior.call(this,1,140);
+	this.circleRadius = 8;
+	this.circleDistance = 2;
+	this.wanderAngle = Math.random() * (Math.PI * 2);
+	this.wanderChange = 2;
+};
+glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behaviors","Wander"];
+glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
+glaze_ai_steering_behaviors_Wander.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
+	calculate: function(agent,result) {
+		var circleCenter = agent.velocity.clone();
+		circleCenter.normalize();
+		var s = this.circleDistance;
+		circleCenter.x *= s;
+		circleCenter.y *= s;
+		var displacement = new glaze_geom_Vector2(0,-1);
+		var s1 = this.circleRadius;
+		displacement.x *= s1;
+		displacement.y *= s1;
+		displacement.setAngle(this.wanderAngle);
+		this.wanderAngle += Math.random() * this.wanderChange - this.wanderChange * .5;
+		result.x += circleCenter.x;
+		result.y += circleCenter.y;
+		result.x += displacement.x;
+		result.y += displacement.y;
+	}
+	,__class__: glaze_ai_steering_behaviors_Wander
+});
+var glaze_eco_core_IComponent = function() { };
+glaze_eco_core_IComponent.__name__ = ["glaze","eco","core","IComponent"];
+var glaze_ai_steering_components_Steering = function(behaviors,calculationMethod) {
+	if(calculationMethod == null) calculationMethod = 0;
+	this.behaviors = behaviors;
+	this.steeringParameters = new glaze_ai_steering_SteeringAgentParameters();
+	this.hasChanged = true;
+};
+glaze_ai_steering_components_Steering.__name__ = ["glaze","ai","steering","components","Steering"];
+glaze_ai_steering_components_Steering.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_ai_steering_components_Steering.prototype = {
+	addBehavior: function(behavior) {
+		this.behaviors.push(behavior);
+		this.hasChanged = true;
+	}
+	,removeBehaviour: function(behavior) {
+		HxOverrides.remove(this.behaviors,behavior);
+	}
+	,__class__: glaze_ai_steering_components_Steering
+};
+var glaze_eco_core_System = function(componentSignature) {
+	this.registeredComponents = componentSignature;
+	this.enabled = true;
+};
+glaze_eco_core_System.__name__ = ["glaze","eco","core","System"];
+glaze_eco_core_System.prototype = {
+	onAdded: function(engine) {
+		this.engine = engine;
+	}
+	,onRemoved: function() {
+	}
+	,entityAdded: function(entity) {
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+	}
+	,__class__: glaze_eco_core_System
+};
+var glaze_ai_steering_systems_SteeringSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_physics_components_PhysicsBody,glaze_ai_steering_components_Steering]);
+	this.behaviorForce = new glaze_geom_Vector2();
+	this.totalForce = new glaze_geom_Vector2();
+};
+glaze_ai_steering_systems_SteeringSystem.__name__ = ["glaze","ai","steering","systems","SteeringSystem"];
+glaze_ai_steering_systems_SteeringSystem.__super__ = glaze_eco_core_System;
+glaze_ai_steering_systems_SteeringSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var body = entity.map.PhysicsBody.body;
+			var steering = entity.map.Steering;
+			if(steering.hasChanged) {
+				steering.behaviors.sort($bind(this,this.behaviorsCompare));
+				steering.hasChanged = false;
+			}
+			this.runningSum(steering,body);
+			body.addForce(this.totalForce);
+		}
+	}
+	,runningSum: function(steering,agent) {
+		var _this = this.totalForce;
+		_this.x = 0;
+		_this.y = 0;
+		var _g = 0;
+		var _g1 = steering.behaviors;
+		while(_g < _g1.length) {
+			var behavior = _g1[_g];
+			++_g;
+			var _this1 = this.behaviorForce;
+			_this1.x = 0;
+			_this1.y = 0;
+			behavior.calculate(agent,this.behaviorForce);
+			var _this2 = this.behaviorForce;
+			var s = behavior.weight;
+			_this2.x *= s;
+			_this2.y *= s;
+			var _this3 = this.totalForce;
+			var v = this.behaviorForce;
+			_this3.x += v.x;
+			_this3.y += v.y;
+		}
+		this.totalForce.clampScalar(steering.steeringParameters.maxAcceleration);
+	}
+	,behaviorsCompare: function(a,b) {
+		if(a.priority < b.priority) return -1;
+		if(a.priority == b.priority) return 0;
+		return 1;
+	}
+	,__class__: glaze_ai_steering_systems_SteeringSystem
+});
 var glaze_core_DigitalInput = function() {
 	this.keyMap = [];
 	var _g = 0;
@@ -700,7 +984,8 @@ glaze_debug_DebugEngine.__name__ = ["glaze","debug","DebugEngine"];
 glaze_debug_DebugEngine.GetAllEntities = function() {
 	var result = "<table width='100%'>";
 	result += "<col style='width:10%'>";
-	result += "<col style='width:70%'>";
+	result += "<col style='width:10%'>";
+	result += "<col style='width:60%'>";
 	result += "<col style='width:20%'>";
 	var _g = 0;
 	var _g1 = glaze_debug_DebugEngine.gameEngine.engine.entities;
@@ -709,6 +994,7 @@ glaze_debug_DebugEngine.GetAllEntities = function() {
 		++_g;
 		var ehtml = "<tr>";
 		ehtml += "<td>" + entity.id + "</td>";
+		ehtml += "<td>" + entity.referenceCount + "</td>";
 		ehtml += "<td>" + entity.name + "</td>";
 		ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpEntity(" + entity.id + ");'>Inspect</button></td>";
 		ehtml += "</tr>";
@@ -921,6 +1207,7 @@ glaze_eco_core_Engine.prototype = {
 	,__class__: glaze_eco_core_Engine
 };
 var glaze_eco_core_Entity = function(engine,components) {
+	this.referenceCount = 0;
 	this.list = [];
 	this.map = { };
 	this.id = 0;
@@ -983,8 +1270,6 @@ glaze_eco_core_Entity.prototype = {
 	}
 	,__class__: glaze_eco_core_Entity
 };
-var glaze_eco_core_IComponent = function() { };
-glaze_eco_core_IComponent.__name__ = ["glaze","eco","core","IComponent"];
 var glaze_eco_core_Phase = function(engine,msPerUpdate,maxAccumulatedDelta) {
 	if(maxAccumulatedDelta == null) maxAccumulatedDelta = 0;
 	if(msPerUpdate == null) msPerUpdate = 0;
@@ -1042,25 +1327,6 @@ glaze_eco_core_Phase.prototype = {
 	}
 	,__class__: glaze_eco_core_Phase
 };
-var glaze_eco_core_System = function(componentSignature) {
-	this.registeredComponents = componentSignature;
-	this.enabled = true;
-};
-glaze_eco_core_System.__name__ = ["glaze","eco","core","System"];
-glaze_eco_core_System.prototype = {
-	onAdded: function(engine) {
-		this.engine = engine;
-	}
-	,onRemoved: function() {
-	}
-	,entityAdded: function(entity) {
-	}
-	,entityRemoved: function(entity) {
-	}
-	,update: function(timestamp,delta) {
-	}
-	,__class__: glaze_eco_core_System
-};
 var glaze_eco_core_View = function(components) {
 	this.entityRemoved = new glaze_signals_Signal1();
 	this.entityAdded = new glaze_signals_Signal1();
@@ -1072,10 +1338,14 @@ glaze_eco_core_View.__name__ = ["glaze","eco","core","View"];
 glaze_eco_core_View.prototype = {
 	addEntity: function(entity) {
 		this.entities.push(entity);
+		entity.referenceCount++;
 		this.entityAdded.dispatch(entity);
 	}
 	,removeEntity: function(entity) {
-		if(HxOverrides.remove(this.entities,entity)) this.entityRemoved.dispatch(entity);
+		if(HxOverrides.remove(this.entities,entity)) {
+			entity.referenceCount--;
+			this.entityRemoved.dispatch(entity);
+		}
 	}
 	,__class__: glaze_eco_core_View
 };
@@ -1386,7 +1656,6 @@ glaze_engine_factories_TMXFactory.prototype = {
 		while(_g < _g1.length) {
 			var obj = _g1[_g];
 			++_g;
-			debugger;
 			var tmp;
 			var _this = this.map;
 			var key = obj.type;
@@ -1444,7 +1713,7 @@ glaze_engine_factories_tmx_LightFactory.prototype = $extend(glaze_engine_factori
 		if(__map_reserved.Light != null) tmp = _this.getReserved("Light"); else tmp = _this.h["Light"];
 		var light = this.CreateEntityFromCSV(glaze_lighting_components_Light,tmp);
 		components.push(light);
-		var extents = new glaze_engine_components_Extents(light.range / 2,light.range / 2);
+		var extents = new glaze_engine_components_Extents(light.range / 1.5,light.range / 1.5);
 		components.push(extents);
 		engine.createEntity(components,this.tmxObject.name);
 	}
@@ -2184,6 +2453,11 @@ glaze_geom_Vector2.prototype = {
 		this.x += v2.x * t;
 		this.y += v2.y * t;
 	}
+	,setAngle: function(angle) {
+		var len = Math.sqrt(this.x * this.x + this.y * this.y);
+		this.x = Math.cos(angle) * len;
+		this.y = Math.sin(angle) * len;
+	}
 	,__class__: glaze_geom_Vector2
 };
 var glaze_lighting_components_Light = function(range,attenuation,intensity,flicker,red,green,blue) {
@@ -2426,6 +2700,7 @@ var glaze_physics_Body = function(material) {
 	this.dt = 0;
 	this.invMass = 1;
 	this.mass = 1;
+	this.globalForceFactor = 1;
 	this.damping = 1;
 	this.isBullet = false;
 	this.accumulatedForces = new glaze_geom_Vector2();
@@ -2449,16 +2724,17 @@ glaze_physics_Body.prototype = {
 	update: function(dt,globalForces,globalDamping) {
 		this.dt = dt;
 		var _this = this.forces;
-		_this.x += globalForces.x;
-		_this.y += globalForces.y;
+		var s = this.globalForceFactor;
+		_this.x += globalForces.x * s;
+		_this.y += globalForces.y * s;
 		var _this1 = this.velocity;
 		var v = this.forces;
 		_this1.x += v.x;
 		_this1.y += v.y;
 		var _this2 = this.velocity;
-		var s = globalDamping * this.damping;
-		_this2.x *= s;
-		_this2.y *= s;
+		var s1 = globalDamping * this.damping;
+		_this2.x *= s1;
+		_this2.y *= s1;
 		if(!this.isBullet) {
 			if(this.maxScalarVelocity > 0) this.velocity.clampScalar(this.maxScalarVelocity); else {
 				var _this3 = this.velocity;
@@ -2530,7 +2806,7 @@ glaze_physics_Body.prototype = {
 	}
 	,t: function(msg) {
 		if(this.debug > 0) {
-			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 128, className : "glaze.physics.Body", methodName : "t"});
+			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 129, className : "glaze.physics.Body", methodName : "t"});
 			this.debug--;
 		}
 	}
@@ -7110,6 +7386,68 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
+glaze_ai_steering_SteeringBehavior.CALCULATE_SUM = 0;
+glaze_ai_steering_SteeringBehavior.CALCULATE_SPEED = 1;
+glaze_ai_steering_SteeringBehavior.CALCULATE_ACCURACY = 2;
+glaze_ai_steering_SteeringSettings.speedTweaker = .3;
+glaze_ai_steering_SteeringSettings.arriveFast = 1;
+glaze_ai_steering_SteeringSettings.arriveNormal = 3;
+glaze_ai_steering_SteeringSettings.arriveSlow = 5;
+glaze_ai_steering_SteeringSettings.wanderJitter = 300;
+glaze_ai_steering_SteeringSettings.wanderDistance = 25;
+glaze_ai_steering_SteeringSettings.wanderRadius = 15;
+glaze_ai_steering_SteeringSettings.separationProbability = 0.2;
+glaze_ai_steering_SteeringSettings.cohesionProbability = 0.6;
+glaze_ai_steering_SteeringSettings.alignmentProbability = 0.3;
+glaze_ai_steering_SteeringSettings.dodgeProbability = 0.6;
+glaze_ai_steering_SteeringSettings.seekProbability = 0.8;
+glaze_ai_steering_SteeringSettings.fleeProbability = 0.6;
+glaze_ai_steering_SteeringSettings.pursuitProbability = 0.8;
+glaze_ai_steering_SteeringSettings.evadeProbability = 1;
+glaze_ai_steering_SteeringSettings.offsetPursuitProbability = 0.8;
+glaze_ai_steering_SteeringSettings.arriveProbability = 0.5;
+glaze_ai_steering_SteeringSettings.obstacleAvoidanceProbability = 0.5;
+glaze_ai_steering_SteeringSettings.wallAvoidanceProbability = 0.5;
+glaze_ai_steering_SteeringSettings.hideProbability = 0.8;
+glaze_ai_steering_SteeringSettings.followPathProbability = 0.7;
+glaze_ai_steering_SteeringSettings.interposeProbability = 0.8;
+glaze_ai_steering_SteeringSettings.wanderProbability = 0.8;
+glaze_ai_steering_SteeringSettings.separationWeight = 1;
+glaze_ai_steering_SteeringSettings.alignmentWeight = 3;
+glaze_ai_steering_SteeringSettings.cohesionWeight = 2;
+glaze_ai_steering_SteeringSettings.dodgeWeight = 1;
+glaze_ai_steering_SteeringSettings.seekWeight = 1;
+glaze_ai_steering_SteeringSettings.fleeWeight = 1;
+glaze_ai_steering_SteeringSettings.pursuitWeight = 1;
+glaze_ai_steering_SteeringSettings.evadeWeight = 0.1;
+glaze_ai_steering_SteeringSettings.offsetPursuitWeight = 1;
+glaze_ai_steering_SteeringSettings.arriveWeight = 1;
+glaze_ai_steering_SteeringSettings.obstacleAvoidanceWeight = 10;
+glaze_ai_steering_SteeringSettings.wallAvoidanceWeight = 10;
+glaze_ai_steering_SteeringSettings.hideWeight = 1;
+glaze_ai_steering_SteeringSettings.followPathWeight = 0.5;
+glaze_ai_steering_SteeringSettings.interposeWeight = 1;
+glaze_ai_steering_SteeringSettings.wanderWeight = 1;
+glaze_ai_steering_SteeringSettings.wallAvoidancePriority = 10;
+glaze_ai_steering_SteeringSettings.obstacleAvoidancePriority = 20;
+glaze_ai_steering_SteeringSettings.evadePriority = 30;
+glaze_ai_steering_SteeringSettings.hidePriority = 35;
+glaze_ai_steering_SteeringSettings.seperationPriority = 40;
+glaze_ai_steering_SteeringSettings.alignmentPriority = 50;
+glaze_ai_steering_SteeringSettings.cohesionPriority = 60;
+glaze_ai_steering_SteeringSettings.dodgePriority = 65;
+glaze_ai_steering_SteeringSettings.seekPriority = 70;
+glaze_ai_steering_SteeringSettings.fleePriority = 80;
+glaze_ai_steering_SteeringSettings.arrivePriority = 90;
+glaze_ai_steering_SteeringSettings.pursuitPriority = 100;
+glaze_ai_steering_SteeringSettings.offsetPursuitPriority = 110;
+glaze_ai_steering_SteeringSettings.interposePriority = 120;
+glaze_ai_steering_SteeringSettings.followPathPriority = 130;
+glaze_ai_steering_SteeringSettings.wanderPriority = 140;
+glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
+glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
+glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
+glaze_ai_steering_components_Steering.NAME = "Steering";
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_Display.NAME = "Display";

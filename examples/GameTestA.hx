@@ -1,5 +1,9 @@
 package;
 
+import glaze.ai.steering.behaviors.Seek;
+import glaze.ai.steering.behaviors.Wander;
+import glaze.ai.steering.components.Steering;
+import glaze.ai.steering.systems.SteeringSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
@@ -14,7 +18,6 @@ import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.ParticleSystem;
-// import glaze.engine.systems.PhysicsSystem;
 import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.engine.systems.RenderSystem; 
@@ -93,6 +96,7 @@ class GameTestA extends GameEngine {
  
         var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
+        physicsPhase.addSystem(new SteeringSystem());                                                   
         physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
         physicsPhase.addSystem(new PhysicsPositionSystem());
                 
@@ -133,7 +137,7 @@ class GameTestA extends GameEngine {
         ],"player"); 
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);
- 
+
         playerLight = engine.createEntity( 
             [  
             player.getComponent(Position), 
@@ -146,28 +150,7 @@ class GameTestA extends GameEngine {
         tmxFactory.registerFactory(LightFactory);
         tmxFactory.parseObjectGroup("Objects");
     
-        engine.createEntity( 
-            [  
-            new Position(128,672),
-            new Light(256,1,1,0,255,0,0),
-            new Extents(128,128)
-            ],"light1"); 
-
-        engine.createEntity( 
-            [  
-            new Position(256,672),
-            new Light(256,1,1,0,0,255,0),
-            new Extents(128,128)
-            ],"light2"); 
-        engine.createEntity( 
-            [  
-            new Position(192,640),
-            new Light(256,1,1,0,0,0,255),
-            new Extents(128,128)
-            ],"light3"); 
-
         loop.start();
-
     } 
 
     function setupMap() {
@@ -175,6 +158,38 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
  
+    public function createBee():Void  
+    {
+        var beeBody = new Body(new Material());
+        beeBody.setMass(0.03);
+        beeBody.setBounces(0);     
+        beeBody.globalForceFactor = 0;
+        beeBody.maxScalarVelocity = 100; 
+  
+        var beeProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
+        beeProxy.setBody(beeBody);
+
+        var pos = player.getComponent(Position).coords.clone();
+        
+        var behavior = new glaze.ai.behaviortree.Sequence();
+        behavior.addChild(new glaze.engine.actions.Delay(10000));
+        behavior.addChild(new glaze.engine.actions.DestroyEntity());
+
+        var bee = engine.createEntity([
+            new Position(pos.x,pos.y), 
+            new Display("projectile1.png"), 
+            new PhysicsBody(beeBody), 
+            new PhysicsCollision(beeProxy),  
+            // new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
+            new Script(behavior),
+            new Light(64,1,1,1,255,255,0),
+            new Viewable()
+            ,new Steering([
+                // new Seek(new Vector2(0,0)),
+                new Wander()
+                ])
+        ],"bee");  
+    }
           
     public function fireBullet():Void  
     {
@@ -182,8 +197,8 @@ class GameTestA extends GameEngine {
         bulletBody.setMass(0.03);
         bulletBody.setBounces(3);     
 
-        bulletBody.isBullet = true;
-        bulletBody.maxScalarVelocity = 3000; 
+        // bulletBody.isBullet = true;
+        bulletBody.maxScalarVelocity = 1000; 
   
         var bulletProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
         bulletProxy.setBody(bulletBody);
@@ -193,13 +208,14 @@ class GameTestA extends GameEngine {
         var vel = input.ViewCorrectedMousePosition() ;
         vel.minusEquals(pos);
         vel.normalize();
-        vel.multEquals(2000); 
+        vel.multEquals(1000); 
         bulletBody.velocity.setTo(vel.x,vel.y);
-                   
+        // bulletBody.globalForceFactor = 0;
+        
         var behavior = new glaze.ai.behaviortree.Sequence();
         behavior.addChild(new glaze.engine.actions.Delay(1000));
         behavior.addChild(new glaze.engine.actions.DestroyEntity());
- 
+
         var bullet = engine.createEntity([
             new Position(pos.x,pos.y), 
             new Display("projectile1.png"), 
@@ -209,6 +225,10 @@ class GameTestA extends GameEngine {
             new Script(behavior),
             new Light(64,1,1,1,255,0,0),
             new Viewable()
+            // ,new Steering([
+            //     // new Seek(new Vector2(0,0)),
+            //     new Wander()
+            //     ])
         ],"player bullet");              
                 
     }    
@@ -231,6 +251,10 @@ class GameTestA extends GameEngine {
                 playerLight.addComponent(new Viewable());
         }
         
+        if (input.JustPressed(85)) {
+            createBee();
+        }
+
         if (fire) fireBullet();
 
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);

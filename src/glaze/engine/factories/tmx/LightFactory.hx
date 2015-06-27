@@ -27,7 +27,7 @@ class LightFactory extends TMXEntityFactory {
 
 		components.push(light);
 
-		var extents = new Extents(light.range/2,light.range/2);
+		var extents = new Extents(light.range/1.5,light.range/1.5);
 
 		components.push(extents);
 

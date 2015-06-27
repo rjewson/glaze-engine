@@ -32,6 +32,7 @@ class Body
     public var isBullet:Bool = false;
 
     public var damping:Float = 1;
+    public var globalForceFactor:Float = 1;
 
     public var mass:Float = 1;
     public var invMass:Float = 1;
@@ -55,7 +56,7 @@ class Body
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {
         this.dt = dt;
         //Add global forces to local ones
-        forces.plusEquals(globalForces);
+        forces.plusMultEquals(globalForces,globalForceFactor);
         velocity.plusEquals(forces);
         velocity.multEquals(globalDamping*damping);
 

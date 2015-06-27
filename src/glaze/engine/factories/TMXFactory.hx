@@ -25,7 +25,6 @@ class TMXFactory {
 	public function parseObjectGroup(groupName:String) {
 		var objs = tmxMap.getObjectGroup(groupName);
 		for (obj in objs.objects) {
-			js.Lib.debug();
 			var factory = map.get(obj.type);
 			if (factory!=null) {
 				factory.createEntity(obj,engine);

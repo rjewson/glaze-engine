@@ -1,4 +1,3 @@
-
 package glaze.particle;
 
 import wgr.geom.Point;

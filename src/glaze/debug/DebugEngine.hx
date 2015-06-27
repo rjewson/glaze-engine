@@ -9,12 +9,14 @@ class DebugEngine {
 	public static function GetAllEntities():Dynamic {
 		var result = "<table width='100%'>";
 		result += "<col style='width:10%'>";
-		result += "<col style='width:70%'>";
+		result += "<col style='width:10%'>";
+		result += "<col style='width:60%'>";
 		result += "<col style='width:20%'>";
 		for (entity in gameEngine.engine.entities) {
 			var ehtml = "<tr>";
 
 			ehtml += "<td>"+entity.id+"</td>";
+			ehtml += "<td>"+entity.referenceCount+"</td>";
 			ehtml += "<td>"+entity.name+"</td>";
 			ehtml += "<td><button onclick='glaze.debug.DebugEngine.DumpEntity("+entity.id+");'>Inspect</button></td>";
 			
