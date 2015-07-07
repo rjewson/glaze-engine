@@ -33,6 +33,7 @@ class BruteforceBroadphase implements IBroadphase
     }
 
     public function collide() {
+        // trace("bfcount="+dynamicProxies.length);
         var count = dynamicProxies.length;
         for (i in 0...count) {
 

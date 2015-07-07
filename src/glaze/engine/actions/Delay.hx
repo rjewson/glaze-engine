@@ -19,7 +19,7 @@ class Delay extends Behavior {
     }
 
     override private function update(context:BehaviorContext):BehaviorStatus { 
-        elapsed+=context.time;
+        elapsed+=context.delta;
         if (elapsed>delay) {
             return Success;
         }

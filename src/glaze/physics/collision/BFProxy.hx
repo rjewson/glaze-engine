@@ -1,6 +1,7 @@
 
 package glaze.physics.collision;
 
+import glaze.eco.core.Entity;
 import glaze.geom.AABB;
 import glaze.physics.Body;
 import glaze.physics.collision.BFProxy;
@@ -12,6 +13,7 @@ class BFProxy
 
     public var aabb:AABB;
     public var body:Body;
+    public var entity:Entity;
 
     public var isStatic:Bool = false;
     public var isSensor:Bool = false;

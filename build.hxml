@@ -5,6 +5,7 @@
 -lib glaze-core
 -lib glaze-render
 -lib glaze-eco
+-lib compiletime
 -main GameTestA
 #-debug
 -D analyzer

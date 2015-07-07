@@ -22,7 +22,8 @@ class BehaviourSystem extends System {
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
             var script = entity.getComponent(Script);
-            script.context.time = delta;
+            script.context.timestamp = timestamp;
+            script.context.delta = delta;
             script.behavior.tick(script.context);
         }
     }
