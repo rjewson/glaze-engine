@@ -9,9 +9,12 @@ class Delay extends Behavior {
     private var delay:Float;
     private var elapsed:Float;
 
-    public function new(delay:Float) {
+    public function new(delay:Float,random:Float=0.0) {
         super();
         this.delay = delay;
+        if (random!=0) {
+            this.delay += glaze.util.Random.RandomFloat(-random,random);
+        }
     }
 
     override private function initialize(context:BehaviorContext):Void {

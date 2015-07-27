@@ -11,23 +11,24 @@ import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.collision.Filter;
 
+typedef ContactCallback = BFProxy -> BFProxy -> Contact -> Void;
+
 class BFProxy 
 {
 
     public var aabb:AABB;
 
-    public var position:Position;
     public var offset:Vector2;
 
     public var body:Body;
-    // public var entity:Entity;
+    public var entity:Entity;
 
     public var isStatic:Bool = false;
     public var isSensor:Bool = false;
 
     public var filter:Filter;
 
-    public var contactCallback :  BFProxy -> BFProxy -> Contact -> Void = null;
+    public var contactCallback:ContactCallback;
 
     public function new(width:Float,height:Float,filter:Filter,offsetX:Float=0,offsetY:Float=0,isSensor:Bool=false) {
         aabb = new AABB();

@@ -3,6 +3,7 @@ package glaze.physics.systems;
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Position;
+import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.components.PhysicsBody;
 import glaze.eco.core.Entity;
@@ -24,9 +25,10 @@ class PhysicsStaticSystem extends System {
         var extents = entity.getComponent(Extents);
         var position = entity.getComponent(Position);
 
-        collision.proxy = new glaze.physics.collision.BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
+        collision.proxy = new BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
         collision.proxy.isStatic = true;
-        collision.proxy.aabb.position = entity.getComponent(Position).coords; //??
+        collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body
+        collision.proxy.entity = entity;
 
         broadphase.addProxy(collision.proxy);
     }

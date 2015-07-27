@@ -8,7 +8,7 @@ class PhysicsCollision implements IComponent {
     
     public var isSensor:Bool = false;
     public var filter:Filter = null;
-    //public var contactCallback:BFProxy -> BFProxy -> Contact -> Void = null;
+    public var contactCallback:ContactCallback = null;
 
     public var proxy:BFProxy;
 

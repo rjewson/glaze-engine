@@ -26,7 +26,8 @@ class PhysicsCollisionSystem extends System {
 
         collision.proxy = new glaze.physics.collision.BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
         collision.proxy.setBody(body.body);
-
+        collision.proxy.entity = entity;
+        
         broadphase.addProxy(collision.proxy);
     }
     

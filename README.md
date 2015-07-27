@@ -1,4 +1,4 @@
-sts# glaze-engine
+# glaze-engine
 
 A 2D webgl browser game engine.
 
@@ -8,7 +8,6 @@ Utilizes all the glaze sub projects:
 - eco
 - physics
 - render
-
 
 Local Build
 
