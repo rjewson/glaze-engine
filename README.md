@@ -22,5 +22,6 @@ haxelib git glaze-core https://github.com/rjewson/glaze-core
 haxelib git glaze-render https://github.com/rjewson/glaze-render
 haxelib git glaze-eco https://github.com/rjewson/glaze-eco
 haxelib install compiletime
+```
 * Run the build.hxml
 * Open the bin/index.html to see the game.  You'll need to serve this via a proper HTTP server (not just the file system).

@@ -2,7 +2,10 @@
 package glaze.physics.collision;
 
 import glaze.eco.core.Entity;
+import glaze.engine.components.Extents;
+import glaze.engine.components.Position;
 import glaze.geom.AABB;
+import glaze.geom.Vector2;
 import glaze.physics.Body;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
@@ -12,8 +15,12 @@ class BFProxy
 {
 
     public var aabb:AABB;
+
+    public var position:Position;
+    public var offset:Vector2;
+
     public var body:Body;
-    public var entity:Entity;
+    // public var entity:Entity;
 
     public var isStatic:Bool = false;
     public var isSensor:Bool = false;
@@ -22,9 +29,10 @@ class BFProxy
 
     public var contactCallback :  BFProxy -> BFProxy -> Contact -> Void = null;
 
-    public function new(width:Float,height:Float,filter:Filter,isSensor:Bool=false) {
+    public function new(width:Float,height:Float,filter:Filter,offsetX:Float=0,offsetY:Float=0,isSensor:Bool=false) {
         aabb = new AABB();
         aabb.extents.setTo(width,height);
+        offset = new Vector2(offsetX,offsetY);
         this.filter = filter;
     }
 

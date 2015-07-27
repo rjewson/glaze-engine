@@ -84,7 +84,8 @@ class Intersect
                         proxyA.aabb.extents,
                         proxyB.aabb.position,
                         proxyB.aabb.extents,
-                        contact);            }
+                        contact);            
+            }
         } else {
             //Were just left with static<>dynamic collisions
             //Order them

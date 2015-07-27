@@ -19,7 +19,13 @@ class PhysicsCollisionSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         var proxy = entity.getComponent(PhysicsCollision).proxy;
-        proxy.entity = entity;
+        //proxy.entity = entity;
+
+        //FIX THIS SHITE
+        if (proxy.isStatic) {
+            proxy.aabb.position = entity.getComponent(Position).coords;
+        }
+
         broadphase.addProxy(proxy);
     }
     

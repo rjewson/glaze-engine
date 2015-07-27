@@ -7,10 +7,12 @@ class Position implements IComponent {
     
     public var coords:Vector2;
     public var prevCoords:Vector2;
+    public var direction:Vector2;
 
     public function new(x:Float,y:Float) {
         coords = new Vector2(x,y);
         prevCoords = new Vector2(x,y);
+        direction = new Vector2(1,1);
     }
 
     public function update(position:Vector2) {
