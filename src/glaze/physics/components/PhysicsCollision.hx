@@ -2,20 +2,19 @@ package glaze.physics.components;
 
 import glaze.eco.core.IComponent;
 import glaze.physics.collision.BFProxy;
+import glaze.physics.collision.Filter;
 
 class PhysicsCollision implements IComponent {
     
+    public var isSensor:Bool = false;
+    public var filter:Filter = null;
+    //public var contactCallback:BFProxy -> BFProxy -> Contact -> Void = null;
+
     public var proxy:BFProxy;
-    //public var isStatic:Bool;
-    //Filter here
 
-    // public var halfWidths:Vector2;
-    // public var offset:Vector2;
-
-    // public function new(width:Float,height:Float,offsetX:Float=0,offsetY:Float=0) {
-    //     halfWidths = new Vector2(width,height);
-    //     offset = new Vector2(offsetX,offsetY);
-    // }
-
+    public function new(isSensor:Bool,filter:Filter) {
+    	this.isSensor = isSensor;
+    	this.filter = filter;
+    }
 
 }

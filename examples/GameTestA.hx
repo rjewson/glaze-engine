@@ -32,9 +32,11 @@ import glaze.physics.collision.Filter;
 import glaze.physics.collision.Map;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
+import glaze.physics.components.PhysicsStatic;
 import glaze.physics.Material;
 import glaze.physics.systems.PhysicsCollisionSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
+import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
 import glaze.render.renderers.webgl.FBOLighting;
 import glaze.render.renderers.webgl.SpriteRenderer;
@@ -98,8 +100,10 @@ class GameTestA extends GameEngine {
  
         var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
-        physicsPhase.addSystem(new SteeringSystem());                                                   
-        physicsPhase.addSystem(new PhysicsCollisionSystem(new BruteforceBroadphase(map,new glaze.physics.collision.Intersect())));
+        physicsPhase.addSystem(new SteeringSystem());
+        var broadphase = new BruteforceBroadphase(map,new glaze.physics.collision.Intersect());
+        physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
+        physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
         physicsPhase.addSystem(new PhysicsPositionSystem());
                 
 
@@ -130,15 +134,16 @@ class GameTestA extends GameEngine {
         body.maxScalarVelocity = 0;
         body.maxVelocity.setTo(160,1000);
 
-        var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,playerFilter);
-        proxy.setBody(body);
+        // var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,playerFilter);
+        // proxy.setBody(body);
         characterController = new CharacterController(input,body);
            
         player = engine.createEntity([
             new Position(300,180),
+            new Extents(30/2,72/2),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(proxy)
+            new PhysicsCollision(false,playerFilter)
         ],"player"); 
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);
@@ -169,8 +174,8 @@ class GameTestA extends GameEngine {
  
     public function createTurret() {
   
-        var turretProxy = new glaze.physics.collision.BFProxy(12,12,null);
-        turretProxy.isStatic = true;
+        // var turretProxy = new glaze.physics.collision.BFProxy(12,12,null);
+        // turretProxy.isStatic = true;
 
         var position = new Position(200,100);
 
@@ -185,7 +190,9 @@ class GameTestA extends GameEngine {
          var turret = engine.createEntity([
             position, 
             new Display("turretA.png"), 
-            new PhysicsCollision(turretProxy),  
+            new Extents(12,12),
+            new PhysicsCollision(false,null),
+            new PhysicsStatic(),
             new Script(behavior),
             new Viewable()
         ],"turret");        
@@ -211,14 +218,14 @@ class GameTestA extends GameEngine {
 
         var bee = engine.createEntity([
             new Position(pos.x,pos.y), 
+            new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(beeBody), 
-            new PhysicsCollision(beeProxy),  
+            new PhysicsCollision(false,playerFilter),  
             new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
             new Script(behavior),
             new Light(64,1,1,1,255,255,0),
-            new Viewable()
-            ,new Steering([
+            new Steering([
                 new Wander()
                 ])
         ],"bee");  
@@ -233,9 +240,9 @@ class GameTestA extends GameEngine {
         // bulletBody.isBullet = true;
         bulletBody.maxScalarVelocity = velocity; 
   
-        var bulletProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
-        bulletProxy.setBody(bulletBody);
-   
+        // var bulletProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
+        // bulletProxy.setBody(bulletBody);
+      
         //var pos = player.getComponent(Position).coords.clone();
          
         var vel = target.clone();//input.ViewCorrectedMousePosition() ;
@@ -250,14 +257,15 @@ class GameTestA extends GameEngine {
         behavior.addChild(new glaze.engine.actions.DestroyEntity());
    
         var bullet = engine.createEntity([
-            new Position(pos.x,pos.y), 
+            new Position(pos.x,pos.y),
+            new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(bulletBody), 
-            new PhysicsCollision(bulletProxy),  
+            new PhysicsCollision(false,playerFilter),  
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
             new Script(behavior),
-            // new Light(64,1,1,1,255,0,0),
-            new Viewable()
+            // new Light(64,1,1,1,255,0,0), 
+            // new Viewable()
             // ,new Steering([
             //     // new Seek(new Vector2(0,0)),
             //     new Wander()
@@ -268,7 +276,7 @@ class GameTestA extends GameEngine {
         var light = engine.createEntity([
             bullet.getComponent(Position),
             new Light(64,1,1,1,255,0,0),
-            new Viewable()
+            new Extents(64,64)
         ],"player bullet light");
 
         bullet.addChildEntity(light);

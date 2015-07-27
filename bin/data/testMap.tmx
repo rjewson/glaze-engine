@@ -42,7 +42,7 @@
   </data>
  </layer>
  <objectgroup name="Objects">
-  <object id="17" type="Light" gid="65" x="64" y="112" width="16" height="16"/>
+  <object id="17" name="Hall Light 0" type="Light" gid="65" x="64" y="112" width="16" height="16"/>
   <object id="23" name="Hall Light 1" type="Light" gid="65" x="432" y="48" width="16" height="16"/>
  </objectgroup>
 </map>

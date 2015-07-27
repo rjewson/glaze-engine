@@ -11,7 +11,8 @@ class DestroyEntity extends Behavior {
         super();
     }
 
-    override private function update(context:BehaviorContext):BehaviorStatus { 
+    override private function update(context:BehaviorContext):BehaviorStatus {
+    	// js.Lib.debug(); 
         context.entity.engine.destroyEntity(context.entity);
         return Success;
     }
