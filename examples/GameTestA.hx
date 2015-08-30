@@ -13,7 +13,7 @@ import glaze.engine.components.Position;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
 import glaze.engine.components.Viewable;
-import glaze.engine.core.GameEngine;
+import glaze.engine.core.GameEngine; 
 import glaze.engine.factories.ComponentFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.TMXFactory;
@@ -69,12 +69,12 @@ class GameTestA extends GameEngine {
     }
 
     override public function initalize() {
-    
+           
         setupMap();
 
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase(1000/30);
-        var physicsPhase = engine.createPhase(1000/60);
+        var physicsPhase = engine.createPhase(1000/60);  
              
         renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
@@ -82,7 +82,7 @@ class GameTestA extends GameEngine {
         
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
 
-        var tileMap = new TileMap();
+        var tileMap = new TileMap(); 
         renderSystem.renderer.AddRenderer(tileMap);
         tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
         tileMap.SetTileLayerFromData(mapData,"base",1,1);
@@ -172,25 +172,20 @@ class GameTestA extends GameEngine {
     } 
  
     public function createTurret() {
-  
-        // var turretProxy = new glaze.physics.collision.BFProxy(12,12,null);
-        // turretProxy.isStatic = true;
-
-        var position = new Position(200,100);
 
         var behavior = new glaze.ai.behaviortree.Sequence();   
         behavior.addChild(new glaze.engine.actions.Delay(1000,100));
         behavior.addChild(new glaze.engine.actions.InitEntityCollection());
-        behavior.addChild(new glaze.engine.actions.QueryEntitiesInArea(position,200));
+        behavior.addChild(new glaze.engine.actions.QueryEntitiesInArea(200));
         behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
         behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterVisibleAgainstMap]));
         behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
 
          var turret = engine.createEntity([
-            position,  
+            new Position(200,100),  
             new Display("turretA.png"), 
             new Extents(12,12),
-            new PhysicsCollision(false,null),
+            new PhysicsCollision(false,playerFilter),
             new PhysicsStatic(),
             new Script(behavior)
         ],"turret");        
@@ -205,10 +200,7 @@ class GameTestA extends GameEngine {
         beeBody.globalForceFactor = 0;
         beeBody.maxScalarVelocity = 100; 
   
-        var beeProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
-        beeProxy.setBody(beeBody);
-
-        var pos = player.getComponent(Position).coords.clone();
+        var pos = player.getComponent(Position).coords;
         
         var behavior = new glaze.ai.behaviortree.Sequence();
         behavior.addChild(new glaze.engine.actions.Delay(10000,1000));
@@ -237,23 +229,43 @@ class GameTestA extends GameEngine {
 
         // bulletBody.isBullet = true;
         bulletBody.maxScalarVelocity = velocity; 
-  
-        // var bulletProxy = new glaze.physics.collision.BFProxy(3,3,playerFilter);
-        // bulletProxy.setBody(bulletBody);
-      
-        //var pos = player.getComponent(Position).coords.clone();
-         
+           
         var vel = target.clone();//input.ViewCorrectedMousePosition() ;
         vel.minusEquals(pos);
         vel.normalize();
         vel.multEquals(velocity); 
         bulletBody.velocity.setTo(vel.x,vel.y);
         bulletBody.globalForceFactor = gff;
-        
-        var behavior = new glaze.ai.behaviortree.Sequence();
-        behavior.addChild(new glaze.engine.actions.Delay(ttl));       
-        behavior.addChild(new glaze.engine.actions.DestroyEntity());
-   
+
+        // var behavior = new glaze.ai.behaviortree.Sequence();
+        // behavior.addChild(new glaze.engine.actions.Delay(ttl));       
+        // behavior.addChild(new glaze.engine.actions.DestroyEntity());
+        var d:glaze.engine.actions.CollisionMonitor;
+        var data = '
+        {
+            "type":"Sequence",
+            "children": [
+                {
+                    "type":"Monitor",
+                    "children": [
+                        {
+                            "type":"glaze.engine.actions.Delay",
+                            "params":[1000,100]
+                        },
+                        {
+                            "type":"glaze.engine.actions.CollisionMonitor"
+                        }
+                    ]
+                },
+                {
+                    "type":"glaze.engine.actions.DestroyEntity"
+                }
+
+            ]
+        }';
+
+        var behavior = glaze.ai.behaviortree.BehaviorTree.fromJSON(data);
+
         var bullet = engine.createEntity([
             new Position(pos.x,pos.y),
             new Extents(3,3),
@@ -262,9 +274,9 @@ class GameTestA extends GameEngine {
             new PhysicsCollision(false,playerFilter),  
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
             new Script(behavior),
-            // ,new Steering([
-            //     // new Seek(new Vector2(0,0)),
-            //     new Wander()
+            // new Steering([
+            //     new Seek(new Vector2(0,0))
+            //     // new Wander()
             //     ])
         ],"player bullet");              
                 

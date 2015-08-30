@@ -16,15 +16,16 @@ class QueryEntitiesInArea extends Behavior {
     var ec:EntityCollection;
     var filterOwner:Bool;
 
-    public function new(position:Position,range:Float,filterOwner:Bool=true) {
+    public function new(range:Float,filterOwner:Bool=true) {
         super();
         aabb = new glaze.geom.AABB();
-        aabb.position = position.coords;
+        // aabb.position = position.coords;
         aabb.extents.setTo(range,range);
         this.filterOwner = filterOwner;
     }
 
     override private function initialize(context:BehaviorContext):Void {
+        aabb.position = context.entity.getComponent(Position).coords;
         broadphase = context.entity.engine.getSystem(PhysicsCollisionSystem).broadphase;
         ec = untyped context.data.ec;
     }

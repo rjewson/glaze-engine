@@ -72,6 +72,8 @@ class Map
                             var nextCell = data.get(nextX,nextY,0);
                             if (nextCell==0) {
                                 body.respondStaticCollision(contact);
+                                if (proxy.contactCallback!=null)
+                                    proxy.contactCallback(proxy,null,contact);
                                 if (debug!=null)
                                     debug(x,y);
                             } else {
