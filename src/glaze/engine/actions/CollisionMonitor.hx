@@ -15,7 +15,7 @@ class CollisionMonitor extends Behavior {
 	public var totalContactCount:Int = 0;
 	public var updateContactCount:Int = 0;
 
-    public function new(successCount:Int=1) {
+    public function new(successCount:Int=2) {
     	this.successCount = successCount;
         super(); 
     }
@@ -23,17 +23,15 @@ class CollisionMonitor extends Behavior {
     override private function initialize(context:BehaviorContext):Void {
     	physicsCollision = context.entity.getComponent(PhysicsCollision);
     	if (physicsCollision!=null)
-	    	physicsCollision.contactCallback = onContact;
+	    	physicsCollision.setCallback(onContact);
     }
 
-    //BFProxy -> BFProxy -> Contact -> Void;
     function onContact(a:BFProxy,b:BFProxy,contact:Contact) {
     	totalContactCount++;
     	updateContactCount++;
     }
 
     override private function update(context:BehaviorContext):BehaviorStatus { 
-    	trace(totalContactCount);
         if (totalContactCount>=successCount)
         	return Success;
         return Running;

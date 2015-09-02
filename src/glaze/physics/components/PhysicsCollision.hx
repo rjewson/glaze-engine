@@ -17,4 +17,10 @@ class PhysicsCollision implements IComponent {
     	this.filter = filter;
     }
 
+    public function setCallback(cb:ContactCallback) {
+    	this.contactCallback = cb;
+    	if (proxy!=null)
+    		proxy.contactCallback = cb;
+    }
+
 }

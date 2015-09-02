@@ -53,7 +53,7 @@ class Map
         plane.setFromSegment(body.predictedPosition,body.position);
 
         for (x in startX...endX) {
-            for (y in startY...endY) {
+            for (y in startY...endY) { 
                 var cell = data.get(x,y,0);
                 if (cell&COLLIDABLE==1) {
                     tilePosition.x = (x*tileSize)+tileHalfSize;
@@ -63,6 +63,9 @@ class Map
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
                             if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
                                 body.respondBulletCollision(contact);
+                                if (proxy.contactCallback!=null) {
+                                    proxy.contactCallback(proxy,null,contact);
+                                }
                             }                            
                         }
                     } else {
@@ -72,10 +75,11 @@ class Map
                             var nextCell = data.get(nextX,nextY,0);
                             if (nextCell==0) {
                                 body.respondStaticCollision(contact);
-                                if (proxy.contactCallback!=null)
+                                if (proxy.contactCallback!=null) {
                                     proxy.contactCallback(proxy,null,contact);
-                                if (debug!=null)
-                                    debug(x,y);
+                                }
+                                // if (debug!=null)
+                                //     debug(x,y);
                             } else {
                             }
                         }

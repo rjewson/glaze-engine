@@ -62,7 +62,7 @@ class GameTestA extends GameEngine {
     var playerFilter:Filter;
     var renderSystem:RenderSystem;    
     var filterSupport:FilterSupport;
-
+  
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
         loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,TILE_MAP_DATA_1,TILE_MAP_DATA_2]);
@@ -73,29 +73,30 @@ class GameTestA extends GameEngine {
         setupMap();
 
         var corephase = engine.createPhase(); 
-        var aiphase = engine.createPhase(1000/30);
-        var physicsPhase = engine.createPhase(1000/60);  
+        var aiphase = engine.createPhase();//1000/30);
+        var physicsPhase = engine.createPhase();//1000/60);    
              
         renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
+              
 
-        var tileMap = new TileMap(); 
-        renderSystem.renderer.AddRenderer(tileMap);
-        tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
-        tileMap.SetTileLayerFromData(mapData,"base",1,1);
-        tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
-        tileMap.tileSize = 16;
-        tileMap.TileScale(2); 
-       
         var spriteRender = new SpriteRenderer();
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
         var blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
+     
+        var tileMap = new TileMap(); 
+        renderSystem.renderer.AddRenderer(tileMap);    
+        tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
+        tileMap.SetTileLayerFromData(mapData,"base",1,1);
+        // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
+        tileMap.tileSize = 16 ;  
+        tileMap.TileScale(2);      
  
         var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -105,14 +106,14 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
         physicsPhase.addSystem(new PhysicsPositionSystem());
                 
-
-        /*
+        
+        /*     
          * Lighting RnD
          */
         // var lightSystem = new glaze.lighting.systems.LightingSystem(map);
         // renderSystem.renderer.AddRenderer(lightSystem.renderer);
-        var lightSystem = new glaze.lighting.systems.PointLightingSystem(map);
-        renderSystem.renderer.AddRenderer(lightSystem.renderer);
+        // var lightSystem = new glaze.lighting.systems.PointLightingSystem(map);
+        // renderSystem.renderer.AddRenderer(lightSystem.renderer);
         // var fboLighting = new FBOLighting();
         // renderSystem.renderer.AddRenderer(fboLighting);
 
@@ -121,11 +122,11 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
-        corephase.addSystem(lightSystem);
-        corephase.addSystem(renderSystem);
+        // corephase.addSystem(lightSystem);
+        corephase.addSystem(renderSystem); 
          
         filterSupport = new FilterSupport(engine);
-
+  
         playerFilter = new Filter();
         playerFilter.groupIndex = 1; 
 
@@ -142,7 +143,8 @@ class GameTestA extends GameEngine {
             new Extents(30/2,72/2),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(false,playerFilter)
+            new PhysicsCollision(false,playerFilter),
+            new ParticleEmitters([new glaze.particle.emitter.FieldEmitter()]),
         ],"player"); 
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);
@@ -152,16 +154,16 @@ class GameTestA extends GameEngine {
             player.getComponent(Position), 
             new Light(256,1,1,0,255,255,255)
             ,new Viewable()
-            ],"player light"); 
-             
+            ],"player light");  
+              
 
         var tmxFactory = new TMXFactory(engine,tmxMap);
         tmxFactory.registerFactory(LightFactory);
         tmxFactory.parseObjectGroup("Objects");
     
 
-
-        createTurret();
+   
+        createTurret();    
 
         loop.start();
     } 
@@ -171,7 +173,7 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
  
-    public function createTurret() {
+    public function createTurret() { 
 
         var behavior = new glaze.ai.behaviortree.Sequence();   
         behavior.addChild(new glaze.engine.actions.Delay(1000,100));
@@ -182,7 +184,9 @@ class GameTestA extends GameEngine {
         behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
 
          var turret = engine.createEntity([
-            new Position(200,100),  
+            new Position(336,100),  
+            // new Position(432,148),   
+            // new Position(200,465),  
             new Display("turretA.png"), 
             new Extents(12,12),
             new PhysicsCollision(false,playerFilter),
@@ -227,7 +231,7 @@ class GameTestA extends GameEngine {
         bulletBody.setMass(0.03);
         bulletBody.setBounces(3);     
 
-        // bulletBody.isBullet = true;
+        bulletBody.isBullet = true;
         bulletBody.maxScalarVelocity = velocity; 
            
         var vel = target.clone();//input.ViewCorrectedMousePosition() ;
