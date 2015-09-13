@@ -1,6 +1,8 @@
 
 package glaze.particle.emitter;
 
+import glaze.eco.core.Entity;
+import glaze.engine.components.Position;
 import glaze.geom.Vector2;
 import glaze.particle.IParticleEngine;
 
@@ -17,7 +19,8 @@ class RandomSpray implements IParticleEmitter
         this.lastTime = 0;
     }
 
-    public function update(time:Float, position:Vector2, engine:IParticleEngine):Void {
+    public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
+        var position = entity.getComponent(Position).coords;
         if (time-lastTime<rate) 
             return;
         lastTime = time;

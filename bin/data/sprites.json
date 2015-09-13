@@ -11,16 +11,25 @@
 },
 "character2.png":
 {
-	"frame": {"x":56,"y":2,"w":60,"h":80},
+	"frame": {"x":2,"y":82,"w":60,"h":80},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":80},
 	"sourceSize": {"w":60,"h":80},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"door.png":
+{
+	"frame": {"x":2,"y":164,"w":24,"h":64},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":64},
+	"sourceSize": {"w":24,"h":64},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "projectile1.png":
 {
-	"frame": {"x":118,"y":2,"w":8,"h":8},
+	"frame": {"x":28,"y":164,"w":8,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":8},
@@ -29,7 +38,7 @@
 },
 "turretA.png":
 {
-	"frame": {"x":2,"y":84,"w":28,"h":24},
+	"frame": {"x":2,"y":230,"w":28,"h":24},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":24},
@@ -41,8 +50,8 @@
 	"version": "1.0",
 	"image": "sprites.png",
 	"format": "RGBA8888",
-	"size": {"w":128,"h":128},
+	"size": {"w":64,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:f1dce586b8b1b55da98dd714e73c3a1e:753e479e5a0dbd21abe5fbd4b90f8702:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:b0ac5bfb3687ad4c32d5a376050d0e99:14dfe642e14a2f16d0e4f20ecef350b3:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }

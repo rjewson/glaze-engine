@@ -1,6 +1,8 @@
 
 package glaze.particle.emitter;
 
+import glaze.eco.core.Entity;
+import glaze.engine.components.Position;
 import glaze.geom.Vector2;
 import glaze.particle.IParticleEngine;
 import glaze.util.Random.RandomFloat;
@@ -18,7 +20,8 @@ class InterpolatedEmitter implements IParticleEmitter
         this.speed = speed;
     }
 
-    public function update(time:Float, position:Vector2, engine:IParticleEngine):Void {
+    public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
+        var position = entity.getComponent(Position).coords;
         if (prevPosition==null) {
             prevPosition = position.clone();
         }

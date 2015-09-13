@@ -54,12 +54,13 @@ class Map
 
         for (x in startX...endX) {
             for (y in startY...endY) { 
-                var cell = data.get(x,y,0);
+                var cell = data.get(x,y,1);
                 if (cell&COLLIDABLE==1) {
                     tilePosition.x = (x*tileSize)+tileHalfSize;
                     tilePosition.y = (y*tileSize)+tileHalfSize;
 
                     if (body.isBullet) {
+                        //FIXME
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
                             if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
                                 body.respondBulletCollision(contact);
@@ -72,14 +73,12 @@ class Map
                         if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,contact)==true) {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
-                            var nextCell = data.get(nextX,nextY,0);
-                            if (nextCell==0) {
+                            var nextCell = data.get(nextX,nextY,1);
+                            if (nextCell&COLLIDABLE==0) {
                                 body.respondStaticCollision(contact);
                                 if (proxy.contactCallback!=null) {
                                     proxy.contactCallback(proxy,null,contact);
                                 }
-                                // if (debug!=null)
-                                //     debug(x,y);
                             } else {
                             }
                         }

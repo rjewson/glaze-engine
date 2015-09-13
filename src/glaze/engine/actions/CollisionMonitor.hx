@@ -27,6 +27,8 @@ class CollisionMonitor extends Behavior {
     }
 
     function onContact(a:BFProxy,b:BFProxy,contact:Contact) {
+        if (b!=null && b.isSensor)
+            return;
     	totalContactCount++;
     	updateContactCount++;
     }

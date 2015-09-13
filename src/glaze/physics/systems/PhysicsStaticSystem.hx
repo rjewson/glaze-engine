@@ -27,6 +27,7 @@ class PhysicsStaticSystem extends System {
 
         collision.proxy = new BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
         collision.proxy.isStatic = true;
+        collision.proxy.isSensor = collision.isSensor;
         collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body
         collision.proxy.entity = entity;
 

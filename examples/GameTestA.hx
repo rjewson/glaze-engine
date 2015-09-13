@@ -1,5 +1,6 @@
 package;
 
+import examples.components.Player;
 import glaze.ai.steering.behaviors.Seek;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
@@ -13,6 +14,7 @@ import glaze.engine.components.Position;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
 import glaze.engine.components.Viewable;
+import glaze.engine.components.Water;
 import glaze.engine.core.GameEngine; 
 import glaze.engine.factories.ComponentFactory;
 import glaze.engine.factories.tmx.LightFactory;
@@ -29,10 +31,13 @@ import glaze.physics.Body;
 import glaze.physics.collision.broadphase.BruteforceBroadphase;
 import glaze.physics.collision.Filter;
 import glaze.physics.collision.Map;
+import glaze.physics.components.ContactRouter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.components.PhysicsStatic;
+import glaze.physics.contact.ForceGenerator;
 import glaze.physics.Material;
+import glaze.physics.systems.ContactRouterSystem;
 import glaze.physics.systems.PhysicsCollisionSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
@@ -70,7 +75,7 @@ class GameTestA extends GameEngine {
 
     override public function initalize() {
            
-        setupMap();
+        setupMap();    
 
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);
@@ -81,8 +86,9 @@ class GameTestA extends GameEngine {
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
+        var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
               
-
+ 
         var spriteRender = new SpriteRenderer();
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
@@ -98,15 +104,18 @@ class GameTestA extends GameEngine {
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);      
  
-        var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
+        // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
+        var map = new Map(collisionData);   
         physicsPhase.addSystem(new PhysicsUpdateSystem());
         physicsPhase.addSystem(new SteeringSystem());
         var broadphase = new BruteforceBroadphase(map,new glaze.physics.collision.Intersect());
         physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
         physicsPhase.addSystem(new PhysicsPositionSystem());
+        physicsPhase.addSystem(new ContactRouterSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
                 
-        
+                  
         /*     
          * Lighting RnD
          */
@@ -139,6 +148,7 @@ class GameTestA extends GameEngine {
         characterController = new CharacterController(input,body);
            
         player = engine.createEntity([
+            new Player(),
             new Position(300,180),
             new Extents(30/2,72/2),
             new Display("character1.png"),
@@ -160,10 +170,9 @@ class GameTestA extends GameEngine {
         var tmxFactory = new TMXFactory(engine,tmxMap);
         tmxFactory.registerFactory(LightFactory);
         tmxFactory.parseObjectGroup("Objects");
-    
 
-   
         createTurret();    
+        createWater();
 
         loop.start();
     } 
@@ -173,6 +182,25 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
  
+    public function createWater() { 
+        var water = engine.createEntity([
+            new Position((32*33),(32*7.5)),
+            new Extents(64,48),
+            new PhysicsCollision(true,null),
+            new PhysicsStatic(),
+            new Water()
+        ],"water");
+
+        var door = engine.createEntity([
+            new Position(32*4.5,32*5),
+            new Extents(14,32),
+            new Display("door.png"),
+            new PhysicsCollision(false,null),
+            new PhysicsStatic()
+        ],"water");
+
+    }
+
     public function createTurret() { 
 
         var behavior = new glaze.ai.behaviortree.Sequence();   
@@ -231,7 +259,7 @@ class GameTestA extends GameEngine {
         bulletBody.setMass(0.03);
         bulletBody.setBounces(3);     
 
-        bulletBody.isBullet = true;
+        //bulletBody.isBullet = true;
         bulletBody.maxScalarVelocity = velocity; 
            
         var vel = target.clone();//input.ViewCorrectedMousePosition() ;
