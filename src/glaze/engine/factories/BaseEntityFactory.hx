@@ -24,8 +24,10 @@ class BaseEntityFactory implements IEntityFactory {
     }
 
 	public static function getCSVParams(csv:String):Array<Dynamic> {
-		var params = csv.split(",");
 		var parsedParams = new Array<Dynamic>();
+		if (csv==null)
+			return parsedParams;	
+		var params = csv.split(",");
 		for (param in params) {
 			var i = Std.parseInt(param);
 			if (i!=null) {

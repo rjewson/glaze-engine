@@ -16,11 +16,15 @@ class Filter
             return true;
         else if ((filterA.groupIndex > 0 && filterB.groupIndex > 0 && filterA.groupIndex == filterB.groupIndex)) {
             return false; 
-        } else {
-            if ((filterA.maskBits & filterB.categoryBits) == 0) return false;
-            if ((filterA.categoryBits & filterB.maskBits) == 0) return false;         
-        }        
-        return true;
+        } 
+
+        return ((filterA.maskBits & filterB.categoryBits) != 0 && (filterA.categoryBits & filterB.maskBits) != 0);
+
+        // else {
+        //     if ((filterA.maskBits & filterB.categoryBits) == 0) return false;
+        //     if ((filterA.categoryBits & filterB.maskBits) == 0) return false;         
+        // }        
+        // return true;
     }
 
 

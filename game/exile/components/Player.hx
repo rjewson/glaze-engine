@@ -1,4 +1,4 @@
-package examples.components;
+package exile.components;
 
 import glaze.eco.core.IComponent;
 

@@ -29,6 +29,7 @@ class Map
     public var plane:Plane = new Plane();
 
     public var contact:Contact;
+    public var closestContact:Contact;
 
     public var debug:Int->Int->Void; 
 
@@ -38,6 +39,7 @@ class Map
         tileHalfSize = tileSize/2;
         tileExtents.setTo(tileHalfSize,tileHalfSize);
         contact = new Contact();
+        closestContact = new Contact();
     }
 
     public function testCollision(proxy:BFProxy) {
@@ -50,26 +52,36 @@ class Map
         var endX = data.Index(Math.max(body.position.x,body.predictedPosition.x) + proxy.aabb.extents.x + CORRECTION - ROUNDDOWN) + 1;
         var endY = data.Index(Math.max(body.position.y,body.predictedPosition.y) + proxy.aabb.extents.y + CORRECTION ) + 1;
 
-        plane.setFromSegment(body.predictedPosition,body.position);
 
-        for (x in startX...endX) {
-            for (y in startY...endY) { 
-                var cell = data.get(x,y,1);
-                if (cell&COLLIDABLE==1) {
-                    tilePosition.x = (x*tileSize)+tileHalfSize;
-                    tilePosition.y = (y*tileSize)+tileHalfSize;
-
-                    if (body.isBullet) {
-                        //FIXME
+        if (body.isBullet) {
+            plane.setFromSegment(body.predictedPosition,body.position);
+            closestContact.time = Math.POSITIVE_INFINITY;
+            for (x in startX...endX) {
+                for (y in startY...endY) { 
+                    var cell = data.get(x,y,1);
+                    if (cell&COLLIDABLE==1) {
+                        tilePosition.x = (x*tileSize)+tileHalfSize;
+                        tilePosition.y = (y*tileSize)+tileHalfSize;
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
                             if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
-                                body.respondBulletCollision(contact);
-                                if (proxy.contactCallback!=null) {
-                                    proxy.contactCallback(proxy,null,contact);
+                                if (body.respondBulletCollision(contact)) {
+                                    closestContact.setTo(contact);
                                 }
                             }                            
                         }
-                    } else {
+                    }
+                }
+            }
+            if (proxy.contactCallback!=null && closestContact.time<Math.POSITIVE_INFINITY ) {
+                proxy.contactCallback(proxy,null,contact);
+            }
+        } else {
+            for (x in startX...endX) {
+                for (y in startY...endY) { 
+                    var cell = data.get(x,y,1);
+                    if (cell&COLLIDABLE==1) {
+                        tilePosition.x = (x*tileSize)+tileHalfSize;
+                        tilePosition.y = (y*tileSize)+tileHalfSize;
                         if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,contact)==true) {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
@@ -79,13 +91,49 @@ class Map
                                 if (proxy.contactCallback!=null) {
                                     proxy.contactCallback(proxy,null,contact);
                                 }
-                            } else {
-                            }
+                            } 
                         }
                     }
                 }
             }
         }
+
+        // plane.setFromSegment(body.predictedPosition,body.position);
+
+        // for (x in startX...endX) {
+        //     for (y in startY...endY) { 
+        //         var cell = data.get(x,y,1);
+        //         if (cell&COLLIDABLE==1) {
+        //             tilePosition.x = (x*tileSize)+tileHalfSize;
+        //             tilePosition.y = (y*tileSize)+tileHalfSize;
+
+        //             if (body.isBullet) {
+        //                 //FIXME
+        //                 if (Math.abs(plane.distancePoint(tilePosition))<40) {
+        //                     if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
+        //                         body.respondBulletCollision(contact);
+        //                         if (proxy.contactCallback!=null) {
+        //                             proxy.contactCallback(proxy,null,contact);
+        //                         }
+        //                     }                            
+        //                 }
+        //             } else {
+        //                 if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,contact)==true) {
+        //                     var nextX:Int = x + Std.int(contact.normal.x);
+        //                     var nextY:Int = y + Std.int(contact.normal.y);
+        //                     var nextCell = data.get(nextX,nextY,1);
+        //                     if (nextCell&COLLIDABLE==0) {
+        //                         body.respondStaticCollision(contact);
+        //                         if (proxy.contactCallback!=null) {
+        //                             proxy.contactCallback(proxy,null,contact);
+        //                         }
+        //                     } else {
+        //                     }
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
     }
 
     public function castRay(ray:Ray):Bool {

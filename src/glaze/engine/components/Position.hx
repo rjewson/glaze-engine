@@ -15,9 +15,16 @@ class Position implements IComponent {
         direction = new Vector2(1,1);
     }
 
-    public function update(position:Vector2) {
+    inline public function update(position:Vector2) {
     	prevCoords.copy(coords);
     	coords.copy(position);
+    }
+
+    public function clone():Position {
+        var clone = new Position(this.coords.x,this.coords.y);
+        clone.prevCoords.copy(this.prevCoords);
+        clone.direction.copy(this.direction);
+        return clone;
     }
 
 }

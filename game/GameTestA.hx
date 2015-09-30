@@ -1,54 +1,48 @@
 package;
 
-import examples.components.Player;
-import glaze.ai.steering.behaviors.Seek;
-import glaze.ai.steering.behaviors.Wander;
-import glaze.ai.steering.components.Steering;
+import exile.components.Player;
+import exile.systems.PlayerSystem;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
 import glaze.engine.components.Display;
+import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Holdable;
+import glaze.engine.components.Holder;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
-import glaze.eco.core.Engine;
 import glaze.engine.components.Script;
-import glaze.engine.components.Viewable;
 import glaze.engine.components.Water;
-import glaze.engine.core.GameEngine; 
-import glaze.engine.factories.ComponentFactory;
-import glaze.engine.factories.tmx.LightFactory;
+import glaze.engine.components.Wind;
+import glaze.engine.core.GameEngine;
+import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.factories.TMXFactory;
+import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.ParticleSystem;
+import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
-import glaze.engine.systems.RenderSystem; 
-import glaze.lighting.components.Light;
 import glaze.particle.BlockSpriteParticleEngine;
-import glaze.particle.emitter.RandomSpray;
 import glaze.physics.Body;
-import glaze.physics.collision.broadphase.BruteforceBroadphase;
+import glaze.physics.Material;
 import glaze.physics.collision.Filter;
 import glaze.physics.collision.Map;
-import glaze.physics.components.ContactRouter;
+import glaze.physics.collision.broadphase.BruteforceBroadphase;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.components.PhysicsStatic;
-import glaze.physics.contact.ForceGenerator;
-import glaze.physics.Material;
 import glaze.physics.systems.ContactRouterSystem;
 import glaze.physics.systems.PhysicsCollisionSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
-import glaze.render.renderers.webgl.FBOLighting;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
 import glaze.tmx.TmxMap;
 import js.Browser;
 import js.html.CanvasElement;
-import util.CharacterController;
 
 class GameTestA extends GameEngine {
      
@@ -61,10 +55,9 @@ class GameTestA extends GameEngine {
     public static inline var TILE_MAP_DATA_2:String = "data/spelunky1.png";
 
     var tmxMap:TmxMap;
-    var characterController:CharacterController; 
     var player:Entity;
-    var playerLight:Entity;
     var playerFilter:Filter;
+    var holderFilter:Filter;
     var renderSystem:RenderSystem;    
     var filterSupport:FilterSupport;
   
@@ -114,6 +107,13 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsPositionSystem());
         physicsPhase.addSystem(new ContactRouterSystem());
         physicsPhase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
+
+        physicsPhase.addSystem(new glaze.engine.systems.environment.EnvironmentForceSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.environment.WindRenderSystem(blockParticleEngine));
+
+        physicsPhase.addSystem(new glaze.engine.systems.HolderSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.HeldSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.HoldableSystem());
                 
                   
         /*     
@@ -128,6 +128,7 @@ class GameTestA extends GameEngine {
 
         aiphase.addSystem(new BehaviourSystem());                                                   
 
+        corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
@@ -137,42 +138,44 @@ class GameTestA extends GameEngine {
         filterSupport = new FilterSupport(engine);
   
         playerFilter = new Filter();
+        playerFilter.maskBits = 0;
         playerFilter.groupIndex = 1; 
 
         var body = new glaze.physics.Body(new Material());
         body.maxScalarVelocity = 0;
         body.maxVelocity.setTo(160,1000);
-
-        // var proxy = new glaze.physics.collision.BFProxy(30/2,72/2,playerFilter);
-        // proxy.setBody(body);
-        characterController = new CharacterController(input,body);
-           
+    
         player = engine.createEntity([
             new Player(),
             new Position(300,180),
             new Extents(30/2,72/2),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(false,playerFilter),
-            new ParticleEmitters([new glaze.particle.emitter.FieldEmitter()]),
+            new PhysicsCollision(false,playerFilter)
         ],"player"); 
 
-        renderSystem.CameraTarget(player.getComponent(Position).coords);
+        var thingbody = new glaze.physics.Body(new Material());
+        thingbody.maxScalarVelocity = 0;
+        thingbody.maxVelocity.setTo(160,1000);
+ 
+         var thing = engine.createEntity([
+            new Position(336,150),  
+            new Display("turretA.png"), 
+            new Extents(12,12),
+            new PhysicsCollision(false,new Filter()),
+            new PhysicsBody(thingbody),
+            new Holdable()
+        ],"thing"); 
 
-        playerLight = engine.createEntity( 
-            [  
-            player.getComponent(Position), 
-            new Light(256,1,1,0,255,255,255)
-            ,new Viewable()
-            ],"player light");  
-              
+        renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
         var tmxFactory = new TMXFactory(engine,tmxMap);
         tmxFactory.registerFactory(LightFactory);
+        tmxFactory.registerFactory(WaterFactory);
         tmxFactory.parseObjectGroup("Objects");
 
         createTurret();    
-        createWater();
+        createWind();
 
         loop.start();
     } 
@@ -182,23 +185,15 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
  
-    public function createWater() { 
-        var water = engine.createEntity([
-            new Position((32*33),(32*7.5)),
-            new Extents(64,48),
+    public function createWind() { 
+        engine.createEntity([
+            new Position(128,500),  
+            new Extents(256,256),
             new PhysicsCollision(true,null),
             new PhysicsStatic(),
-            new Water()
-        ],"water");
-
-        var door = engine.createEntity([
-            new Position(32*4.5,32*5),
-            new Extents(14,32),
-            new Display("door.png"),
-            new PhysicsCollision(false,null),
-            new PhysicsStatic()
-        ],"water");
-
+            new EnvironmentForce(),
+            new Wind(1/600)
+        ],"wind");        
     }
 
     public function createTurret() { 
@@ -210,7 +205,7 @@ class GameTestA extends GameEngine {
         behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
         behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterVisibleAgainstMap]));
         behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
-
+return;
          var turret = engine.createEntity([
             new Position(336,100),  
             // new Position(432,148),   
@@ -223,104 +218,10 @@ class GameTestA extends GameEngine {
         ],"turret");        
 
     }
-
-    public function createBee():Void  
-    {
-        var beeBody = new Body(new Material());
-        beeBody.setMass(0.03);
-        beeBody.setBounces(0);     
-        beeBody.globalForceFactor = 0;
-        beeBody.maxScalarVelocity = 100; 
-  
-        var pos = player.getComponent(Position).coords;
-        
-        var behavior = new glaze.ai.behaviortree.Sequence();
-        behavior.addChild(new glaze.engine.actions.Delay(10000,1000));
-        behavior.addChild(new glaze.engine.actions.DestroyEntity());
-
-        var bee = engine.createEntity([
-            new Position(pos.x,pos.y), 
-            new Extents(3,3),
-            new Display("projectile1.png"), 
-            new PhysicsBody(beeBody), 
-            new PhysicsCollision(false,playerFilter),  
-            new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
-            new Script(behavior),
-            new Light(64,1,1,1,255,255,0),
-            new Steering([
-                new Wander()
-                ])
-        ],"bee");  
-    }
           
-    public function fireBullet(pos:Vector2,target:Vector2,velocity:Float,ttl:Float,gff:Float=1):Void  
-    {
-        var bulletBody = new Body(new Material());
-        bulletBody.setMass(0.03);
-        bulletBody.setBounces(3);     
-
-        //bulletBody.isBullet = true;
-        bulletBody.maxScalarVelocity = velocity; 
-           
-        var vel = target.clone();//input.ViewCorrectedMousePosition() ;
-        vel.minusEquals(pos);
-        vel.normalize();
-        vel.multEquals(velocity); 
-        bulletBody.velocity.setTo(vel.x,vel.y);
-        bulletBody.globalForceFactor = gff;
-
-        // var behavior = new glaze.ai.behaviortree.Sequence();
-        // behavior.addChild(new glaze.engine.actions.Delay(ttl));       
-        // behavior.addChild(new glaze.engine.actions.DestroyEntity());
-        var d:glaze.engine.actions.CollisionMonitor;
-        var data = '
-        {
-            "type":"Sequence",
-            "children": [
-                {
-                    "type":"Monitor",
-                    "children": [
-                        {
-                            "type":"glaze.engine.actions.Delay",
-                            "params":[1000,100]
-                        },
-                        {
-                            "type":"glaze.engine.actions.CollisionMonitor"
-                        }
-                    ]
-                },
-                {
-                    "type":"glaze.engine.actions.DestroyEntity"
-                }
-
-            ]
-        }';
-
-        var behavior = glaze.ai.behaviortree.BehaviorTree.fromJSON(data);
-
-        var bullet = engine.createEntity([
-            new Position(pos.x,pos.y),
-            new Extents(3,3),
-            new Display("projectile1.png"), 
-            new PhysicsBody(bulletBody), 
-            new PhysicsCollision(false,playerFilter),  
-            new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
-            new Script(behavior),
-            // new Steering([
-            //     new Seek(new Vector2(0,0))
-            //     // new Wander()
-            //     ])
-        ],"player bullet");              
-                
-
-        var light = engine.createEntity([
-            bullet.getComponent(Position),
-            new Light(64,1,1,1,255,0,0),
-            new Extents(64,64)
-        ],"player bullet light");
-
-        bullet.addChildEntity(light);
-
+    public function fireBullet(pos:Vector2,target:Vector2,velocity:Float,ttl:Float,gff:Float=1):Void {
+        var bullet = new exile.entities.projectile.StandardBullet().create(engine,new Position(pos.x,pos.y),playerFilter);
+        glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
     }    
     
     function fireBulletAtEntity(context:glaze.ai.behaviortree.BehaviorContext) {
@@ -335,35 +236,7 @@ class GameTestA extends GameEngine {
     }
 
     override public function preUpdate() {
-      
-        //TODO find somewhere better for this 
-        characterController.update(); 
-      
-        var fire = input.JustPressed(32);
-        var search = input.JustPressed(71);
-        var debug = input.Pressed(72); 
-        var ray = input.Pressed(82);
-
-        if (input.JustPressed(84)) {
-            var lightActive = playerLight.getComponent(Viewable);
-            if (lightActive!=null)
-                playerLight.removeComponent(lightActive);
-            else
-                playerLight.addComponent(new Viewable());
-        }
-        
-        if (input.JustPressed(85)) {
-            createBee();
-        }
-
-        if (fire) fireBullet(
-            player.getComponent(Position).coords.clone(),
-            input.ViewCorrectedMousePosition(),
-            1000,
-            1000);
-
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
-  
     }
 
     public static function main() {

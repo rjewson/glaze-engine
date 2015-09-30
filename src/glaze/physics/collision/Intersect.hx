@@ -36,6 +36,10 @@ class Intersect
                     proxyB.aabb.position,
                     proxyB.aabb.extents,
                     contact);
+            // if ((proxyA.entity.name+"<>"+proxyB.entity.name) == "playerHolder<>thing" && collided==true) {
+            //     js.Lib.debug();
+            // }
+
             //TODO should we make a special case for bullets?            
 
         } else if (!proxyA.isStatic && !proxyB.isStatic) {

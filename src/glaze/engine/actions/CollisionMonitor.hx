@@ -7,6 +7,7 @@ import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
 
+@:keep
 class CollisionMonitor extends Behavior {
 
 	var physicsCollision:PhysicsCollision;

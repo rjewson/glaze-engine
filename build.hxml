@@ -1,7 +1,7 @@
 -js bin/script.js
 -cp src
 -cp test
--cp examples
+-cp game
 -lib glaze-core
 -lib glaze-render
 -lib glaze-eco

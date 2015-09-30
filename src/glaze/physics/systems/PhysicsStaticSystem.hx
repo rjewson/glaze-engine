@@ -24,12 +24,15 @@ class PhysicsStaticSystem extends System {
         var collision = entity.getComponent(PhysicsCollision);
         var extents = entity.getComponent(Extents);
         var position = entity.getComponent(Position);
+        var physics = entity.getComponent(PhysicsStatic);
 
         collision.proxy = new BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
-        collision.proxy.isStatic = true;
+        collision.proxy.isStatic = physics.isStatic;
         collision.proxy.isSensor = collision.isSensor;
         collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body
         collision.proxy.entity = entity;
+        collision.setCallback(collision.contactCallback);
+
 
         broadphase.addProxy(collision.proxy);
     }

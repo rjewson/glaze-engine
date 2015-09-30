@@ -1,5 +1,5 @@
 
-package util;
+package exile.util;
 
 import glaze.core.DigitalInput;
 import glaze.geom.Vector2;
@@ -53,7 +53,12 @@ class CharacterController
 
         }
 
-        if (body.onGround) {
+        if (body.inWater) {
+            if (left>0)     controlForce.x -= WALK_FORCE;
+            if (right>0)    controlForce.x += WALK_FORCE;
+            if (up)         controlForce.y -= 400;
+            if (down>0)       controlForce.y += WALK_FORCE;
+        } else if (body.onGround) {
             if (left>0)     controlForce.x -= WALK_FORCE;
             if (right>0)    controlForce.x += WALK_FORCE;
             if (up)         controlForce.y -= JUMP_FORCE/5;

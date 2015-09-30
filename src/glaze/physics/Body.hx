@@ -17,6 +17,7 @@ class Body
     public var originalVelocity:Vector2 = new Vector2();
 
     public var lastNormal:Vector2 = new Vector2();
+    public var tangent:Vector2 = new Vector2();
     public var toi:Float;
 
     public var stepContactCount:Int = 0;
@@ -41,12 +42,15 @@ class Body
 
     public var onGround:Bool = false;
     public var onGroundPrev:Bool = false;
+    public var inWater:Bool = false;
 
     public var totalBounceCount:Int = 0;
     public var bounceCount:Int = 0;
     public var canBounce(get, null):Bool;
 
     public var debug:Int = 0;    
+
+    public var skip:Bool = false;
 
     public function new(material:Material) {
         this.material = material;
@@ -55,6 +59,7 @@ class Body
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {
         this.dt = dt;
+        if (skip) return;
         //Add global forces to local ones
         forces.plusMultEquals(globalForces,globalForceFactor);
         velocity.plusEquals(forces);
@@ -83,6 +88,7 @@ class Body
 
         onGroundPrev = onGround;
         onGround = false;
+        inWater = false;
         stepContactCount = 0;
 
         toi = Math.POSITIVE_INFINITY;
@@ -143,7 +149,7 @@ class Body
     }
 
     public function updatePosition() {
-
+        if (skip) return;
         //Its a bullet and it hit something?
         if (isBullet) {
             if (toi<Math.POSITIVE_INFINITY) {
@@ -163,7 +169,9 @@ class Body
         //or apply Friction here?
         if (stepContactCount>0 && !canBounce && lastNormal.y < 0) {
             //onGround = true;
-            var tangent:Vector2 = lastNormal.rightHandNormal();
+            // var tangent:Vector2 = lastNormal.rightHandNormal();
+            tangent.copy(lastNormal);
+            tangent.rightHandNormalEquals();
             var tv:Float = originalVelocity.dot(tangent) * material.friction;
             velocity.x -= tangent.x * tv;
             velocity.y -= tangent.y * tv;
