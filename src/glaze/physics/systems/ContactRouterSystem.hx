@@ -14,15 +14,11 @@ class ContactRouterSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
-        var collision = entity.getComponent(PhysicsCollision);
-        var router = entity.getComponent(ContactRouter);
-        collision.setCallback(router.calback);
-        js.Lib.debug();
+        entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(entity.getComponent(ContactRouter).calback);
     }
     
     override public function entityRemoved(entity:Entity) {
-        var collision = entity.getComponent(PhysicsCollision);
-        collision.setCallback(null);
+        var collision = entity.getComponent(PhysicsCollision).proxy.contactCallbacks.remove(entity.getComponent(ContactRouter).calback);
     }
 
     override public function update(timestamp:Float,delta:Float) {

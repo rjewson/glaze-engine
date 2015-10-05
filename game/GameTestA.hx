@@ -20,6 +20,7 @@ import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.systems.BehaviourSystem;
+import glaze.engine.systems.DestroySystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.ViewManagementSystem;
@@ -106,6 +107,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
         physicsPhase.addSystem(new PhysicsPositionSystem());
         physicsPhase.addSystem(new ContactRouterSystem());
+
         physicsPhase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
 
         physicsPhase.addSystem(new glaze.engine.systems.environment.EnvironmentForceSystem());
@@ -115,6 +117,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new glaze.engine.systems.HeldSystem());
         physicsPhase.addSystem(new glaze.engine.systems.HoldableSystem());
                 
+        physicsPhase.addSystem(new exile.systems.ProjectileSystem(broadphase));
                   
         /*     
          * Lighting RnD
@@ -128,6 +131,7 @@ class GameTestA extends GameEngine {
 
         aiphase.addSystem(new BehaviourSystem());                                                   
 
+        corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
@@ -151,7 +155,7 @@ class GameTestA extends GameEngine {
             new Extents(30/2,72/2),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(false,playerFilter)
+            new PhysicsCollision(false,playerFilter,[])
         ],"player"); 
 
         var thingbody = new glaze.physics.Body(new Material());
@@ -160,9 +164,9 @@ class GameTestA extends GameEngine {
  
          var thing = engine.createEntity([
             new Position(336,150),  
-            new Display("turretA.png"), 
-            new Extents(12,12),
-            new PhysicsCollision(false,new Filter()),
+            new Display("grenade.png"), 
+            new Extents(8,8),
+            new PhysicsCollision(false,new Filter(),[]),
             new PhysicsBody(thingbody),
             new Holdable()
         ],"thing"); 
@@ -184,12 +188,12 @@ class GameTestA extends GameEngine {
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
         tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
- 
+  
     public function createWind() { 
         engine.createEntity([
             new Position(128,500),  
             new Extents(256,256),
-            new PhysicsCollision(true,null),
+            new PhysicsCollision(true,null,[]),
             new PhysicsStatic(),
             new EnvironmentForce(),
             new Wind(1/600)
@@ -212,7 +216,7 @@ return;
             // new Position(200,465),  
             new Display("turretA.png"), 
             new Extents(12,12),
-            new PhysicsCollision(false,playerFilter),
+            new PhysicsCollision(false,playerFilter,[]),
             new PhysicsStatic(),
             new Script(behavior)
         ],"turret");        

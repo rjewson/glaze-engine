@@ -59,9 +59,10 @@ class StandardBullet {
             new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(bulletBody), 
-            new PhysicsCollision(false,filter),  
+            new PhysicsCollision(false,filter,[]),  
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
-            new Script(behavior),
+            new exile.components.Projectile("bullet")
+            // new Script(behavior),
             // new Steering([
             //     new Seek(new Vector2(0,0))
             //     // new Wander()

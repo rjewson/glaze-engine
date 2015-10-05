@@ -27,9 +27,18 @@
 	"sourceSize": {"w":24,"h":64},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"grenade.png":
+{
+	"frame": {"x":28,"y":164,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "projectile1.png":
 {
-	"frame": {"x":28,"y":164,"w":8,"h":8},
+	"frame": {"x":46,"y":164,"w":8,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":8},
@@ -52,6 +61,6 @@
 	"format": "RGBA8888",
 	"size": {"w":64,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:b0ac5bfb3687ad4c32d5a376050d0e99:14dfe642e14a2f16d0e4f20ecef350b3:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:525be00caeccca184a46a9eb5e801f4b:23dce72758cc7793926004d5b10da246:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }

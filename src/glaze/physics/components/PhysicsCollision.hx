@@ -6,21 +6,13 @@ import glaze.physics.collision.Filter;
 
 class PhysicsCollision implements IComponent {
     
-    public var isSensor:Bool = false;
-    public var filter:Filter = null;
-    public var contactCallback:ContactCallback = null;
-
     public var proxy:BFProxy;
 
-    public function new(isSensor:Bool,filter:Filter) {
-    	this.isSensor = isSensor;
-    	this.filter = filter;
-    }
-
-    public function setCallback(cb:ContactCallback) {
-    	this.contactCallback = cb;
-    	if (proxy!=null)
-    		proxy.contactCallback = cb;
+    public function new(isSensor:Bool,filter:Filter,contactCallbacks:Array<ContactCallback>) {
+        proxy = new BFProxy();
+        proxy.isSensor = isSensor;
+        proxy.filter = filter;
+    	proxy.contactCallbacks = contactCallbacks;
     }
 
 }

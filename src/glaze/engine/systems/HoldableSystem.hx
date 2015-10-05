@@ -26,7 +26,7 @@ class HoldableSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         var physicsCollision = entity.getComponent(PhysicsCollision);
-        physicsCollision.filter.categoryBits = 0x2;    
+        physicsCollision.proxy.filter.categoryBits = 0x2;    
     }
 
     override public function entityRemoved(entity:Entity) {

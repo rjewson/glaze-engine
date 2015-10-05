@@ -60,14 +60,14 @@ class BruteforceBroadphase implements IBroadphase
     public function QueryArea(aabb:glaze.geom.AABB,result:BFProxy->Void,checkDynamic:Bool = true,checkStatic:Bool = true) {
         
         if (checkDynamic) {
-            for (proxy in staticProxies) {
+            for (proxy in dynamicProxies) {
                 if (!proxy.isSensor&&aabb.overlap(proxy.aabb)) 
                     result(proxy);
             }
         }
 
         if (checkStatic) {
-            for (proxy in dynamicProxies) {
+            for (proxy in staticProxies) {
                 if (!proxy.isSensor&&aabb.overlap(proxy.aabb))
                     result(proxy);
             }

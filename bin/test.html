@@ -244,7 +244,7 @@
     function physicsPass() {
         for(var i=0; i<entities.length; i++) {
             var entity = entities[i];
-            /*
+            
             if(entity.type == "point") {
                 // Simulate gravity on points. This isn't something that should
                 // be put in this function, but meh.
@@ -262,22 +262,22 @@
                 }
                 if(pushBallLeft == true) {
                     entity.velocity.x -= 0.2;
-                    entity.velocity.x = -5;
+                    // entity.velocity.x = -5;
                 }
                 if(pushBallUp == true) {
                     entity.velocity.y += 0.2;
-                    entity.velocity.y = 5;
+                    // entity.velocity.y = 5;
                 }
                 if(pushBallRight == true) {
                     entity.velocity.x += 0.2;
-                    entity.velocity.x = 5;
+                    // entity.velocity.x = 5;
                 }
                 if(pushBallDown == true) {
                     entity.velocity.y -= 0.2;
-                    entity.velocity.y = -5;
+                    // entity.velocity.y = -5;
                 }
             }
-            */
+            entity.velocity.y -= 0.5;
             // If the entity isn't moving, let's not do physics.
             if(entity.velocity.x == 0 && entity.velocity.y == 0) {
                 continue;
@@ -727,9 +727,9 @@
         
         player = new Entity();
         player.type = "box";
-        player.width = 24;
+        player.width = 10;
         player.height = 48;
-        player.impactFunction = "bounce";
+        player.impactFunction = "slide";
         player.position.x = 75;
         player.position.y = 180;
         player.elasticity = 0.9;

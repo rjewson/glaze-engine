@@ -113,11 +113,8 @@ class Intersect
         }
 
         if (collided==true) {
-            //Call any registered calbacks
-            if (proxyA.contactCallback!=null)
-                proxyA.contactCallback(proxyA,proxyB,contact);
-            if (proxyB.contactCallback!=null)
-                proxyB.contactCallback(proxyB,proxyA,contact);
+            proxyA.collide(proxyB,contact);
+            proxyB.collide(proxyA,contact);
         }
 
         return collided;

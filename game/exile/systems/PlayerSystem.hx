@@ -60,12 +60,12 @@ class PlayerSystem extends System {
             position,
             entity.getComponent(Extents),
             holder,
-            new glaze.physics.components.PhysicsCollision(true,new Filter()),
+            new glaze.physics.components.PhysicsCollision(true,new Filter(),[]),
             new glaze.physics.components.PhysicsStatic(false)
         ],"playerHolder");
         player.addChildEntity(playerHolder);
 
-        playerFilter = entity.getComponent(PhysicsCollision).filter;
+        playerFilter = entity.getComponent(PhysicsCollision).proxy.filter;
 
     }
 

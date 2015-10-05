@@ -72,8 +72,8 @@ class Map
                     }
                 }
             }
-            if (proxy.contactCallback!=null && closestContact.time<Math.POSITIVE_INFINITY ) {
-                proxy.contactCallback(proxy,null,contact);
+            if (closestContact.time<Math.POSITIVE_INFINITY) {
+                proxy.collide(null,contact);
             }
         } else {
             for (x in startX...endX) {
@@ -88,9 +88,7 @@ class Map
                             var nextCell = data.get(nextX,nextY,1);
                             if (nextCell&COLLIDABLE==0) {
                                 body.respondStaticCollision(contact);
-                                if (proxy.contactCallback!=null) {
-                                    proxy.contactCallback(proxy,null,contact);
-                                }
+                                proxy.collide(null,contact);
                             } 
                         }
                     }

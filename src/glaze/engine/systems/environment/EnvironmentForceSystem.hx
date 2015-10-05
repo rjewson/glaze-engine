@@ -25,7 +25,7 @@ class EnvironmentForceSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
-        entity.getComponent(PhysicsCollision).setCallback(callback);
+        entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(callback);
     }
 
     override public function entityRemoved(entity:Entity) {

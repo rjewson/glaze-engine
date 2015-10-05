@@ -22,9 +22,7 @@ class CollisionMonitor extends Behavior {
     }
 
     override private function initialize(context:BehaviorContext):Void {
-    	physicsCollision = context.entity.getComponent(PhysicsCollision);
-    	if (physicsCollision!=null)
-	    	physicsCollision.setCallback(onContact);
+    	context.entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(onContact);
     }
 
     function onContact(a:BFProxy,b:BFProxy,contact:Contact) {

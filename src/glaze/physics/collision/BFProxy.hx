@@ -28,14 +28,19 @@ class BFProxy
 
     public var filter:Filter;
 
-    public var contactCallback:ContactCallback;
+    public var contactCallbacks:Array<ContactCallback> = [];
 
-    public function new(width:Float,height:Float,filter:Filter,offsetX:Float=0,offsetY:Float=0,isSensor:Bool=false) {
+    public function new() {
         aabb = new AABB();
-        aabb.extents.setTo(width,height);
-        offset = new Vector2(offsetX,offsetY);
-        this.filter = filter;
+        offset = new Vector2();
     }
+
+    // public function new(width:Float,height:Float,filter:Filter,offsetX:Float=0,offsetY:Float=0,isSensor:Bool=false) {
+    //     aabb = new AABB();
+    //     aabb.extents.setTo(width,height);
+    //     offset = new Vector2(offsetX,offsetY);
+    //     this.filter = filter;
+    // }
 
     public function setBody(body:Body) {
         this.body = body;
@@ -43,8 +48,15 @@ class BFProxy
         isStatic = false; //bodies are always dynamic
     }
 
+    public function collide(proxy:BFProxy,contact:Contact){
+        for (callback in contactCallbacks)
+            callback(this,proxy,contact);
+    }
+
     public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float,filter:Filter):BFProxy {
-        var bfproxy = new BFProxy(hw,hh,filter);
+        var bfproxy = new BFProxy();//hw,hh,filter);
+        bfproxy.aabb.extents.setTo(hw,hh);
+        bfproxy.filter = filter;
         bfproxy.aabb.position.setTo(x,y);
         bfproxy.isStatic = true;
         return bfproxy;

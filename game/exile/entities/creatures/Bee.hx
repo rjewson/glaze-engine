@@ -38,7 +38,7 @@ class Bee {
             new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(beeBody), 
-            new PhysicsCollision(false,null),  
+            new PhysicsCollision(false,null,[]),  
             new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
             new Script(behavior),
             new Light(64,1,1,1,255,255,0),

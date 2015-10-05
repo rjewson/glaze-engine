@@ -24,11 +24,10 @@ class PhysicsCollisionSystem extends System {
         // var position = entity.getComponent(Position);
         var body = entity.getComponent(PhysicsBody);
 
-        collision.proxy = new glaze.physics.collision.BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
+        //collision.proxy = new glaze.physics.collision.BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
+        collision.proxy.aabb.extents.copy(extents.halfWidths);
         collision.proxy.setBody(body.body);
         collision.proxy.entity = entity;
-        collision.proxy.isSensor = collision.isSensor;
-        collision.setCallback(collision.contactCallback);
         
         broadphase.addProxy(collision.proxy);
     }

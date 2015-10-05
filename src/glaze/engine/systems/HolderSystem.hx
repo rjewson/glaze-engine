@@ -26,8 +26,8 @@ class HolderSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         var physicsCollision = entity.getComponent(PhysicsCollision);
-        physicsCollision.setCallback(callback);
-        physicsCollision.filter.maskBits = physicsCollision.filter.maskBits | 0x2;
+        physicsCollision.proxy.contactCallbacks.push(callback);//setCallback(callback);
+        physicsCollision.proxy.filter.maskBits = physicsCollision.proxy.filter.maskBits | 0x2;
     }
 
     override public function entityRemoved(entity:Entity) {

@@ -27,7 +27,7 @@ class WaterSystem extends System {
     override public function entityAdded(entity:Entity) {
         var cb2 = new glaze.signals.Signal3<BFProxy,BFProxy,Contact>();
         cb2.add(callback);
-        entity.getComponent(PhysicsCollision).setCallback(cb2.dispatch);
+        entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(cb2.dispatch);
     }
 
     override public function entityRemoved(entity:Entity) {
