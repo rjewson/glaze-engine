@@ -2,7 +2,7 @@ package glaze.physics.components;
 
 import glaze.eco.core.IComponent;
 
-class PhysicsStatic implements IComponent {
+class PhysicsStaticX implements IComponent {
    //Only used to ensure its matched to a particular system 
    public var isStatic:Bool;
 

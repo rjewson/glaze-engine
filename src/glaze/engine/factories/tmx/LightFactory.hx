@@ -2,6 +2,7 @@ package glaze.engine.factories.tmx;
 
 import glaze.eco.core.Engine;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Fixed;
 import glaze.engine.factories.tmx.TMXEntityFactory;
 import glaze.lighting.components.Light;
 
@@ -30,6 +31,7 @@ class LightFactory extends TMXEntityFactory {
 		var extents = new Extents(light.range/1.5,light.range/1.5);
 
 		components.push(extents);
+		components.push(new Fixed());
 
 		engine.createEntity(components,tmxObject.name);
 

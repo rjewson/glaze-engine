@@ -5,6 +5,7 @@ import glaze.ai.steering.components.Steering;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
@@ -38,6 +39,7 @@ class Bee {
             new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(beeBody), 
+            new Moveable(),
             new PhysicsCollision(false,null,[]),  
             new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
             new Script(behavior),

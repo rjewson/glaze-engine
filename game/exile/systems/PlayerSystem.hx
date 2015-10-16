@@ -7,6 +7,7 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Holder;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.engine.components.Viewable;
 import glaze.lighting.components.Light;
@@ -20,7 +21,7 @@ import glaze.physics.components.PhysicsCollision;
 class PlayerSystem extends System {
 
     public var particleEngine:IParticleEngine;
-    public var input:DigitalInput;
+    public var input:DigitalInput;  
 
     var player:Entity;
     var position:Position;
@@ -51,8 +52,9 @@ class PlayerSystem extends System {
         playerLight = engine.createEntity( 
             [  
             position, 
-            new Light(256,1,1,0,255,255,255)
-            ,new Viewable()
+            new Light(256,1,1,0,255,255,255),
+            new Viewable(),
+            new Moveable()
             ],"player light");  
 
         holder = new Holder();
@@ -61,7 +63,7 @@ class PlayerSystem extends System {
             entity.getComponent(Extents),
             holder,
             new glaze.physics.components.PhysicsCollision(true,new Filter(),[]),
-            new glaze.physics.components.PhysicsStatic(false)
+            new Moveable()
         ],"playerHolder");
         player.addChildEntity(playerHolder);
 
@@ -85,10 +87,11 @@ class PlayerSystem extends System {
             var lightActive = playerLight.getComponent(Viewable);
             if (lightActive!=null)
                 playerLight.removeComponent(lightActive);
+                // playerLight.removeComponent2(Light);
             else
                 playerLight.addComponent(new Viewable());
         }
-        
+        //u    
         if (input.JustPressed(85)) {
             new exile.entities.creatures.Bee().create(engine,position.clone());
         }
@@ -102,7 +105,7 @@ class PlayerSystem extends System {
         }
 
         if (fire) {
-            var bullet = new exile.entities.projectile.StandardBullet().create(engine,position.clone(),playerFilter);
+            var bullet = exile.entities.projectile.StandardBullet.create(engine,position.clone(),playerFilter);
             glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),1500);        
 
         } 

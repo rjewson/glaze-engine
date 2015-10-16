@@ -8,17 +8,16 @@ import glaze.engine.actions.FilterSupport;
 import glaze.engine.components.Display;
 import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Fixed;
 import glaze.engine.components.Holdable;
-import glaze.engine.components.Holder;
-import glaze.engine.components.ParticleEmitters;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
-import glaze.engine.components.Water;
 import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
-import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
+import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.DestroySystem;
 import glaze.engine.systems.ParticleSystem;
@@ -116,6 +115,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new glaze.engine.systems.HolderSystem());
         physicsPhase.addSystem(new glaze.engine.systems.HeldSystem());
         physicsPhase.addSystem(new glaze.engine.systems.HoldableSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.HealthSystem());
                 
         physicsPhase.addSystem(new exile.systems.ProjectileSystem(broadphase));
                   
@@ -155,21 +155,11 @@ class GameTestA extends GameEngine {
             new Extents(30/2,72/2),
             new Display("character1.png"),
             new PhysicsBody(body),
-            new PhysicsCollision(false,playerFilter,[])
+            new PhysicsCollision(false,playerFilter,[]),
+            new Moveable()
         ],"player"); 
 
-        var thingbody = new glaze.physics.Body(new Material());
-        thingbody.maxScalarVelocity = 0;
-        thingbody.maxVelocity.setTo(160,1000);
- 
-         var thing = engine.createEntity([
-            new Position(336,150),  
-            new Display("grenade.png"), 
-            new Extents(8,8),
-            new PhysicsCollision(false,new Filter(),[]),
-            new PhysicsBody(thingbody),
-            new Holdable()
-        ],"thing"); 
+        exile.entities.weapon.Grenade.create(engine,100,100);
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
@@ -194,14 +184,14 @@ class GameTestA extends GameEngine {
             new Position(128,500),  
             new Extents(256,256),
             new PhysicsCollision(true,null,[]),
-            new PhysicsStatic(),
+            new Fixed(),
             new EnvironmentForce(),
             new Wind(1/600)
         ],"wind");        
     }
 
     public function createTurret() { 
-
+return;
         var behavior = new glaze.ai.behaviortree.Sequence();   
         behavior.addChild(new glaze.engine.actions.Delay(1000,100));
         behavior.addChild(new glaze.engine.actions.InitEntityCollection());
@@ -209,7 +199,7 @@ class GameTestA extends GameEngine {
         behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
         behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterVisibleAgainstMap]));
         behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
-return;
+// return;
          var turret = engine.createEntity([
             new Position(336,100),  
             // new Position(432,148),   
@@ -217,14 +207,14 @@ return;
             new Display("turretA.png"), 
             new Extents(12,12),
             new PhysicsCollision(false,playerFilter,[]),
-            new PhysicsStatic(),
+            new Fixed(),
             new Script(behavior)
         ],"turret");        
 
     }
           
     public function fireBullet(pos:Vector2,target:Vector2,velocity:Float,ttl:Float,gff:Float=1):Void {
-        var bullet = new exile.entities.projectile.StandardBullet().create(engine,new Position(pos.x,pos.y),playerFilter);
+        var bullet = exile.entities.projectile.StandardBullet.create(engine,new Position(pos.x,pos.y),playerFilter);
         glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
     }    
     
@@ -236,7 +226,7 @@ return;
             ec.entities.head.entity.getComponent(Position).coords.clone(),
             1000,
             1000,
-            0.1);
+            0.1); 
     }
 
     override public function preUpdate() {

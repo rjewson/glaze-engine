@@ -8,6 +8,7 @@ class SpaceManagerProxy {
 	public var isStatic:Bool = false;
 	public var entity:Entity = null;
 	public var active:Bool = false;
+	public var referenceCount:Int = 0;
 
 	public function new() {
 	}

@@ -25,7 +25,7 @@ class FilterEntities extends Behavior {
             if (entityCollection.length==0) break;
             entityCollection.filter(filter);
         }
-        trace("final result="+entityCollection.length);
+        // trace("final result="+entityCollection.length);
         return Success;
     }
 

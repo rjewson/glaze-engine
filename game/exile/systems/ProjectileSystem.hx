@@ -4,6 +4,7 @@ import exile.components.Projectile;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Destroy;
+import glaze.engine.components.Health;
 import glaze.engine.components.Position;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
@@ -17,7 +18,7 @@ class ProjectileSystem extends System {
 
 
     public function new(broadphase:IBroadphase) {
-        super([Projectile,PhysicsCollision]);
+        super([Projectile,PhysicsCollision,Health]);
         this.broadphase = broadphase;
         bfAreaQuery = new glaze.util.BroadphaseAreaQuery(broadphase);
     }
@@ -40,23 +41,27 @@ class ProjectileSystem extends System {
         for (entity in view.entities) {
             var projectile = entity.getComponent(Projectile);
             projectile.age-=delta;
-            if ((projectile.age<0 || projectile.bounce<=0) && entity.getComponent(Destroy)==null) {
+            var health = entity.getComponent(Health);
+            if ((projectile.age<0 || projectile.bounce<=0 || health.currentHealth<0) && entity.getComponent(Destroy)==null) {
                 entity.addComponent(new Destroy(2)); 
                 entity.getComponent(glaze.engine.components.ParticleEmitters).emitters.push(new glaze.particle.emitter.Explosion(10,50));
                 bfAreaQuery.query(entity.getComponent(Position).coords,64,entity,true);
                 var item = bfAreaQuery.entityCollection.entities.head;
                 while (item!=null) {
+                    var health = item.entity.getComponent(Health);
+                    if (health!=null) {
+                        health.applyDamage(50);
+                    }
                     var body = item.entity.getComponent(glaze.physics.components.PhysicsBody);
                     if (body!=null) {
                         var delta = body.body.position.clone();
                         delta.minusEquals(entity.getComponent(Position).coords);
                         delta.normalize();
-                        delta.multEquals(200);
+                        delta.multEquals(100);
                         body.body.addForce(delta);
                     }
                     item = item.next;
                 }
-                trace(bfAreaQuery.entityCollection);
             }
         }
     }

@@ -35,13 +35,6 @@ class BFProxy
         offset = new Vector2();
     }
 
-    // public function new(width:Float,height:Float,filter:Filter,offsetX:Float=0,offsetY:Float=0,isSensor:Bool=false) {
-    //     aabb = new AABB();
-    //     aabb.extents.setTo(width,height);
-    //     offset = new Vector2(offsetX,offsetY);
-    //     this.filter = filter;
-    // }
-
     public function setBody(body:Body) {
         this.body = body;
         this.aabb.position = body.position;
@@ -54,7 +47,7 @@ class BFProxy
     }
 
     public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float,filter:Filter):BFProxy {
-        var bfproxy = new BFProxy();//hw,hh,filter);
+        var bfproxy = new BFProxy();
         bfproxy.aabb.extents.setTo(hw,hh);
         bfproxy.filter = filter;
         bfproxy.aabb.position.setTo(x,y);

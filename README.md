@@ -24,3 +24,6 @@ haxelib install compiletime
 ```
 * Run the build.hxml
 * Open the bin/index.html to see the game.  You'll need to serve this via a proper HTTP server (not just the file system).
+
+TODO
+Add static, dynamic and kinematic components

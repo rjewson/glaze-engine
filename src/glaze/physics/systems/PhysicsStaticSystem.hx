@@ -2,6 +2,7 @@ package glaze.physics.systems;
 
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Fixed;
 import glaze.engine.components.Position;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
@@ -16,7 +17,7 @@ class PhysicsStaticSystem extends System {
     public var broadphase:IBroadphase;
 
     public function new(broadphase:IBroadphase) {
-        super([Position,Extents,PhysicsCollision,PhysicsStatic]);
+        super([Position,Extents,PhysicsCollision,Fixed]);
         this.broadphase = broadphase;
     }
 
@@ -24,15 +25,11 @@ class PhysicsStaticSystem extends System {
         var collision = entity.getComponent(PhysicsCollision);
         var extents = entity.getComponent(Extents);
         var position = entity.getComponent(Position);
-        var physics = entity.getComponent(PhysicsStatic);
 
         // collision.proxy = new BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
         collision.proxy.aabb.extents.copy(extents.halfWidths);
         collision.proxy.entity = entity;
-
-
-        // collision.proxy.isStatic = physics.isStatic;
-        // collision.proxy.isSensor = collision.isSensor;
+        collision.proxy.isStatic = true;
         collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body
         // collision.proxy.entity = entity;
         // collision.setCallback(collision.contactCallback);

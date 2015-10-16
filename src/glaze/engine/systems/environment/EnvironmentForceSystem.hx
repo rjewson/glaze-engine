@@ -13,7 +13,6 @@ import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
 import glaze.geom.Vector2;
-import glaze.physics.components.PhysicsStatic;
 import glaze.util.Random.RandomFloat;
 
 class EnvironmentForceSystem extends System {
@@ -21,7 +20,7 @@ class EnvironmentForceSystem extends System {
     public var particleEngine:IParticleEngine;
 
     public function new() {
-        super([PhysicsCollision,PhysicsStatic,Extents,EnvironmentForce]);
+        super([PhysicsCollision,Extents,EnvironmentForce]);
     }
 
     override public function entityAdded(entity:Entity) {

@@ -12,7 +12,7 @@ class ParticleSystem extends System {
     public var particleEngine:IParticleEngine;
 
     public function new(particleEngine:IParticleEngine) {
-        super([Position,ParticleEmitters,Viewable]);
+        super([Position,ParticleEmitters]);
         this.particleEngine = particleEngine;
     }
 
