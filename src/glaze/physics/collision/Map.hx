@@ -26,6 +26,7 @@ class Map
 
     public var tilePosition:Vector2 = new Vector2();
     public var tileExtents:Vector2 = new Vector2();
+    public var bias:Vector2 =  new Vector2(1,1);
     public var plane:Plane = new Plane();
 
     public var contact:Contact;
@@ -82,7 +83,7 @@ class Map
                     if (cell&COLLIDABLE==1) {
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
-                        if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,contact)==true) {
+                        if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
                             var nextCell = data.get(nextX,nextY,1);

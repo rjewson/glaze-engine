@@ -29,7 +29,7 @@ class StandardBullet {
         bulletBody.setMass(0.03);
         bulletBody.setBounces(3);     
         bulletBody.globalForceFactor = 1;
-        bulletBody.isBullet = true;
+        // bulletBody.isBullet = true;
 /*
         var data = '
         {

@@ -3,6 +3,7 @@ package glaze.physics.systems;
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
@@ -11,24 +12,24 @@ import glaze.eco.core.Entity;
 import glaze.physics.components.PhysicsCollision;
 
 
-class PhysicsStaticSystem extends System {
+class PhysicsMoveableSystem extends System {
     
     public var broadphase:IBroadphase;
 
     public function new(broadphase:IBroadphase) {
-        super([Position,Extents,PhysicsCollision,Fixed]);
+        super([Position,Extents,PhysicsCollision,Moveable]);
         this.broadphase = broadphase;
     }
 
     override public function entityAdded(entity:Entity) {
         var collision = entity.getComponent(PhysicsCollision);
         var extents = entity.getComponent(Extents);
-        var position = entity.getComponent(Position);
+        var body = entity.getComponent(PhysicsBody);
 
         collision.proxy.aabb.extents.copy(extents.halfWidths);
+        collision.proxy.isStatic = false;
         collision.proxy.entity = entity;
-        collision.proxy.isStatic = true;
-        collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body
+        collision.proxy.aabb.position = entity.getComponent(Position).coords; //Because its not linked to a body BUT it could cause an issue?
 
         broadphase.addProxy(collision.proxy);
     }

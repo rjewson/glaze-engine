@@ -19,6 +19,7 @@ class BFProxy
     public var aabb:AABB;
 
     public var offset:Vector2;
+    public var responseBias:Vector2;
 
     public var body:Body;
     public var entity:Entity;
@@ -33,6 +34,7 @@ class BFProxy
     public function new() {
         aabb = new AABB();
         offset = new Vector2();
+        responseBias = new Vector2(1,1);
     }
 
     public function setBody(body:Body) {

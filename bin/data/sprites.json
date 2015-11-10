@@ -11,7 +11,7 @@
 },
 "character2.png":
 {
-	"frame": {"x":2,"y":82,"w":60,"h":80},
+	"frame": {"x":56,"y":2,"w":60,"h":80},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":80},
@@ -20,16 +20,25 @@
 },
 "door.png":
 {
-	"frame": {"x":2,"y":164,"w":24,"h":64},
+	"frame": {"x":2,"y":84,"w":24,"h":96},
 	"rotated": false,
 	"trimmed": false,
-	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":64},
-	"sourceSize": {"w":24,"h":64},
+	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":96},
+	"sourceSize": {"w":24,"h":96},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"dooropen.png":
+{
+	"frame": {"x":28,"y":84,"w":24,"h":48},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":48},
+	"sourceSize": {"w":24,"h":48},
 	"pivot": {"x":0.5,"y":0.5}
 },
 "grenade.png":
 {
-	"frame": {"x":28,"y":164,"w":16,"h":16},
+	"frame": {"x":54,"y":84,"w":16,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -38,7 +47,7 @@
 },
 "projectile1.png":
 {
-	"frame": {"x":46,"y":164,"w":8,"h":8},
+	"frame": {"x":72,"y":84,"w":8,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":8},
@@ -47,7 +56,7 @@
 },
 "turretA.png":
 {
-	"frame": {"x":2,"y":230,"w":28,"h":24},
+	"frame": {"x":82,"y":84,"w":28,"h":24},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":24},
@@ -59,8 +68,8 @@
 	"version": "1.0",
 	"image": "sprites.png",
 	"format": "RGBA8888",
-	"size": {"w":64,"h":256},
+	"size": {"w":128,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:525be00caeccca184a46a9eb5e801f4b:23dce72758cc7793926004d5b10da246:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:eb83f14d3edf6b21c7b5db5b54718a4c:a6e535d23ede7755ab0a88e8a8c4cbf8:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }

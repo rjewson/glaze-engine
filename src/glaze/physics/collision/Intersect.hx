@@ -107,6 +107,7 @@ class Intersect
                     dynamicProxy.aabb.extents,
                     staticProxy.aabb.position,
                     staticProxy.aabb.extents,
+                    staticProxy.responseBias,
                     contact);
             //We have to the response process and get the result
             collided = dynamicProxy.body.respondStaticCollision(contact);
@@ -249,7 +250,7 @@ class Intersect
         }
     }
 
-    public static function AABBvsStaticSolidAABB(aabb_position_A:Vector2,aabb_extents_A:Vector2,aabb_position_B:Vector2,aabb_extents_B:Vector2,contact:Contact):Bool {
+    public static function AABBvsStaticSolidAABB(aabb_position_A:Vector2,aabb_extents_A:Vector2,aabb_position_B:Vector2,aabb_extents_B:Vector2,bias:Vector2,contact:Contact):Bool {
 
         //New overlap code, handle corners better
         var dx = aabb_position_B.x - aabb_position_A.x;
@@ -266,6 +267,9 @@ class Intersect
             contact.normal.y = dy<0 ? 1 : -1;
         }
 
+        contact.normal.x *= bias.x;
+        contact.normal.y *= bias.y;
+
         // var dx = aabb_position_B.x - aabb_position_A.x;
         // var dy = aabb_position_B.y - aabb_position_A.y;
 
@@ -276,7 +280,6 @@ class Intersect
         //     contact.normal.x = 0;
         //     contact.normal.y = dy>=0 ? -1 : 1;
         // }
-
         var pcx = (contact.normal.x * (aabb_extents_A.x+aabb_extents_B.x) ) + aabb_position_B.x;
         var pcy = (contact.normal.y * (aabb_extents_A.y+aabb_extents_B.y) ) + aabb_position_B.y;
 

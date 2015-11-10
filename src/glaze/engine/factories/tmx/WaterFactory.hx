@@ -7,7 +7,6 @@ import glaze.engine.components.Position;
 import glaze.engine.factories.tmx.TMXEntityFactory;
 import glaze.engine.components.Water;
 import glaze.physics.components.PhysicsCollision;
-import glaze.physics.components.PhysicsStatic;
 
 class WaterFactory extends TMXEntityFactory {
 

@@ -15,7 +15,6 @@ import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
 import glaze.geom.Vector2;
-import glaze.physics.components.PhysicsStatic;
 import glaze.util.Random.RandomFloat;
 
 class HoldableSystem extends System {

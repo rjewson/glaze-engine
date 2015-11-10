@@ -52,7 +52,6 @@ class RegularGridSpaceManager implements ISpaceManager {
 	}
 
     public function addActiveCell(cell:Cell,viewAABB:glaze.geom.AABB,callback:Entity->Bool->Void) {
-        trace("added cell");
         for (proxy in cell.proxies) {
             if (proxy.referenceCount++==0) {
                 callback(proxy.entity,true);
@@ -62,7 +61,6 @@ class RegularGridSpaceManager implements ISpaceManager {
     }
 
     public function removeActiveCell(cell:Cell,viewAABB:glaze.geom.AABB,callback:Entity->Bool->Void) {
-        trace("removed cell");
         for (proxy in cell.proxies) {
             if (--proxy.referenceCount==0) {
                 callback(proxy.entity,false);
@@ -81,7 +79,6 @@ class RegularGridSpaceManager implements ISpaceManager {
                 return;
             lastUpdatePosition.copy(viewAABB.position);
         }
-        trace("Update static view");
 		var startX = grid.Index(viewAABB.position.x - viewAABB.extents.x);
         var startY = grid.Index(viewAABB.position.y - viewAABB.extents.y);
 

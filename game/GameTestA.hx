@@ -1,10 +1,13 @@
 package;
 
+import exile.components.Door;
 import exile.components.Player;
+import exile.systems.DoorSystem;
 import exile.systems.PlayerSystem;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
+import glaze.engine.components.CollidableSwitch;
 import glaze.engine.components.Display;
 import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
@@ -13,15 +16,18 @@ import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
+import glaze.engine.components.State;
 import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.systems.BehaviourSystem;
+import glaze.engine.systems.CollidableSwitchSystem;
 import glaze.engine.systems.DestroySystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
+import glaze.engine.systems.StateSystem;
 import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.particle.BlockSpriteParticleEngine;
@@ -32,15 +38,16 @@ import glaze.physics.collision.Map;
 import glaze.physics.collision.broadphase.BruteforceBroadphase;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
-import glaze.physics.components.PhysicsStatic;
 import glaze.physics.systems.ContactRouterSystem;
 import glaze.physics.systems.PhysicsCollisionSystem;
+import glaze.physics.systems.PhysicsMoveableSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
 import glaze.tmx.TmxMap;
+import glaze.util.MessageBus;
 import js.Browser;
 import js.html.CanvasElement;
 
@@ -60,6 +67,9 @@ class GameTestA extends GameEngine {
     var holderFilter:Filter;
     var renderSystem:RenderSystem;    
     var filterSupport:FilterSupport;
+    var messageBus:MessageBus;
+
+    public var door:Entity;
   
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
@@ -73,7 +83,9 @@ class GameTestA extends GameEngine {
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);
         var physicsPhase = engine.createPhase();//1000/60);    
-             
+        
+        messageBus = new MessageBus();
+
         renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
@@ -103,6 +115,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new SteeringSystem());
         var broadphase = new BruteforceBroadphase(map,new glaze.physics.collision.Intersect());
         physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
+        physicsPhase.addSystem(new PhysicsMoveableSystem(broadphase));
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
         physicsPhase.addSystem(new PhysicsPositionSystem());
         physicsPhase.addSystem(new ContactRouterSystem());
@@ -129,7 +142,10 @@ class GameTestA extends GameEngine {
         // var fboLighting = new FBOLighting();
         // renderSystem.renderer.AddRenderer(fboLighting);
 
-        aiphase.addSystem(new BehaviourSystem());                                                   
+        aiphase.addSystem(new BehaviourSystem());  
+        aiphase.addSystem(new StateSystem(messageBus));  
+        aiphase.addSystem(new CollidableSwitchSystem(messageBus));  
+        aiphase.addSystem(new DoorSystem());                                                 
 
         corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
@@ -170,6 +186,7 @@ class GameTestA extends GameEngine {
 
         createTurret();    
         createWind();
+        createDoor();
 
         loop.start();
     } 
@@ -188,6 +205,30 @@ class GameTestA extends GameEngine {
             new EnvironmentForce(),
             new Wind(1/600)
         ],"wind");        
+    }
+
+    public function createDoor() {
+        door = engine.createEntity([
+            new Position(128,32*5.5),  
+            new Extents(16,32+16),
+            new Display("door.png"),
+            new PhysicsCollision(false,null,[]),
+            new Fixed(),
+            new Door(false,""),
+            new State(['closed','open'],0,["doorA"])
+        ],"door");        
+
+        var doorSwitch = engine.createEntity([
+            new Position(336,100),  
+            // new Position(432,148),   
+            // new Position(200,465),  
+            new Display("turretA.png"), 
+            new Extents(12,12),
+            new PhysicsCollision(false,null,[]),
+            new Fixed(),
+            new CollidableSwitch(1000,["doorA"])
+        ],"turret");        
+
     }
 
     public function createTurret() { 
@@ -242,6 +283,10 @@ return;
         });
         Browser.document.getElementById("startbutton").addEventListener("click",function(event){
             game.loop.start();
+        });       
+        Browser.document.getElementById("debugbutton").addEventListener("click",function(event){
+            var x = game.door.getComponent(PhysicsCollision);
+            game.messageBus.trigger("doorA",null);
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
             untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());

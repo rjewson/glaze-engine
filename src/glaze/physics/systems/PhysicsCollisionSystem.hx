@@ -2,6 +2,7 @@ package glaze.physics.systems;
 
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.components.PhysicsBody;
@@ -14,27 +15,15 @@ class PhysicsCollisionSystem extends System {
     public var broadphase:IBroadphase;
 
     public function new(broadphase:IBroadphase) {
-        super([Extents,PhysicsCollision,PhysicsBody]);
+        super([PhysicsCollision,PhysicsBody,Moveable]);
         this.broadphase = broadphase;
     }
 
     override public function entityAdded(entity:Entity) {
         var collision = entity.getComponent(PhysicsCollision);
-        var extents = entity.getComponent(Extents);
-        // var position = entity.getComponent(Position);
         var body = entity.getComponent(PhysicsBody);
-
-        //collision.proxy = new glaze.physics.collision.BFProxy(extents.halfWidths.x,extents.halfWidths.y,collision.filter);
-        collision.proxy.aabb.extents.copy(extents.halfWidths);
+        //All this really does is add the body to the proxy and run the physics
         collision.proxy.setBody(body.body);
-        collision.proxy.entity = entity;
-        
-        broadphase.addProxy(collision.proxy);
-    }
-    
-    override public function entityRemoved(entity:Entity) {
-        // js.Lib.debug();
-        broadphase.removeProxy(entity.getComponent(PhysicsCollision).proxy);
     }
 
     override public function update(timestamp:Float,delta:Float) {

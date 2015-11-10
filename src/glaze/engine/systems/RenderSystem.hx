@@ -57,8 +57,10 @@ class RenderSystem extends System {
     override public function entityAdded(entity:Entity) {
         var position = entity.getComponent(Position);
         var display = entity.getComponent(Display);
-        display.displayObject = createSprite("",display.textureID);
+        display.displayObject = new Sprite();//createSprite("",display.textureID);
+        display.onChange = onChange;
         display.displayObject.position = position.coords;
+        updateSprite(display.displayObject,"",display.textureID);
         itemContainer.addChild(display.displayObject);
     }
 
@@ -75,6 +77,17 @@ class RenderSystem extends System {
     //Fixme
     public function CameraTarget(target:Vector2) {
         cameraTarget = target;
+    }
+
+    function onChange(display:Display) {
+        updateSprite(display.displayObject,"",display.textureID);
+    }
+
+    function updateSprite(s:Sprite,id:String,tid:String) {
+        s.id = id;
+        s.texture = textureManager.textures.get(tid);
+        s.pivot.x = s.texture.frame.width * s.texture.pivot.x;
+        s.pivot.y = s.texture.frame.height * s.texture.pivot.y;        
     }
 
     function createSprite(id:String,tid:String) {
