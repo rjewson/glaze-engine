@@ -22,6 +22,9 @@ class Intersect
         if ((proxyA.isStatic && proxyB.isStatic) || (proxyA.isSensor && proxyB.isSensor))
             return false;
 
+        if (!proxyA.isActive||!proxyB.isActive)
+            return false;
+
         //Do filtering
         if (!Filter.CHECK(proxyA.filter,proxyB.filter))
             return false;
@@ -88,7 +91,8 @@ class Intersect
                         proxyA.aabb.extents,
                         proxyB.aabb.position,
                         proxyB.aabb.extents,
-                        contact);            
+                        contact); 
+                // if (collided==true) trace("hit");           
             }
         } else {
             //Were just left with static<>dynamic collisions

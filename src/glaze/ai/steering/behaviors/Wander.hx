@@ -20,9 +20,9 @@ class Wander extends Behavior
 	public function new() {
 		super(SteeringSettings.wanderWeight, SteeringSettings.wanderPriority);
 		circleRadius = 8;
-		circleDistance = 2;
+		circleDistance = 1;
 		wanderAngle = Random.RandomFloat(0, Math.PI * 2);
-		wanderChange = 2;
+		wanderChange = 4;
 	}
 
 	override public function calculate(agent:Body,result:Vector2) {

@@ -47,6 +47,7 @@ class ProjectileSystem extends System {
                 entity.getComponent(glaze.engine.components.ParticleEmitters).emitters.push(new glaze.particle.emitter.Explosion(10,50));
                 bfAreaQuery.query(entity.getComponent(Position).coords,64,entity,true);
                 var item = bfAreaQuery.entityCollection.entities.head;
+                trace("found="+bfAreaQuery.entityCollection.length);
                 while (item!=null) {
                     var health = item.entity.getComponent(Health);
                     if (health!=null) {

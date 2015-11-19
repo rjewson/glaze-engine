@@ -2,7 +2,7 @@
 
 "character1.png":
 {
-	"frame": {"x":2,"y":2,"w":52,"h":78},
+	"frame": {"x":0,"y":0,"w":52,"h":78},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":52,"h":78},
@@ -11,7 +11,7 @@
 },
 "character2.png":
 {
-	"frame": {"x":56,"y":2,"w":60,"h":80},
+	"frame": {"x":52,"y":0,"w":60,"h":80},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":60,"h":80},
@@ -20,7 +20,7 @@
 },
 "door.png":
 {
-	"frame": {"x":2,"y":84,"w":24,"h":96},
+	"frame": {"x":0,"y":80,"w":24,"h":96},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":96},
@@ -29,7 +29,7 @@
 },
 "dooropen.png":
 {
-	"frame": {"x":28,"y":84,"w":24,"h":48},
+	"frame": {"x":24,"y":80,"w":24,"h":48},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":24,"h":48},
@@ -38,7 +38,7 @@
 },
 "grenade.png":
 {
-	"frame": {"x":54,"y":84,"w":16,"h":16},
+	"frame": {"x":48,"y":80,"w":16,"h":16},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
@@ -47,16 +47,34 @@
 },
 "projectile1.png":
 {
-	"frame": {"x":72,"y":84,"w":8,"h":8},
+	"frame": {"x":64,"y":80,"w":8,"h":8},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":8,"h":8},
 	"sourceSize": {"w":8,"h":8},
 	"pivot": {"x":0.5,"y":0.5}
 },
+"switch1.png":
+{
+	"frame": {"x":72,"y":80,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16},
+	"pivot": {"x":0.5,"y":0.5}
+},
+"switch2.png":
+{
+	"frame": {"x":88,"y":80,"w":16,"h":16},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":16,"h":16},
+	"sourceSize": {"w":16,"h":16},
+	"pivot": {"x":0.5,"y":0.5}
+},
 "turretA.png":
 {
-	"frame": {"x":82,"y":84,"w":28,"h":24},
+	"frame": {"x":0,"y":176,"w":28,"h":24},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":28,"h":24},
@@ -70,6 +88,6 @@
 	"format": "RGBA8888",
 	"size": {"w":128,"h":256},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:eb83f14d3edf6b21c7b5db5b54718a4c:a6e535d23ede7755ab0a88e8a8c4cbf8:1eabdf11f75e3a4fe3147baf7b5be24b$"
+	"smartupdate": "$TexturePacker:SmartUpdate:c5ba9ad97f5a6bbeb9e9f3522dec4c44:f7ae41932028081ce605ab39c2953923:1eabdf11f75e3a4fe3147baf7b5be24b$"
 }
 }

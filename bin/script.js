@@ -117,6 +117,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		aiphase.addSystem(new glaze_engine_systems_StateSystem(this.messageBus));
 		aiphase.addSystem(new glaze_engine_systems_CollidableSwitchSystem(this.messageBus));
 		aiphase.addSystem(new exile_systems_DoorSystem());
+		aiphase.addSystem(new exile_systems_TeleporterSystem());
+		aiphase.addSystem(new exile_systems_BeeHiveSystem());
 		corephase.addSystem(new glaze_engine_systems_DestroySystem());
 		corephase.addSystem(new exile_systems_PlayerSystem(this.input,blockParticleEngine));
 		corephase.addSystem(new glaze_engine_systems_ViewManagementSystem(this.renderSystem.camera));
@@ -159,6 +161,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	,createDoor: function() {
 		this.door = this.engine.createEntity([new glaze_engine_components_Position(128,176.),new glaze_engine_components_Extents(16,48),new glaze_engine_components_Display("door.png"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"])],"door");
 		this.engine.createEntity([new glaze_engine_components_Position(336,100),new glaze_engine_components_Display("turretA.png"),new glaze_engine_components_Extents(12,12),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"])],"turret");
+		this.engine.createEntity([new glaze_engine_components_Position(300,48),new glaze_engine_components_Extents(16,16),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(100,100)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[])],"teleporter");
+		this.engine.createEntity([new glaze_engine_components_Position(640,128),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("turretA.png"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_BeeHive(3)],"BeeHive");
 	}
 	,createTurret: function() {
 		return;
@@ -505,6 +509,15 @@ Xml.prototype = {
 };
 var glaze_eco_core_IComponent = function() { };
 glaze_eco_core_IComponent.__name__ = ["glaze","eco","core","IComponent"];
+var exile_components_BeeHive = function(maxBees) {
+	this.maxBees = maxBees;
+	this.bees = [];
+};
+exile_components_BeeHive.__name__ = ["exile","components","BeeHive"];
+exile_components_BeeHive.__interfaces__ = [glaze_eco_core_IComponent];
+exile_components_BeeHive.prototype = {
+	__class__: exile_components_BeeHive
+};
 var exile_components_Door = function(open,triggerEvent) {
 	this.open = open;
 	this.triggerEvent = triggerEvent;
@@ -529,22 +542,30 @@ exile_components_Projectile.__interfaces__ = [glaze_eco_core_IComponent];
 exile_components_Projectile.prototype = {
 	__class__: exile_components_Projectile
 };
+var exile_components_Teleporter = function(teleportPosition) {
+	this.teleportPosition = teleportPosition;
+};
+exile_components_Teleporter.__name__ = ["exile","components","Teleporter"];
+exile_components_Teleporter.__interfaces__ = [glaze_eco_core_IComponent];
+exile_components_Teleporter.prototype = {
+	__class__: exile_components_Teleporter
+};
 var exile_entities_creatures_Bee = function() {
 };
 exile_entities_creatures_Bee.__name__ = ["exile","entities","creatures","Bee"];
 exile_entities_creatures_Bee.prototype = {
 	create: function(engine,position) {
 		var beeBody = new glaze_physics_Body(new glaze_physics_Material());
-		beeBody.setMass(0.03);
+		beeBody.setMass(0.1);
 		beeBody.setBounces(0);
 		beeBody.globalForceFactor = 0;
-		beeBody.maxScalarVelocity = 100;
 		var behavior = new glaze_ai_behaviortree_Sequence();
 		var child = new glaze_engine_actions_Delay(10000,1000);
 		behavior.children.add(child);
 		var child1 = new glaze_engine_actions_DestroyEntity();
 		behavior.children.add(child1);
-		engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(50,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()])],"bee");
+		var bee = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_RandomSpray(50,10)]),new glaze_engine_components_Script(behavior),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()])],"bee");
+		return bee;
 	}
 	,__class__: exile_entities_creatures_Bee
 };
@@ -601,19 +622,69 @@ glaze_eco_core_System.prototype = {
 	}
 	,__class__: glaze_eco_core_System
 };
+var exile_systems_BeeHiveSystem = function() {
+	glaze_eco_core_System.call(this,[exile_components_BeeHive,glaze_engine_components_Viewable]);
+	this.beeFactory = new exile_entities_creatures_Bee();
+};
+exile_systems_BeeHiveSystem.__name__ = ["exile","systems","BeeHiveSystem"];
+exile_systems_BeeHiveSystem.__super__ = glaze_eco_core_System;
+exile_systems_BeeHiveSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+	}
+	,entityRemoved: function(entity) {
+		var beehive = entity.map.BeeHive;
+		var _g = 0;
+		var _g1 = beehive.bees;
+		while(_g < _g1.length) {
+			var bee = _g1[_g];
+			++_g;
+			bee.destroy();
+		}
+	}
+	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var beehive = entity.map.BeeHive;
+			if(beehive.bees.length < beehive.maxBees) {
+				if(Math.random() < 0.01) {
+					var newBee = this.beeFactory.create(this.engine,entity.map.Position.clone());
+					newBee.parent = entity;
+					newBee.messages.add($bind(this,this.beeDestroyed));
+					beehive.bees.push(newBee);
+				}
+			}
+		}
+	}
+	,beeDestroyed: function(entity,channel,data) {
+		if(channel == "destroy") {
+			if(entity.parent != null) {
+				var beeHive = entity.parent.map.BeeHive;
+				HxOverrides.remove(beeHive.bees,entity);
+			}
+		}
+	}
+	,__class__: exile_systems_BeeHiveSystem
+});
 var exile_systems_DoorSystem = function() {
 	glaze_eco_core_System.call(this,[exile_components_Door,glaze_physics_components_PhysicsCollision,glaze_engine_components_State,glaze_engine_components_Display]);
 	this.hasUpdate = false;
+	this.scp = new glaze_util_StateChangeProxy();
+	this.scp.registerStateHandler("open",$bind(this,this.openDoor2));
+	this.scp.registerStateHandler("closed",$bind(this,this.closeDoor2));
 };
 exile_systems_DoorSystem.__name__ = ["exile","systems","DoorSystem"];
 exile_systems_DoorSystem.__super__ = glaze_eco_core_System;
 exile_systems_DoorSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
 		var state = entity.map.State;
-		state.onChanged.add($bind(this,this.setDoorState));
-		this.setDoorState(state);
+		this.scp.registerState(state);
 	}
 	,entityRemoved: function(entity) {
+		var state = entity.map.State;
+		this.scp.unregisterState(state);
 	}
 	,update: function(timestamp,delta) {
 	}
@@ -633,6 +704,24 @@ exile_systems_DoorSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		var pc = entity.map.PhysicsCollision;
 		pc.proxy.responseBias.x = 1;
 		var display = entity.map.Display;
+		display.update("door.png");
+		var _this = display.displayObject.scale;
+		_this.x = 1;
+		_this.y = 1;
+	}
+	,openDoor2: function(state) {
+		var pc = state.owner.map.PhysicsCollision;
+		pc.proxy.responseBias.x = 0;
+		var display = state.owner.map.Display;
+		display.update("dooropen.png");
+		var _this = display.displayObject.scale;
+		_this.x = 1;
+		_this.y = 2;
+	}
+	,closeDoor2: function(state) {
+		var pc = state.owner.map.PhysicsCollision;
+		pc.proxy.responseBias.x = 1;
+		var display = state.owner.map.Display;
 		display.update("door.png");
 		var _this = display.displayObject.scale;
 		_this.x = 1;
@@ -733,6 +822,7 @@ exile_systems_ProjectileSystem.prototype = $extend(glaze_eco_core_System.prototy
 				entity.map.ParticleEmitters.emitters.push(new glaze_particle_emitter_Explosion(10,50));
 				this.bfAreaQuery.query(entity.map.Position.coords,64,entity,true);
 				var item = this.bfAreaQuery.entityCollection.entities.head;
+				haxe_Log.trace("found=" + this.bfAreaQuery.entityCollection.entities.length,{ fileName : "ProjectileSystem.hx", lineNumber : 50, className : "exile.systems.ProjectileSystem", methodName : "update"});
 				while(item != null) {
 					var health1 = item.entity.map.Health;
 					if(health1 != null) health1.applyDamage(50);
@@ -757,6 +847,38 @@ exile_systems_ProjectileSystem.prototype = $extend(glaze_eco_core_System.prototy
 		a.entity.map.Projectile.bounce--;
 	}
 	,__class__: exile_systems_ProjectileSystem
+});
+var exile_systems_TeleporterSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_physics_components_PhysicsCollision,exile_components_Teleporter,glaze_engine_components_State]);
+	this.hasUpdate = false;
+};
+exile_systems_TeleporterSystem.__name__ = ["exile","systems","TeleporterSystem"];
+exile_systems_TeleporterSystem.__super__ = glaze_eco_core_System;
+exile_systems_TeleporterSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+		var collision = entity.map.PhysicsCollision;
+		collision.proxy.contactCallbacks.push($bind(this,this.onCollision));
+		var state = entity.map.State;
+		state.onChanged.add($bind(this,this.setTeleporterState));
+		this.setTeleporterState(state);
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+	}
+	,setTeleporterState: function(state) {
+		var collision = state.owner.map.PhysicsCollision;
+		if(state.getState() == "on") collision.proxy.isActive = true; else collision.proxy.isActive = false;
+	}
+	,onCollision: function(a,b,c) {
+		if(Math.random() < 0.1) {
+			var _this = b.body.position;
+			var v = a.entity.map.Teleporter.teleportPosition;
+			_this.x = v.x;
+			_this.y = v.y;
+		}
+	}
+	,__class__: exile_systems_TeleporterSystem
 });
 var exile_util_CharacterController = function(input,body) {
 	this.jumping = false;
@@ -1030,9 +1152,9 @@ glaze_ai_steering_behaviors_Behavior.prototype = {
 var glaze_ai_steering_behaviors_Wander = function() {
 	glaze_ai_steering_behaviors_Behavior.call(this,1,140);
 	this.circleRadius = 8;
-	this.circleDistance = 2;
+	this.circleDistance = 1;
 	this.wanderAngle = Math.random() * (Math.PI * 2);
-	this.wanderChange = 2;
+	this.wanderChange = 4;
 };
 glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behaviors","Wander"];
 glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
@@ -1665,15 +1787,6 @@ glaze_eco_core_Engine.prototype = {
 		return entity;
 	}
 	,destroyEntity: function(entity) {
-		var _g = 0;
-		var _g1 = entity.children;
-		while(_g < _g1.length) {
-			var child = _g1[_g];
-			++_g;
-			this.destroyEntity(child);
-			haxe_Log.trace("removed child",{ fileName : "Engine.hx", lineNumber : 67, className : "glaze.eco.core.Engine", methodName : "destroyEntity"});
-		}
-		entity.removeAllComponents();
 		HxOverrides.remove(this.entities,entity);
 	}
 	,createPhase: function(msPerUpdate) {
@@ -1710,6 +1823,7 @@ glaze_eco_core_Engine.prototype = {
 };
 var glaze_eco_core_Entity = function(engine,components) {
 	this.referenceCount = 0;
+	this.messages = new glaze_signals_Signal3();
 	this.children = [];
 	this.map = { };
 	this.id = 0;
@@ -1761,6 +1875,19 @@ glaze_eco_core_Entity.prototype = {
 	}
 	,exists: function(key) {
 		return Object.prototype.hasOwnProperty.call(this.map,key);
+	}
+	,destroy: function() {
+		var _g = 0;
+		var _g1 = this.children;
+		while(_g < _g1.length) {
+			var child = _g1[_g];
+			++_g;
+			child.destroy();
+		}
+		this.messages.dispatch(this,"destroy",null);
+		this.messages.removeAll();
+		this.removeAllComponents();
+		this.engine.destroyEntity(this);
 	}
 	,__class__: glaze_eco_core_Entity
 };
@@ -1993,7 +2120,7 @@ glaze_engine_actions_DestroyEntity.__name__ = ["glaze","engine","actions","Destr
 glaze_engine_actions_DestroyEntity.__super__ = glaze_ai_behaviortree_Behavior;
 glaze_engine_actions_DestroyEntity.prototype = $extend(glaze_ai_behaviortree_Behavior.prototype,{
 	update: function(context) {
-		context.entity.engine.destroyEntity(context.entity);
+		context.entity.destroy();
 		return glaze_ai_behaviortree_BehaviorStatus.Success;
 	}
 	,__class__: glaze_engine_actions_DestroyEntity
@@ -2264,6 +2391,7 @@ glaze_engine_components_Script.prototype = {
 var glaze_engine_components_State = function(states,initialStateIndex,triggerChannels) {
 	this.states = states;
 	this.currentState = initialStateIndex;
+	this.previousState = initialStateIndex;
 	this.triggerChannels = triggerChannels;
 	this.onChanged = new glaze_signals_Signal1();
 };
@@ -2274,6 +2402,7 @@ glaze_engine_components_State.prototype = {
 		return this.states[this.currentState];
 	}
 	,incrementState: function() {
+		this.previousState = this.currentState;
 		this.currentState += 1;
 		if(this.currentState >= this.states.length) this.currentState = 0;
 		this.onChanged.dispatch(this);
@@ -2698,7 +2827,7 @@ glaze_engine_systems_DestroySystem.prototype = $extend(glaze_eco_core_System.pro
 		var next = 0;
 		while(count > 0) {
 			var entity = this.view.entities[next];
-			if(entity.map.Destroy.count-- <= 0) this.engine.destroyEntity(entity); else next++;
+			if(entity.map.Destroy.count-- <= 0) entity.destroy(); else next++;
 			count--;
 		}
 	}
@@ -3804,6 +3933,32 @@ glaze_particle_emitter_RandomSpray.prototype = {
 	}
 	,__class__: glaze_particle_emitter_RandomSpray
 };
+var glaze_particle_emitter_ScanLineEmitter = function(interval,velocity,ttl,jitter) {
+	this.velocity = velocity;
+	this.interval = interval;
+	this.ttl = ttl;
+	this.jitter = jitter;
+	this.lastTime = 0;
+};
+glaze_particle_emitter_ScanLineEmitter.__name__ = ["glaze","particle","emitter","ScanLineEmitter"];
+glaze_particle_emitter_ScanLineEmitter.__interfaces__ = [glaze_particle_emitter_IParticleEmitter];
+glaze_particle_emitter_ScanLineEmitter.prototype = {
+	update: function(time,entity,engine) {
+		if(time - this.lastTime < this.interval) return;
+		this.lastTime = time;
+		var position = entity.map.Position.coords;
+		var extents = entity.map.Extents.halfWidths;
+		var _g = 0;
+		while(_g < 16) {
+			var x = _g++;
+			var tmp;
+			var min = -this.jitter;
+			tmp = Math.floor(Math.random() * (this.jitter - min) + min);
+			engine.EmitParticle(position.x - 16 + x * 2,position.y - extents.y,0,this.velocity + tmp,0,0,this.ttl,0.99,true,true,null,4,255,255,255,255);
+		}
+	}
+	,__class__: glaze_particle_emitter_ScanLineEmitter
+};
 var glaze_physics_Body = function(material) {
 	this.skip = false;
 	this.debug = 0;
@@ -4048,6 +4203,7 @@ glaze_physics_Material.prototype = {
 };
 var glaze_physics_collision_BFProxy = function() {
 	this.contactCallbacks = [];
+	this.isActive = true;
 	this.isSensor = false;
 	this.isStatic = false;
 	this.aabb = new glaze_geom_AABB();
@@ -4227,6 +4383,7 @@ glaze_physics_collision_Intersect.AABBvsStaticSolidAABB = function(aabb_position
 glaze_physics_collision_Intersect.prototype = {
 	Collide: function(proxyA,proxyB) {
 		if(proxyA.isStatic && proxyB.isStatic || proxyA.isSensor && proxyB.isSensor) return false;
+		if(!proxyA.isActive || !proxyB.isActive) return false;
 		if(!glaze_physics_collision_Filter.CHECK(proxyA.filter,proxyB.filter)) return false;
 		var collided = false;
 		if(proxyA.isSensor || proxyB.isSensor) collided = glaze_physics_collision_Intersect.StaticAABBvsStaticAABB(proxyA.aabb.position,proxyA.aabb.extents,proxyB.aabb.position,proxyB.aabb.extents,this.contact); else if(!proxyA.isStatic && !proxyB.isStatic) {
@@ -5253,6 +5410,86 @@ glaze_render_renderers_webgl_IRenderer.__name__ = ["glaze","render","renderers",
 glaze_render_renderers_webgl_IRenderer.prototype = {
 	__class__: glaze_render_renderers_webgl_IRenderer
 };
+var glaze_render_renderers_webgl_FBOLighting = function() {
+	this.fullReset = true;
+	this.maxLights = 32;
+};
+glaze_render_renderers_webgl_FBOLighting.__name__ = ["glaze","render","renderers","webgl","FBOLighting"];
+glaze_render_renderers_webgl_FBOLighting.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
+glaze_render_renderers_webgl_FBOLighting.prototype = {
+	Init: function(gl,camera) {
+		this.gl = gl;
+		this.camera = camera;
+		this.gridSize = 4;
+		this.viewportSize = new glaze_geom_Vector2();
+		this.scaledViewportSize = new Float32Array(2);
+		this.quadVertBuffer = gl.createBuffer();
+		gl.bindBuffer(34962,this.quadVertBuffer);
+		var quadVerts = new Float32Array([-1,1,1,1,1,-1,1,-1,-1,-1,-1,1]);
+		gl.bufferData(34962,quadVerts,35044);
+		gl.bufferData(34962,quadVerts,35044);
+		this.screenShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER));
+		this.surfaceShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER));
+		this.surface = new glaze_render_texture_BaseTexture(gl,800 / this.gridSize | 0,640 / this.gridSize | 0);
+		this.lightData = new Float32Array(this.maxLights * 4 * 4);
+		this.lightDataTexture = new glaze_render_texture_BaseTexture(gl,this.lightData.length,1,true);
+		this.reset();
+	}
+	,Resize: function(width,height) {
+		this.viewportSize.x = width;
+		this.viewportSize.y = height;
+	}
+	,reset: function() {
+		this.indexRun = 0;
+		this.lightCount = 0;
+	}
+	,addLight: function(x,y,intensity,red,green,blue) {
+		if(this.lightCount++ == this.maxLights - 1) return;
+		this.lightData[this.indexRun++] = x;
+		this.lightData[this.indexRun++] = y;
+		this.lightData[this.indexRun++] = intensity;
+		this.lightData[this.indexRun++] = (red << 16 | green << 8 | blue) / 16777216;
+	}
+	,drawSurface: function() {
+		this.addLight(0,0,0,0,0,0);
+		var x = this.camera.position.x;
+		var y = this.camera.position.y;
+		this.lightDataTexture.bind(0);
+		this.gl.texImage2D(3553,0,6408,8,8,0,6408,5126,this.lightData);
+		this.gl.clearColor(1,1,1,1);
+		this.gl.clear(16384);
+		this.gl.colorMask(true,true,true,true);
+		this.gl.useProgram(this.surfaceShader.program);
+		this.gl.uniform2fv(this.surfaceShader.uniform.viewportSize,this.scaledViewportSize);
+		this.gl.uniform2f(this.surfaceShader.uniform.resolution,800,640);
+		this.gl.uniform2f(this.surfaceShader.uniform.viewOffset,-x,-y);
+		this.gl.uniform2f(this.surfaceShader.uniform.gridSize,this.gridSize,this.gridSize);
+		this.gl.uniform1i(this.surfaceShader.uniform.numLights,this.maxLights);
+		this.gl.uniform1i(this.surfaceShader.uniform.texture,0);
+		this.gl.bindBuffer(34962,this.quadVertBuffer);
+		this.gl.vertexAttribPointer(this.surfaceShader.attribute.position,2,5126,false,0,0);
+		this.gl.drawArrays(4,0,6);
+	}
+	,Render: function(clip) {
+		var x = this.camera.position.x;
+		var y = this.camera.position.y;
+		this.surface.drawTo($bind(this,this.drawSurface));
+		this.gl.enable(3042);
+		this.gl.blendFunc(774,0);
+		this.gl.useProgram(this.screenShader.program);
+		this.gl.uniform2fv(this.screenShader.uniform.viewportSize,this.scaledViewportSize);
+		this.gl.uniform2f(this.screenShader.uniform.resolution,800,640);
+		this.gl.uniform2f(this.screenShader.uniform.textureOffset,-x % this.gridSize,-y % this.gridSize);
+		this.surface.bind(0);
+		this.gl.uniform1i(this.screenShader.uniform.texture,0);
+		this.gl.bindBuffer(34962,this.quadVertBuffer);
+		this.gl.vertexAttribPointer(this.screenShader.attribute.position,2,5126,false,0,0);
+		this.gl.drawArrays(4,0,6);
+		this.surface.unbind(0);
+		this.gl.disable(3042);
+	}
+	,__class__: glaze_render_renderers_webgl_FBOLighting
+};
 var glaze_render_renderers_webgl_PointSpriteLightMapRenderer = function() {
 	this.first = true;
 };
@@ -5945,6 +6182,7 @@ glaze_render_texture_TextureManager.prototype = {
 	}
 	,ParseTexturePackerJSON: function(textureConfig,id) {
 		if(!(typeof(textureConfig) == "string")) return;
+		debugger;
 		var tmp;
 		var _this = this.baseTextures;
 		if(__map_reserved[id] != null) tmp = _this.getReserved(id); else tmp = _this.h[id];
@@ -5957,7 +6195,7 @@ glaze_render_texture_TextureManager.prototype = {
 			++_g;
 			var frame = Reflect.field(textureData.frames,prop);
 			var _this1 = this.textures;
-			var value = new glaze_render_texture_Texture(baseTexture,new glaze_geom_Rectangle(Std.parseInt(frame.frame.x),Std.parseInt(frame.frame.y),Std.parseInt(frame.frame.w),Std.parseInt(frame.frame.h)),new glaze_geom_Vector2(parseFloat(frame.pivot.x),parseFloat(frame.pivot.y)));
+			var value = new glaze_render_texture_Texture(baseTexture,new glaze_geom_Rectangle(frame.frame.x,frame.frame.y,frame.frame.w,frame.frame.h),new glaze_geom_Vector2(frame.pivot.x,frame.pivot.y));
 			if(__map_reserved[prop] != null) _this1.setReserved(prop,value); else _this1.h[prop] = value;
 		}
 	}
@@ -6981,6 +7219,34 @@ glaze_util_Random.RandomInteger = function(min,max) {
 glaze_util_Random.PseudoFloat = function() {
 	glaze_util_Random.PseudoRandomSeed = (glaze_util_Random.PseudoRandomSeed * 9301 + 49297) % 233280;
 	return glaze_util_Random.PseudoRandomSeed / 233280.0;
+};
+var glaze_util_StateChangeProxy = function() {
+	this.map = new haxe_ds_StringMap();
+};
+glaze_util_StateChangeProxy.__name__ = ["glaze","util","StateChangeProxy"];
+glaze_util_StateChangeProxy.prototype = {
+	registerState: function(state) {
+		state.onChanged.add($bind(this,this.onStateChange));
+	}
+	,onStateChange: function(state) {
+		var tmp;
+		var _this = this.map;
+		var key = state.getState();
+		if(__map_reserved[key] != null) tmp = _this.getReserved(key); else tmp = _this.h[key];
+		var f = tmp;
+		if(f != null) f(state);
+	}
+	,unregisterState: function(state) {
+		state.onChanged.remove($bind(this,this.onStateChange));
+	}
+	,registerStateHandler: function(stateName,f) {
+		var _this = this.map;
+		if(__map_reserved[stateName] != null) _this.setReserved(stateName,f); else _this.h[stateName] = f;
+	}
+	,unregisterStateHandler: function(stateName) {
+		this.map.remove(stateName);
+	}
+	,__class__: glaze_util_StateChangeProxy
 };
 var haxe_IMap = function() { };
 haxe_IMap.__name__ = ["haxe","IMap"];
@@ -8674,9 +8940,11 @@ Xml.Comment = 3;
 Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
+exile_components_BeeHive.NAME = "BeeHive";
 exile_components_Door.NAME = "Door";
 exile_components_Player.NAME = "Player";
 exile_components_Projectile.NAME = "Projectile";
+exile_components_Teleporter.NAME = "Teleporter";
 exile_util_CharacterController.WALK_FORCE = 20;
 exile_util_CharacterController.AIR_CONTROL_FORCE = 10;
 exile_util_CharacterController.JUMP_FORCE = 1000;
@@ -8750,6 +9018,7 @@ glaze_ds_EntityCollection.itempool = (function($this) {
 	$r = pool;
 	return $r;
 }(this));
+glaze_eco_core_Entity.DESTROY = "destroy";
 glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_Destroy.NAME = "Destroy";
@@ -8781,6 +9050,10 @@ glaze_physics_collision_Map.ROUNDUP = .5;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
+glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
+glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER = ["precision mediump float;","precision mediump int;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 viewOffset;","uniform vec2 gridSize;","uniform int maxLights;","vec4 accumulatedLight = vec4(0.0,0.0,0.0,1.0);","void applyLight(vec2 tilePos,vec4 light)","{","   vec2 dist = tilePos-light.xy;","   float intensity = 1.0 - (dist.x*dist.x+dist.y*dist.y)/(light.z*light.z);","   intensity = clamp(intensity,0.0,1.0);","   intensity = intensity * intensity;","   vec3 unpackedValues = vec3(1.0, 256.0, 65536.0);","   unpackedValues = fract(unpackedValues * light.w);","   accumulatedLight.xyz =  max(unpackedValues*intensity,accumulatedLight.xyz);","}","void main(void) {","   vec2 tilePos = viewOffset + (gl_FragCoord.xy * gridSize) + gridSize/2.0;","   float index = 0.0;","   for (int i=0; i<32; i++) {","       vec4 lightData = texture2D(texture,vec2(index,0.0));","       if (lightData.z==0.0) break;","       applyLight(tilePos,lightData);","       index+=1.0/32.0;","   }","   gl_FragColor = accumulatedLight;","}"];
+glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
+glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER = ["precision mediump float;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 textureOffset;","void main(void) {","    vec2 uv = (gl_FragCoord.xy)/(resolution.xy);","    uv.y = 1.0-uv.y;","    gl_FragColor = texture2D(texture,uv);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];

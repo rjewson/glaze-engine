@@ -1,9 +1,13 @@
 package;
 
+import exile.components.BeeHive;
 import exile.components.Door;
 import exile.components.Player;
+import exile.components.Teleporter;
+import exile.systems.BeeHiveSystem;
 import exile.systems.DoorSystem;
 import exile.systems.PlayerSystem;
+import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
@@ -14,6 +18,7 @@ import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
 import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
+import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
 import glaze.engine.components.State;
@@ -44,6 +49,7 @@ import glaze.physics.systems.PhysicsMoveableSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
+import glaze.render.renderers.webgl.FBOLighting;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
 import glaze.tmx.TmxMap;
@@ -60,12 +66,12 @@ class GameTestA extends GameEngine {
     public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
     public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
     public static inline var TILE_MAP_DATA_2:String = "data/spelunky1.png";
-
+  
     var tmxMap:TmxMap;
     var player:Entity;
     var playerFilter:Filter;
     var holderFilter:Filter;
-    var renderSystem:RenderSystem;    
+    var renderSystem:RenderSystem;     
     var filterSupport:FilterSupport;
     var messageBus:MessageBus;
 
@@ -93,7 +99,7 @@ class GameTestA extends GameEngine {
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
               
- 
+  
         var spriteRender = new SpriteRenderer();
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
@@ -135,23 +141,26 @@ class GameTestA extends GameEngine {
         /*     
          * Lighting RnD
          */
-        // var lightSystem = new glaze.lighting.systems.LightingSystem(map);
+        //var lightSystem = new glaze.lighting.systems.LightingSystem(map);
         // renderSystem.renderer.AddRenderer(lightSystem.renderer);
+
+        //This one
         // var lightSystem = new glaze.lighting.systems.PointLightingSystem(map);
         // renderSystem.renderer.AddRenderer(lightSystem.renderer);
-        // var fboLighting = new FBOLighting();
-        // renderSystem.renderer.AddRenderer(fboLighting);
 
         aiphase.addSystem(new BehaviourSystem());  
         aiphase.addSystem(new StateSystem(messageBus));  
         aiphase.addSystem(new CollidableSwitchSystem(messageBus));  
         aiphase.addSystem(new DoorSystem());                                                 
+        aiphase.addSystem(new TeleporterSystem());                                                 
+        aiphase.addSystem(new BeeHiveSystem());                                                 
 
         corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
+        // and this one
         // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem); 
          
@@ -228,6 +237,25 @@ class GameTestA extends GameEngine {
             new Fixed(),
             new CollidableSwitch(1000,["doorA"])
         ],"turret");        
+
+        engine.createEntity([
+            new Position(300,32+16),  
+            new Extents(16,16),
+            new PhysicsCollision(true,null,[]),
+            new Fixed(),
+            new Teleporter(new Vector2(100,100)),
+            new ParticleEmitters([new glaze.particle.emitter.ScanLineEmitter(200,100,600,10)]),
+            new State(["on","off"],0,[])
+            ],"teleporter");
+
+        engine.createEntity([
+            new Position(20*32,4*32),  
+            new Extents(16,16),
+            new Display("turretA.png"), 
+            new PhysicsCollision(false,null,[]),
+            new Fixed(),
+            new BeeHive(3)
+        ],"BeeHive"); 
 
     }
 

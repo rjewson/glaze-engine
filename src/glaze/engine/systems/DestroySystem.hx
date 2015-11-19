@@ -24,7 +24,7 @@ class DestroySystem extends System {
         while (count>0) {
             var entity = view.entities[next];
             if ((entity.getComponent(Destroy).count--)<=0) {
-                engine.destroyEntity(entity);
+                entity.destroy();
             } else {
                 next++;
             }
