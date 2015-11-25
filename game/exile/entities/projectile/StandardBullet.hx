@@ -62,10 +62,10 @@ class StandardBullet {
             new Display("projectile1.png"), 
             new PhysicsBody(bulletBody),
             new Moveable(),
-            new PhysicsCollision(false,filter,[]),  
+            new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
             new Projectile({ttl:1000,bounce:1,power:10,range:32}),
-            new Health(10,10,0,onNoHealth)
+            new Health(10,10,0)
             // new Script(behavior),
             // new Steering([
             //     new Seek(new Vector2(0,0))
@@ -85,9 +85,5 @@ class StandardBullet {
         return bullet;
 
 	}
-
-    public static function onNoHealth() {
-        trace("no health");
-    }
 
 }

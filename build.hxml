@@ -8,6 +8,6 @@
 -lib compiletime
 -main GameTestA
 #-debug
-# --no-traces
+#--no-traces
 -D analyzer
 -cmd osascript bin/refreshTab

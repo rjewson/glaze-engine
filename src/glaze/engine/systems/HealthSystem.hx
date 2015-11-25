@@ -20,7 +20,10 @@ class HealthSystem extends System {
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
             var health = entity.getComponent(Health);
-            health.currentHealth = Math.min(health.maxHealth,health.currentHealth+(health.recoveryPerMs*delta));
+            if (health.currentHealth<=0) {
+            } else {
+                health.currentHealth = Math.min(health.maxHealth,health.currentHealth+(health.recoveryPerMs*delta));                
+            }
         }
     }
 

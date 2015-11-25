@@ -92,7 +92,7 @@ class Intersect
                         proxyB.aabb.position,
                         proxyB.aabb.extents,
                         contact); 
-                // if (collided==true) trace("hit");           
+                if (collided==true) trace("hit");           
             }
         } else {
             //Were just left with static<>dynamic collisions

@@ -6,6 +6,7 @@ import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
+import glaze.engine.components.Health;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
@@ -37,6 +38,7 @@ class Bee {
 
         var bee = engine.createEntity([
             position, 
+            new exile.components.Bee(),
             new Extents(3,3),
             new Display("projectile1.png"), 
             new PhysicsBody(beeBody), 
@@ -47,7 +49,8 @@ class Bee {
             new Light(64,1,1,1,255,255,0),
             new Steering([
                 new Wander()
-                ])
+                ]),
+            new Health(10,10,0)
         ],"bee"); 
 
         return bee; 	    

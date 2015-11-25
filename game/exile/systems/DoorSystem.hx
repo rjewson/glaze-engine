@@ -23,9 +23,6 @@ class DoorSystem extends System {
     override public function entityAdded(entity:Entity) {
     	var state = entity.getComponent(State);
     	scp.registerState(state);
-
-    	// state.onChanged.add(setDoorState);
-    	// setDoorState(state);
 	}
 
 	override public function entityRemoved(entity:Entity) {
@@ -34,32 +31,6 @@ class DoorSystem extends System {
 	}
 
 	override public function update(timestamp:Float,delta:Float) {
-	}
-
-	public function setDoorState(state:State) {
-		var door = state.owner.getComponent(Door);
-		if (state.getState()=="open") {
-			openDoor(state.owner);
-		} else {
-			closeDoor(state.owner);
-		}
-	}
-
-	public function openDoor(entity:Entity) {
-    	var pc = entity.getComponent(PhysicsCollision);
-	    pc.proxy.responseBias.x=0;
-	    var display = entity.getComponent(Display);
-	    display.update("dooropen.png");
-	    display.displayObject.scale.setTo(1,2);
-
-	}
-
-	public function closeDoor(entity:Entity) {
-    	var pc = entity.getComponent(PhysicsCollision);
-	    pc.proxy.responseBias.x=1;
-	   	var display = entity.getComponent(Display);
-	    display.update("door.png");
-	    display.displayObject.scale.setTo(1,1);
 	}
 
 	public function openDoor2(state:State) {

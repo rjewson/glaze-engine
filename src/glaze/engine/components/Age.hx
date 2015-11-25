@@ -14,4 +14,8 @@ class Age implements IComponent {
     	this.age = ttl;
     }
 
+	public inline function isExpired():Bool {
+		return age>ttl;
+	}
+
 }

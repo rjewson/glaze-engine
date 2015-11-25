@@ -5,7 +5,9 @@ import exile.components.Door;
 import exile.components.Player;
 import exile.components.Teleporter;
 import exile.systems.BeeHiveSystem;
+import exile.systems.BeeSystem;
 import exile.systems.DoorSystem;
+import exile.systems.GrenadeSystem;
 import exile.systems.PlayerSystem;
 import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
@@ -75,7 +77,7 @@ class GameTestA extends GameEngine {
     var filterSupport:FilterSupport;
     var messageBus:MessageBus;
 
-    public var door:Entity;
+    public var door:Entity; 
   
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
@@ -83,7 +85,18 @@ class GameTestA extends GameEngine {
     }
 
     override public function initalize() {
-           
+            
+        var bs = new glaze.ds.BitSet(32);                
+ 
+        var mustHave =  new glaze.ds.BitSet(32);
+        mustHave.set(16); 
+
+        for (i in 0...32) {
+            bs.set(i);
+            trace(bs.toString());
+            trace(bs.containsAll(mustHave));     
+        }
+
         setupMap();    
 
         var corephase = engine.createPhase(); 
@@ -135,6 +148,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new glaze.engine.systems.HeldSystem());
         physicsPhase.addSystem(new glaze.engine.systems.HoldableSystem());
         physicsPhase.addSystem(new glaze.engine.systems.HealthSystem());
+        physicsPhase.addSystem(new glaze.engine.systems.AgeSystem());
                 
         physicsPhase.addSystem(new exile.systems.ProjectileSystem(broadphase));
                   
@@ -154,6 +168,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new DoorSystem());                                                 
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
+        aiphase.addSystem(new BeeSystem(broadphase));                                                 
+        aiphase.addSystem(new GrenadeSystem(broadphase));                                                 
 
         corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
@@ -162,7 +178,7 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
         // and this one
         // corephase.addSystem(lightSystem);
-        corephase.addSystem(renderSystem); 
+        corephase.addSystem(renderSystem);   
          
         filterSupport = new FilterSupport(engine);
   
@@ -184,7 +200,7 @@ class GameTestA extends GameEngine {
             new Moveable()
         ],"player"); 
 
-        exile.entities.weapon.Grenade.create(engine,100,100);
+        exile.entities.weapon.HandGrenade.create(engine,100,100);
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
