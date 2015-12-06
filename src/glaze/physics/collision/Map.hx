@@ -142,7 +142,8 @@ class Map
         var cX = x*tileSize;
         var cY = y*tileSize;
         var d = ray.direction;
-
+        if (d.x==0.0&&d.y==0.0)
+            return true;
         var stepX:Int       = 0;
         var tMaxX:Float     = 100000000;
         var tDeltaX:Float   = 0;

@@ -3,6 +3,7 @@ package exile.entities.projectile;
 import exile.components.Projectile;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
+import glaze.engine.components.Age;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
@@ -16,7 +17,7 @@ import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 
-class StandardBullet {
+class StandardBulletFactory {
 	
 	public function new()
 	{
@@ -65,7 +66,8 @@ class StandardBullet {
             new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
             new Projectile({ttl:1000,bounce:1,power:10,range:32}),
-            new Health(10,10,0)
+            new Health(10,10,0),
+            new Age(1000)
             // new Script(behavior),
             // new Steering([
             //     new Seek(new Vector2(0,0))

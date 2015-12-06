@@ -3,6 +3,7 @@ package glaze.engine.components;
 import glaze.eco.core.Entity;
 import glaze.eco.core.IComponent;
 import glaze.geom.Vector2;
+import glaze.physics.constraint.Spring;
 
 class Holder implements IComponent {
 

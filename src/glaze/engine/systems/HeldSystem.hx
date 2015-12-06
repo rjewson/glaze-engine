@@ -16,6 +16,8 @@ import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.geom.Vector2;
+import glaze.physics.components.PhysicsConstraints;
+import glaze.physics.constraint.Spring;
 import glaze.util.Random.RandomFloat;
 
 class HeldSystem extends System {
@@ -28,16 +30,23 @@ class HeldSystem extends System {
         var body = entity.getComponent(PhysicsBody).body;
         body.velocity.setTo(0,0);
         body.skip = true;
+
+        var held = entity.getComponent(Held);
+        var holderBody = held.holder.parent.getComponent(PhysicsBody).body;
     }
 
     override public function entityRemoved(entity:Entity) {
+        // js.Lib.debug();
+        entity.getComponent(Held).holder.getComponent(Holder).drop();
         var body = entity.getComponent(PhysicsBody).body;
         body.skip = false;
     }
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
-            var bodyPosition = entity.getComponent(Position);
+            // for (i in 0...5) {
+            //     entity.getComponent(Held).spring.resolve();                
+            // }
             var holder = entity.getComponent(Held).holder;
             var holderPos = holder.getComponent(glaze.engine.components.Position).coords;
 

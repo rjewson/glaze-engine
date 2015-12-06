@@ -38,4 +38,8 @@ class State implements IComponent {
 		incrementState();
 	}
 
+	public function addState(state:String) {
+		states.push(state);
+	}
+
 }

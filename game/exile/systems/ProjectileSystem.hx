@@ -45,24 +45,7 @@ class ProjectileSystem extends System {
             if ((projectile.age<0 || projectile.bounce<=0 || health.currentHealth<0) && entity.getComponent(Destroy)==null) {
                 entity.addComponent(new Destroy(2)); 
                 entity.getComponent(glaze.engine.components.ParticleEmitters).emitters.push(new glaze.particle.emitter.Explosion(10,50));
-                bfAreaQuery.query(entity.getComponent(Position).coords,64,entity,true);
-                var item = bfAreaQuery.entityCollection.entities.head;
-                trace("found="+bfAreaQuery.entityCollection.length);
-                while (item!=null) {
-                    var health = item.entity.getComponent(Health);
-                    if (health!=null) {
-                        health.applyDamage(50);
-                    }
-                    var body = item.entity.getComponent(glaze.physics.components.PhysicsBody);
-                    if (body!=null) {
-                        var delta = body.body.position.clone();
-                        delta.minusEquals(entity.getComponent(Position).coords);
-                        delta.normalize();
-                        delta.multEquals(100);
-                        body.body.addForce(delta);
-                    }
-                    item = item.next;
-                }
+                exile.util.CombatUtils.explode(entity.getComponent(Position).coords,64,100,entity);
             }
         }
     }

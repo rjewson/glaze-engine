@@ -1,7 +1,7 @@
 package exile.systems;
 
 import exile.components.BeeHive;
-import exile.entities.creatures.Bee;
+import exile.entities.creatures.BeeFactory;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Display;
@@ -11,11 +11,8 @@ import glaze.physics.components.PhysicsCollision;
 
 class BeeHiveSystem extends System {
 	
-	public var beeFactory:Bee;
-
     public function new() {
         super([BeeHive,Viewable]);
-        beeFactory = new Bee();
     }
 
     override public function entityAdded(entity:Entity) {
@@ -33,7 +30,7 @@ class BeeHiveSystem extends System {
 			var beehive = entity.getComponent(BeeHive);
 			if (beehive.bees.length<beehive.maxBees) {
 				if (glaze.util.Random.RandomBoolean(0.01)) {
-					var newBee = beeFactory.create(engine,entity.getComponent(Position).clone());
+					var newBee = BeeFactory.create(engine,entity.getComponent(Position).clone());
 					newBee.parent = entity;
 					newBee.messages.add(beeDestroyed);
 					beehive.bees.push(newBee);

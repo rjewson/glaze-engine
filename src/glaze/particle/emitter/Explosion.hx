@@ -25,7 +25,7 @@ class Explosion implements IParticleEmitter
             var p = Random.RandomFloat(0,power*2);
             var vx = Math.cos(angle) * p;
             var vy = Math.sin(angle) * p;
-            engine.EmitParticle(position.x,position.y,vx,vy,0,1,Random.RandomInteger(300,1000),0.9,true,true,null,4,255,255,0,0);
+            engine.EmitParticle(position.x,position.y,vx,vy,0,1,Random.RandomInteger(50,200),0.99,false,true,null,4,255,255,0,0);
         }
     }
 

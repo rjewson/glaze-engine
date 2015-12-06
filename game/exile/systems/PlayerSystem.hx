@@ -7,8 +7,10 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Holder;
+import glaze.engine.components.Inventory;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
+import glaze.engine.components.State;
 import glaze.engine.components.Viewable;
 import glaze.lighting.components.Light;
 import glaze.particle.IParticleEngine;
@@ -18,6 +20,65 @@ import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 
+/*
+backspace   8
+tab 9
+enter   13
+shift   16
+ctrl    17
+alt 18
+pause/break 19
+caps lock   20
+escape  27
+page up 33
+page down   34
+end 35
+home    36
+left arrow  37
+up arrow    38
+right arrow 39
+down arrow  40
+insert  45
+delete  46
+
+0   48
+1   49
+2   50
+3   51
+4   52
+5   53
+6   54
+7   55
+8   56
+9   57
+
+a   65
+b   66
+c   67
+d   68
+e   69
+f   70
+g   71
+h   72
+i   73
+j   74
+k   75
+l   76
+m   77
+n   78
+o   79
+p   80
+q   81
+r   82
+s   83
+t   84
+u   85
+v   86
+w   87
+x   88
+y   89
+z   90
+*/
 class PlayerSystem extends System {
 
     public var particleEngine:IParticleEngine;
@@ -30,6 +91,7 @@ class PlayerSystem extends System {
     var playerLight:Entity;
     var playerHolder:Entity;
     var holder:Holder;
+    var inventory:Inventory;
 
     var characterController:CharacterController; 
 
@@ -58,12 +120,15 @@ class PlayerSystem extends System {
             ],"player light");  
 
         holder = new Holder();
+        inventory = new Inventory(4);
+
         playerHolder = engine.createEntity([
             position,
             entity.getComponent(Extents),
             holder,
-            new glaze.physics.components.PhysicsCollision(true,new Filter(),[]),
-            new Moveable()
+            new PhysicsCollision(true,new Filter(),[]),
+            new Moveable(),
+            inventory
         ],"playerHolder");
         player.addChildEntity(playerHolder);
 
@@ -93,26 +158,51 @@ class PlayerSystem extends System {
         }
         //u    
         if (input.JustPressed(85)) {
-            new exile.entities.creatures.Bee().create(engine,position.clone());
+            exile.entities.creatures.BeeFactory.create(engine,position.clone());
         }
         
         holder.hold = input.JustPressed(72);
+        // trace("x");
         if (input.JustPressed(74)) {
+            // js.Lib.debug();
             var item = holder.drop();
             if (item!=null) {
-                glaze.util.Ballistics.calcProjectileVelocity(item.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),500);        
+                glaze.util.Ballistics.calcProjectileVelocity(item.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),1000);        
             }
         }
 
+        if (input.JustPressed(81)) { //Q
+            if (holder.heldItem!=null) {
+                var state = holder.heldItem.getComponent(State);
+                if (state!=null) {
+                    state.incrementState();
+                }
+            }
+        }
+
+        if (input.JustPressed(90)) {
+            js.Lib.debug();
+            inventory.store();
+        }
+
         if (fire) {
-            var bullet = exile.entities.projectile.StandardBullet.create(engine,position.clone(),playerFilter);
+            var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter);
             glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),1500);        
 
         } 
-        
+        //'e' aim
+        if (input.Pressed(69)) {
+            var vel = input.ViewCorrectedMousePosition().clone();
+            vel.minusEquals(position.coords);
+            vel.normalize();
+            vel.multEquals(3000); 
+            particleEngine.EmitParticle(position.coords.x,position.coords.y,vel.x,vel.y,0,0,200,1,false,true,null,4,255,255,255,255);
+        }
+
     }
 
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {
+
     }
 
 

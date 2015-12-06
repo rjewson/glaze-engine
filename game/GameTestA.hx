@@ -19,6 +19,7 @@ import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
 import glaze.engine.components.Holdable;
+import glaze.engine.components.Inventory;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
@@ -32,6 +33,7 @@ import glaze.engine.factories.tmx.WaterFactory;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.CollidableSwitchSystem;
 import glaze.engine.systems.DestroySystem;
+import glaze.engine.systems.InventorySystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.StateSystem;
@@ -47,6 +49,7 @@ import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.systems.ContactRouterSystem;
 import glaze.physics.systems.PhysicsCollisionSystem;
+import glaze.physics.systems.PhysicsConstraintSystem;
 import glaze.physics.systems.PhysicsMoveableSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
@@ -98,7 +101,7 @@ class GameTestA extends GameEngine {
         }
 
         setupMap();    
-
+                    
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);
         var physicsPhase = engine.createPhase();//1000/60);    
@@ -127,15 +130,17 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);      
- 
+                             
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);   
         physicsPhase.addSystem(new PhysicsUpdateSystem());
         physicsPhase.addSystem(new SteeringSystem());
         var broadphase = new BruteforceBroadphase(map,new glaze.physics.collision.Intersect());
+        exile.util.CombatUtils.setBroadphase(broadphase);
         physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
         physicsPhase.addSystem(new PhysicsMoveableSystem(broadphase));
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
+        physicsPhase.addSystem(new PhysicsConstraintSystem());     
         physicsPhase.addSystem(new PhysicsPositionSystem());
         physicsPhase.addSystem(new ContactRouterSystem());
 
@@ -169,7 +174,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
         aiphase.addSystem(new BeeSystem(broadphase));                                                 
-        aiphase.addSystem(new GrenadeSystem(broadphase));                                                 
+        aiphase.addSystem(new GrenadeSystem(broadphase)); 
+        aiphase.addSystem(new InventorySystem());                                                
 
         corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
@@ -200,7 +206,14 @@ class GameTestA extends GameEngine {
             new Moveable()
         ],"player"); 
 
-        exile.entities.weapon.HandGrenade.create(engine,100,100);
+        // var serializer = new haxe.Serializer();
+        // serializer.serialize(new Position(0,0));
+        // var s = serializer.toString();
+        // trace(s);
+
+        // var unserializer = new haxe.Unserializer(s);
+        // trace(unserializer.unserialize());
+
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
@@ -223,12 +236,12 @@ class GameTestA extends GameEngine {
   
     public function createWind() { 
         engine.createEntity([
-            new Position(128,500),  
-            new Extents(256,256),
+            new Position(32+16,512+16),  
+            new Extents(16,256),
             new PhysicsCollision(true,null,[]),
             new Fixed(),
-            new EnvironmentForce(),
-            new Wind(1/600)
+            new EnvironmentForce(new Vector2(0,-40)),
+            new Wind(1/100)
         ],"wind");        
     }
 
@@ -299,7 +312,7 @@ return;
     }
           
     public function fireBullet(pos:Vector2,target:Vector2,velocity:Float,ttl:Float,gff:Float=1):Void {
-        var bullet = exile.entities.projectile.StandardBullet.create(engine,new Position(pos.x,pos.y),playerFilter);
+        var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,new Position(pos.x,pos.y),playerFilter);
         glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
     }    
     
@@ -312,6 +325,16 @@ return;
             1000,
             1000,
             0.1); 
+    }
+
+    public function dropGrenades() {
+        var spread = 50;
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*1,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*2,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*3,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*4,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*5,150);        
     }
 
     override public function preUpdate() {
@@ -329,8 +352,7 @@ return;
             game.loop.start();
         });       
         Browser.document.getElementById("debugbutton").addEventListener("click",function(event){
-            var x = game.door.getComponent(PhysicsCollision);
-            game.messageBus.trigger("doorA",null);
+            game.dropGrenades();
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
             untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());

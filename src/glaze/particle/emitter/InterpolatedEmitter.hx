@@ -34,7 +34,7 @@ class InterpolatedEmitter implements IParticleEmitter
             var angle = RandomFloat(0,2*Math.PI);
             var vx = Math.cos(angle) * speed*RandomFloat(0,2);
             var vy = Math.sin(angle) * speed*RandomFloat(0,2);
-            engine.EmitParticle(temp.x,temp.y,vx,vy,0,0,Std.int(600*RandomFloat(0.1,1.2)),0.99,true,true,null,4,255,255,255,255);
+            engine.EmitParticle(temp.x,temp.y,vx,vy,0,0,Std.int(400*RandomFloat(0.1,1.2)),0.99,true,true,null,4,255,255,255,255);
         }
         prevPosition.copy(position);
     }

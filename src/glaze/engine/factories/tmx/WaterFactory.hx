@@ -31,18 +31,6 @@ class WaterFactory extends TMXEntityFactory {
 		var water = CreateEntityFromCSV(Water,tmxObject.combined.get("Water"));
 		components.push(water);
 
-
-
-
-		// var components2= TMXEntityFactory.getEmptyComponentArray();
-  //       components2.push(new Position((32*33),(32*7.5)));
-  //       components2.push(new Extents(64,48));
-  //       components2.push(new PhysicsCollision(true,null));
-  //       components2.push(new PhysicsStatic());
-  //      	components2.push(new Water());
-
-// js.Lib.debug();
-
 		engine.createEntity(components,tmxObject.name);
 
 	}

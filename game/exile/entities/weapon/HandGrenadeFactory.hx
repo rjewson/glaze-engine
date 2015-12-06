@@ -1,5 +1,6 @@
 package exile.entities.weapon;
 
+import exile.components.Grenade;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Display;
@@ -15,7 +16,7 @@ import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 
-class HandGrenade {
+class HandGrenadeFactory {
 	
 	public static function create(engine:Engine,x:Float,y:Float):Entity {
 
@@ -23,14 +24,14 @@ class HandGrenade {
         body.maxScalarVelocity = 200;
  
         var grenade = engine.createEntity([
-            new Position(336,150),  
+            new Position(x,y),  
             new Display("grenade.png"), 
             new Extents(8,8),
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
             new PhysicsBody(body),
             new Holdable(),
-            new exile.components.Grenade(),
+            new Grenade(),
             new Health(100,100,0),
             new State(['off','on'],0,[])
         ],"grenade"); 

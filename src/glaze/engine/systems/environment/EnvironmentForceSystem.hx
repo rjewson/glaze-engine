@@ -34,8 +34,12 @@ class EnvironmentForceSystem extends System {
     }
 
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {        
-        var area = a.aabb.overlapArea(b.aabb);
-        b.body.addForce(new Vector2(0,-area/80));
+        var areaOverlap = b.aabb.overlapArea(a.aabb);
+        var percent = areaOverlap/b.aabb.area();
+        //trace(areaOverlap,percent);
+        var f = a.entity.getComponent(EnvironmentForce).direction.clone();
+        f.multEquals(percent);
+        b.body.addForce(f);
     }
 
 }
