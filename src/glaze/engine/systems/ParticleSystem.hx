@@ -2,6 +2,7 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Viewable;
@@ -12,7 +13,7 @@ class ParticleSystem extends System {
     public var particleEngine:IParticleEngine;
 
     public function new(particleEngine:IParticleEngine) {
-        super([Position,ParticleEmitters]);
+        super([Position,ParticleEmitters,Active]);
         this.particleEngine = particleEngine;
     }
 

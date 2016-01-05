@@ -5,6 +5,7 @@ import exile.util.CharacterController;
 import glaze.core.DigitalInput;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Holder;
 import glaze.engine.components.Inventory;
@@ -116,7 +117,8 @@ class PlayerSystem extends System {
             position, 
             new Light(256,1,1,0,255,255,255),
             new Viewable(),
-            new Moveable()
+            new Moveable(),
+            new Active()
             ],"player light");  
 
         holder = new Holder();
@@ -128,6 +130,7 @@ class PlayerSystem extends System {
             holder,
             new PhysicsCollision(true,new Filter(),[]),
             new Moveable(),
+            new Active(),
             inventory
         ],"playerHolder");
         player.addChildEntity(playerHolder);
@@ -161,7 +164,7 @@ class PlayerSystem extends System {
             exile.entities.creatures.BeeFactory.create(engine,position.clone());
         }
         
-        holder.hold = input.JustPressed(72);
+        holder.activate = input.JustPressed(72);
         // trace("x");
         if (input.JustPressed(74)) {
             // js.Lib.debug();
@@ -181,8 +184,11 @@ class PlayerSystem extends System {
         }
 
         if (input.JustPressed(90)) {
-            js.Lib.debug();
             inventory.store();
+        }        
+
+        if (input.JustPressed(88)) {
+            inventory.retrieve();
         }
 
         if (fire) {

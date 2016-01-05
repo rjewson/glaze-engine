@@ -3,6 +3,7 @@ package exile.systems;
 import exile.components.Grenade;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Age;
 import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
@@ -23,7 +24,7 @@ class GrenadeSystem extends System {
     var scp:StateChangeProxy;
 
     public function new(broadphase:IBroadphase) {
-        super([Grenade,PhysicsCollision,Health,State,Display]);
+        super([Grenade,PhysicsCollision,Health,State,Display,Active]);
         this.broadphase = broadphase;
         bfAreaQuery = new glaze.util.BroadphaseAreaQuery(broadphase);
 

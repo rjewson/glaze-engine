@@ -1,5 +1,6 @@
 package glaze.engine.systems;
 
+import glaze.engine.components.Active;
 import glaze.engine.components.Display;
 import glaze.engine.components.Position;
 import glaze.eco.core.Entity;
@@ -30,7 +31,7 @@ class RenderSystem extends System {
     var cameraTarget:Vector2;
 
     public function new(canvas:CanvasElement) {
-        super([Position,Display]);
+        super([Position,Display,Active]);
         this.canvas = canvas;
         initalizeWebGlRenderer();
     }

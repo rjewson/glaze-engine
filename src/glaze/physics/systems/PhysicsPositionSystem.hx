@@ -13,7 +13,7 @@ class PhysicsPositionSystem extends System {
     }
 
     override public function entityAdded(entity:Entity) {
-        trace("added");
+        
     }
 
     override public function entityRemoved(entity:Entity) {

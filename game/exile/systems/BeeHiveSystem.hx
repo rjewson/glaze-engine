@@ -4,6 +4,7 @@ import exile.components.BeeHive;
 import exile.entities.creatures.BeeFactory;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Display;
 import glaze.engine.components.Position;
 import glaze.engine.components.Viewable;
@@ -12,7 +13,7 @@ import glaze.physics.components.PhysicsCollision;
 class BeeHiveSystem extends System {
 	
     public function new() {
-        super([BeeHive,Viewable]);
+        super([BeeHive,Viewable,Active]);
     }
 
     override public function entityAdded(entity:Entity) {

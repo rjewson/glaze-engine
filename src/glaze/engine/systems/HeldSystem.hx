@@ -2,6 +2,7 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Held;
 import glaze.engine.components.Holdable;
@@ -23,7 +24,7 @@ import glaze.util.Random.RandomFloat;
 class HeldSystem extends System {
 
     public function new() {
-        super([Holdable,Held,PhysicsBody]);
+        super([Holdable,Held,PhysicsBody,Active]);
     }
 
     override public function entityAdded(entity:Entity) {
@@ -31,8 +32,11 @@ class HeldSystem extends System {
         body.velocity.setTo(0,0);
         body.skip = true;
 
-        var held = entity.getComponent(Held);
-        var holderBody = held.holder.parent.getComponent(PhysicsBody).body;
+        var holder = entity.getComponent(Held).holder;
+        var holderPos = holder.getComponent(glaze.engine.components.Position).coords;
+
+        entity.getComponent(Position).coords.copy(holderPos);
+        entity.getComponent(PhysicsBody).body.position.copy(holderPos);
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -44,9 +48,6 @@ class HeldSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
-            // for (i in 0...5) {
-            //     entity.getComponent(Held).spring.resolve();                
-            // }
             var holder = entity.getComponent(Held).holder;
             var holderPos = holder.getComponent(glaze.engine.components.Position).coords;
 

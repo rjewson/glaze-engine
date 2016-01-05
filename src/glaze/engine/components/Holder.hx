@@ -7,11 +7,20 @@ import glaze.physics.constraint.Spring;
 
 class Holder implements IComponent {
 
-	public var hold:Bool = false;
+	public var activate:Bool = false;
 	public var heldItem:Entity = null;
 
     public function new() {
     }
+
+	public function hold(item:Entity,holderEntity:Entity) {
+	    if (heldItem==null && item.getComponent(Held)==null) {
+	        var held = new Held();
+	        held.holder = holderEntity;
+	        item.addComponent(held);
+	        heldItem = item;        
+	    }
+	}
 
     public function drop() {
 	    if (heldItem!=null) {

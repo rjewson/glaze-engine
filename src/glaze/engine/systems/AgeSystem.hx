@@ -2,12 +2,13 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Age;
 
 class AgeSystem extends System {
 
     public function new() {
-        super([Age]);
+        super([Age,Active]);
     }
 
     override public function entityAdded(entity:Entity) {

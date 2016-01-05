@@ -2,6 +2,7 @@ package glaze.engine.systems.environment;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Viewable;
@@ -15,7 +16,7 @@ class WindRenderSystem extends System {
     public var particleEngine:IParticleEngine;
 
     public function new(particleEngine:IParticleEngine) {
-        super([Extents,EnvironmentForce,Wind,Viewable,PhysicsCollision]);
+        super([Extents,EnvironmentForce,Wind,Viewable,PhysicsCollision,Active]);
         this.particleEngine = particleEngine;
     }
 

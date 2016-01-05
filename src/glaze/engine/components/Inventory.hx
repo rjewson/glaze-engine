@@ -10,6 +10,7 @@ class Inventory implements IComponent {
 	public var slots:Queue<Entity>;
 	public var count:Int;
 	public var storeCB:Inventory->Void; 
+	public var retrieveCB:Inventory->Void; 
  
 	public function new(slotCount:Int) {
 		slots = new Queue(slotCount);
@@ -18,6 +19,18 @@ class Inventory implements IComponent {
 	public function store() {
 		if (storeCB!=null)
 			storeCB(this);
+	}
+
+	public function retrieve() {
+		if (retrieveCB!=null)
+			retrieveCB(this);
+	}
+
+	public function toString() {
+		var result = "";
+		for (item in slots.data)
+			result+=item.name + ":";
+		return result;
 	}
 
 }

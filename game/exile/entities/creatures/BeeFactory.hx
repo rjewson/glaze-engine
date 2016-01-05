@@ -5,6 +5,7 @@ import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
+import glaze.engine.components.Active;
 import glaze.engine.components.Age;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
@@ -48,7 +49,8 @@ class BeeFactory {
                 new Wander()
                 ]),
             new Age(10000),
-            new Health(10,10,0)
+            new Health(10,10,0),
+            new Active()
         ],"bee"); 
 
         return bee; 	    

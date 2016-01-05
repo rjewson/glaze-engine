@@ -3,6 +3,7 @@ package exile.entities.weapon;
 import exile.components.Grenade;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
+import glaze.engine.components.Active;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
@@ -18,6 +19,8 @@ import glaze.physics.components.PhysicsCollision;
 
 class HandGrenadeFactory {
 	
+    public static var count:Int = 0;
+
 	public static function create(engine:Engine,x:Float,y:Float):Entity {
 
         var body = new glaze.physics.Body(new Material());
@@ -33,8 +36,9 @@ class HandGrenadeFactory {
             new Holdable(),
             new Grenade(),
             new Health(100,100,0),
-            new State(['off','on'],0,[])
-        ],"grenade"); 
+            new State(['off','on'],0,[]),
+            new Active()
+        ],"grenade"+(count++)); 
 
         return grenade;
 

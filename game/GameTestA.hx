@@ -13,6 +13,7 @@ import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
+import glaze.engine.components.Active;
 import glaze.engine.components.CollidableSwitch;
 import glaze.engine.components.Display;
 import glaze.engine.components.EnvironmentForce;
@@ -54,6 +55,7 @@ import glaze.physics.systems.PhysicsMoveableSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
+import glaze.render.frame.Frame;
 import glaze.render.renderers.webgl.FBOLighting;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
@@ -80,8 +82,11 @@ class GameTestA extends GameEngine {
     var filterSupport:FilterSupport;
     var messageBus:MessageBus;
 
+    var animationController:glaze.animation.core.AnimationController;
+    var animation:glaze.animation.core.Animation;
+
     public var door:Entity; 
-  
+   
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
         loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,TILE_MAP_DATA_1,TILE_MAP_DATA_2]);
@@ -130,7 +135,7 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);      
-                             
+                              
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);   
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -198,22 +203,50 @@ class GameTestA extends GameEngine {
     
         player = engine.createEntity([
             new Player(),
-            new Position(300,180),
-            new Extents(30/2,72/2),
-            new Display("character1.png"),
+            new Position(300,180), 
+            new Extents((10*3)/2,(14*3)/2),
+            new Display("player/player_00.png"),
             new PhysicsBody(body),
             new PhysicsCollision(false,playerFilter,[]),
-            new Moveable()
+            new Moveable(),
+            new Active()
         ],"player"); 
 
         // var serializer = new haxe.Serializer();
         // serializer.serialize(new Position(0,0));
         // var s = serializer.toString();
-        // trace(s);
+        // trace(s);  
 
         // var unserializer = new haxe.Unserializer(s);
         // trace(unserializer.unserialize());
 
+        var frameList = new glaze.render.frame.FrameList();
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_00.png")));
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_01.png")));
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_02.png")));
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_03.png")));
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_04.png")));
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_05.png"))); //run start
+        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_06.png")));
+        frameList.addFrame(new Frame("w2",renderSystem.textureManager.textures.get("player/player_07.png")));
+        frameList.addFrame(new Frame("w3",renderSystem.textureManager.textures.get("player/player_08.png")));
+        frameList.addFrame(new Frame("w4",renderSystem.textureManager.textures.get("player/player_09.png")));
+        frameList.addFrame(new Frame("w5",renderSystem.textureManager.textures.get("player/player_10.png")));
+        frameList.addFrame(new Frame("w6",renderSystem.textureManager.textures.get("player/player_11.png")));
+        frameList.addFrame(new Frame("w7",renderSystem.textureManager.textures.get("player/player_12.png")));
+        frameList.addFrame(new Frame("w8",renderSystem.textureManager.textures.get("player/player_13.png")));
+        frameList.addFrame(new Frame("w9",renderSystem.textureManager.textures.get("player/player_14.png")));
+        frameList.addFrame(new Frame("w10",renderSystem.textureManager.textures.get("player/player_15.png")));
+        animationController = new glaze.animation.core.AnimationController(frameList);
+
+        animationController.add("idle",[0],0,false);
+        animationController.add("scratch",[2,1,2,1,2],4,false);
+        animationController.add("shrug",[3,3,3,3,3,3,4,3,3],4,false);
+        animationController.add("run",[6,7,8,9,10,11],4,true);
+        animationController.play("run");
+        player.getComponent(Display).displayObject.scale.setTo(3,3);
+        // animation = new glaze.animation.core.Animation("animation",[1,2,3,4,5,6],10,true);
+        // animation.play();
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
@@ -241,7 +274,8 @@ class GameTestA extends GameEngine {
             new PhysicsCollision(true,null,[]),
             new Fixed(),
             new EnvironmentForce(new Vector2(0,-40)),
-            new Wind(1/100)
+            new Wind(1/100),
+            new Active()
         ],"wind");        
     }
 
@@ -253,7 +287,8 @@ class GameTestA extends GameEngine {
             new PhysicsCollision(false,null,[]),
             new Fixed(),
             new Door(false,""),
-            new State(['closed','open'],0,["doorA"])
+            new State(['closed','open'],0,["doorA"]),
+            new Active()
         ],"door");        
 
         var doorSwitch = engine.createEntity([
@@ -264,7 +299,8 @@ class GameTestA extends GameEngine {
             new Extents(12,12),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
-            new CollidableSwitch(1000,["doorA"])
+            new CollidableSwitch(1000,["doorA"]),
+            new Active()
         ],"turret");        
 
         engine.createEntity([
@@ -274,7 +310,8 @@ class GameTestA extends GameEngine {
             new Fixed(),
             new Teleporter(new Vector2(100,100)),
             new ParticleEmitters([new glaze.particle.emitter.ScanLineEmitter(200,100,600,10)]),
-            new State(["on","off"],0,[])
+            new State(["on","off"],0,[]),
+            new Active()
             ],"teleporter");
 
         engine.createEntity([
@@ -283,8 +320,23 @@ class GameTestA extends GameEngine {
             new Display("turretA.png"), 
             new PhysicsCollision(false,null,[]),
             new Fixed(),
+            new Active(),
             new BeeHive(3)
         ],"BeeHive"); 
+
+
+        var body = new glaze.physics.Body(new Material());
+
+        engine.createEntity([
+            new Position(10*32,4*32),  
+            new Extents(12,12),
+            new Display("rock.png"), 
+            new PhysicsCollision(false,new Filter(),[]),
+            new Moveable(),
+            new PhysicsBody(body),
+            new Holdable(),
+            new Active()
+        ],"rock"); 
 
     }
 
@@ -339,6 +391,10 @@ return;
 
     override public function preUpdate() {
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
+        // js.Lib.debug();
+        animationController.update(60/1000);
+        animationController.getFrame().updateSprite(player.getComponent(Display).displayObject);
+        // trace(animationController.frameIndex);
     }
 
     public static function main() {

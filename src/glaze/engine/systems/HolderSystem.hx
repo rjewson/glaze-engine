@@ -2,6 +2,7 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Held;
 import glaze.engine.components.Holdable;
@@ -20,7 +21,7 @@ import glaze.util.Random.RandomFloat;
 class HolderSystem extends System {
 
     public function new() {
-        super([PhysicsCollision,Extents,Holder]);
+        super([PhysicsCollision,Extents,Holder,Active]);
     }
 
     override public function entityAdded(entity:Entity) {
@@ -37,15 +38,16 @@ class HolderSystem extends System {
 
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {   
         var holder = a.entity.getComponent(Holder);
-        if (holder.hold==true) {
-            trace("hollld");
-            var holdable = b.entity.getComponent(Holdable);
-            if (holder.heldItem==null && b.entity.getComponent(Held)==null) {
-                var held = new Held();
-                held.holder = a.entity;
-                b.entity.addComponent(held);
-                holder.heldItem = b.entity;
-            }
+        if (holder.activate==true) {
+            holder.hold(b.entity,a.entity);
+            // trace("hollld");
+            // var holdable = b.entity.getComponent(Holdable);
+            // if (holder.heldItem==null && b.entity.getComponent(Held)==null) {
+            //     var held = new Held();
+            //     held.holder = a.entity;
+            //     b.entity.addComponent(held);
+            //     holder.heldItem = b.entity;
+            // }
         }
     }
 

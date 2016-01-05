@@ -1,6 +1,7 @@
 package glaze.engine.factories.tmx;
 
 import glaze.eco.core.Engine;
+import glaze.engine.components.Active;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
 import glaze.engine.components.Position;
@@ -28,6 +29,8 @@ class WaterFactory extends TMXEntityFactory {
 		components.push(TMXEntityFactory.getExtents(tmxObject));
         components.push(new PhysicsCollision(true,null,[]));
         components.push(new Fixed());
+       	components.push(new Active());
+
 		var water = CreateEntityFromCSV(Water,tmxObject.combined.get("Water"));
 		components.push(water);
 

@@ -1,6 +1,7 @@
 package glaze.engine.factories.tmx;
 
 import glaze.eco.core.Engine;
+import glaze.engine.components.Active;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
 import glaze.engine.factories.tmx.TMXEntityFactory;
@@ -32,6 +33,7 @@ class LightFactory extends TMXEntityFactory {
 
 		components.push(extents);
 		components.push(new Fixed());
+		components.push(new Active());
 
 		engine.createEntity(components,tmxObject.name);
 

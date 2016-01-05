@@ -2,6 +2,7 @@ package glaze.engine.systems.environment;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
 import glaze.engine.components.ParticleEmitters;
@@ -20,7 +21,7 @@ class EnvironmentForceSystem extends System {
     public var particleEngine:IParticleEngine;
 
     public function new() {
-        super([PhysicsCollision,Extents,EnvironmentForce]);
+        super([PhysicsCollision,Extents,EnvironmentForce,Active]);
     }
 
     override public function entityAdded(entity:Entity) {

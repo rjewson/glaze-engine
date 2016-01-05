@@ -2,6 +2,7 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Holder;
 import glaze.engine.components.Inventory;
 
@@ -13,6 +14,7 @@ class InventorySystem extends System {
 
     override public function entityAdded(entity:Entity) {
         entity.getComponent(Inventory).storeCB = store;
+        entity.getComponent(Inventory).retrieveCB = retrieve;
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -46,8 +48,12 @@ class InventorySystem extends System {
         var entity = findEntity(inventory);
         if (entity!=null) {
             var holder = entity.getComponent(Holder);
-            if (inventory.isFull())
-                return;
+            if (holder.heldItem!=null && !inventory.slots.isFull()) {
+                var item = holder.drop();
+                item.removeComponent(item.getComponent(Active));
+                inventory.slots.enqueue(item);
+                trace(inventory.toString());
+            }            
         } 
     }
 
@@ -55,7 +61,17 @@ class InventorySystem extends System {
         var entity = findEntity(inventory);
         if (entity!=null) {
             var holder = entity.getComponent(Holder);
-
+            var nextItem = inventory.slots.dequeue();
+            if (nextItem!=null) {
+                if (holder.heldItem!=null) {
+                    var item = holder.drop();
+                    item.removeComponent(item.getComponent(Active));
+                    inventory.slots.enqueue(item);
+                }
+                nextItem.addComponent(new Active());
+                holder.hold(nextItem,entity);
+                trace(inventory.toString());
+            }
         } 
     }
 

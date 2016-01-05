@@ -2,6 +2,7 @@ package glaze.physics.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Position;
 import glaze.geom.Vector2;
 import glaze.physics.components.PhysicsBody;
@@ -13,7 +14,7 @@ class PhysicsUpdateSystem extends System {
     public var globalDamping:Float;
 
     public function new() {
-        super([Position,PhysicsBody]);
+        super([Position,PhysicsBody,Active]);
         globalForce = new Vector2(0,30); 
         globalDamping = 0.99;
     }

@@ -2,12 +2,13 @@ package glaze.engine.systems;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Health;
 
 class HealthSystem extends System {
 
     public function new() {
-        super([Health]);
+        super([Health,Active]);
     }
 
     override public function entityAdded(entity:Entity) {

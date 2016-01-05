@@ -3,6 +3,7 @@ package glaze.engine.systems;
 import glaze.ai.behaviortree.BehaviorContext;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
+import glaze.engine.components.Active;
 import glaze.engine.components.Destroy;
 import glaze.engine.components.Script;
 
