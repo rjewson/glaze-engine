@@ -10,10 +10,11 @@ import glaze.engine.components.Age;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
+import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
-import glaze.engine.components.Script; 
+import glaze.engine.components.Script;
 import glaze.lighting.components.Light;
 import glaze.physics.Body;
 import glaze.physics.components.PhysicsBody;
@@ -22,7 +23,7 @@ import glaze.physics.Material;
 import glaze.render.frame.Frame;
 import glaze.render.frame.FrameList;
 
-class BeeFactory {
+class ChickenFactory {
 
     public static var frameList:FrameList;
 
@@ -33,38 +34,35 @@ class BeeFactory {
 
 	public static function create(engine:Engine,position:Position):Entity {
 
-        var beeBody = new Body(new Material());
-        beeBody.setMass(0.1);
-        beeBody.setBounces(0);     
-        beeBody.globalForceFactor = 0;
-        beeBody.maxScalarVelocity = 100; 
-          
-        var animationController = new glaze.animation.core.AnimationController(BeeFactory.frameList);
-        animationController.add("fly",[0,1],4);
-        animationController.play("fly");
+        var chickenBody = new Body(new Material());
+        chickenBody.setMass(0.01);
+        chickenBody.setBounces(3);     
+        chickenBody.maxScalarVelocity = 1000; 
+        chickenBody.globalForceFactor = 0.5;
 
-        var bee = engine.createEntity([
+          
+        var animationController = new glaze.animation.core.AnimationController(ChickenFactory.frameList);
+        animationController.add("walk",[0,1,2,3,4,5],4);
+        animationController.play("walk");
+
+        var chicken = engine.createEntity([
             position, 
-            new Bee(),
-            new Extents((15/2)*1.5,(11/2)*1.5),
-            new Display("bat/bat00.png"), 
-            new PhysicsBody(beeBody), 
+            new exile.components.Chicken(),
+            new Extents((16/2)*2,(16/2)*2),
+            new Display("chicken/frame-001.png"), 
+            new PhysicsCollision(false,new glaze.physics.collision.Filter(),[]),
+            new PhysicsBody(chickenBody), 
             new Moveable(),
-            new PhysicsCollision(false,null,[]),  
+            new Holdable(),
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
             new glaze.animation.components.SpriteAnimation(animationController),
-            new Light(64,1,1,1,255,255,0),
-            new Steering([
-                new Wander()
-                ]),
-            new Age(10000),
             new Health(10,10,0),
             new Active()
-        ],"bee"); 
+        ],"chicken"); 
 
-        bee.getComponent(Display).displayObject.scale.setTo(1.5,1.5);
+        chicken.getComponent(Display).displayObject.scale.setTo(2,2);
 
-        return bee; 	    
+        return chicken; 	    
 	}
 
 }

@@ -8,9 +8,10 @@ import exile.systems.BeeHiveSystem;
 import exile.systems.BeeSystem;
 import exile.systems.DoorSystem;
 import exile.systems.GrenadeSystem;
-import exile.systems.PlayerSystem;
+import exile.systems.PlayerSystem; 
 import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
+import glaze.animation.systems.AnimationSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
 import glaze.engine.components.Active;
@@ -56,11 +57,13 @@ import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
 import glaze.physics.systems.PhysicsUpdateSystem;
 import glaze.render.frame.Frame;
+import glaze.render.frame.FrameList;
 import glaze.render.renderers.webgl.FBOLighting;
 import glaze.render.renderers.webgl.SpriteRenderer;
 import glaze.render.renderers.webgl.TileMap;
 import glaze.tmx.TmxMap;
 import glaze.util.MessageBus;
+import glaze.util.Random.RandomInteger;
 import js.Browser;
 import js.html.CanvasElement;
 
@@ -120,7 +123,7 @@ class GameTestA extends GameEngine {
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
               
-  
+      
         var spriteRender = new SpriteRenderer();
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
@@ -135,7 +138,7 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);      
-                              
+                               
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);   
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -187,6 +190,7 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
+        corephase.addSystem(new AnimationSystem());
         // and this one
         // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);   
@@ -197,7 +201,7 @@ class GameTestA extends GameEngine {
         playerFilter.maskBits = 0;
         playerFilter.groupIndex = 1; 
 
-        var body = new glaze.physics.Body(new Material());
+        var body = new glaze.physics.Body(new Material(1,0.3,0.2));
         body.maxScalarVelocity = 0;
         body.maxVelocity.setTo(160,1000);
     
@@ -220,7 +224,7 @@ class GameTestA extends GameEngine {
         // var unserializer = new haxe.Unserializer(s);
         // trace(unserializer.unserialize());
 
-        var frameList = new glaze.render.frame.FrameList();
+        var frameList = new FrameList();
         frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_00.png")));
         frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_01.png")));
         frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_02.png")));
@@ -237,6 +241,21 @@ class GameTestA extends GameEngine {
         frameList.addFrame(new Frame("w8",renderSystem.textureManager.textures.get("player/player_13.png")));
         frameList.addFrame(new Frame("w9",renderSystem.textureManager.textures.get("player/player_14.png")));
         frameList.addFrame(new Frame("w10",renderSystem.textureManager.textures.get("player/player_15.png")));
+
+        var batframeList = new FrameList();
+        batframeList.addFrame(new Frame("f1",renderSystem.textureManager.textures.get("bat/bat00.png")));
+        batframeList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("bat/bat01.png")));
+        exile.entities.creatures.BeeFactory.frameList = batframeList;
+
+        var chickenFrameList = new FrameList();
+        chickenFrameList.addFrame(new Frame("f1",renderSystem.textureManager.textures.get("chicken/frame-001.png")));
+        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-002.png")));
+        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-003.png")));
+        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-004.png")));
+        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-005.png")));
+        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-006.png")));
+        exile.entities.creatures.ChickenFactory.frameList = chickenFrameList;
+
         animationController = new glaze.animation.core.AnimationController(frameList);
 
         animationController.add("idle",[0],0,false);
@@ -245,6 +264,9 @@ class GameTestA extends GameEngine {
         animationController.add("run",[6,7,8,9,10,11],4,true);
         animationController.play("run");
         player.getComponent(Display).displayObject.scale.setTo(3,3);
+
+        player.addComponent(new glaze.animation.components.SpriteAnimation(animationController));
+
         // animation = new glaze.animation.core.Animation("animation",[1,2,3,4,5,6],10,true);
         // animation.play();
 
@@ -258,6 +280,8 @@ class GameTestA extends GameEngine {
         createTurret();    
         createWind();
         createDoor();
+
+        exile.entities.creatures.ChickenFactory.create(engine,new Position(300,160));
 
         loop.start();
     } 
@@ -376,7 +400,7 @@ return;
             ec.entities.head.entity.getComponent(Position).coords.clone(),
             1000,
             1000,
-            0.1); 
+            0.1);  
     }
 
     public function dropGrenades() {
@@ -389,11 +413,20 @@ return;
         exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*5,150);        
     }
 
+    public function flyChickens() {
+        for (i in 0 ... 10) {
+            var pos = player.getComponent(Position).clone();
+            var chickie = exile.entities.creatures.ChickenFactory.create(engine,pos);
+            chickie.getComponent(PhysicsBody).body.addForce(new Vector2(RandomInteger(-1000,1000),RandomInteger(-1000,100)));
+
+        }
+    }
+
     override public function preUpdate() {
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
         // js.Lib.debug();
-        animationController.update(60/1000);
-        animationController.getFrame().updateSprite(player.getComponent(Display).displayObject);
+        // animationController.update(60/1000);
+        // animationController.getFrame().updateSprite(player.getComponent(Display).displayObject);
         // trace(animationController.frameIndex);
     }
 
@@ -408,7 +441,8 @@ return;
             game.loop.start();
         });       
         Browser.document.getElementById("debugbutton").addEventListener("click",function(event){
-            game.dropGrenades();
+           // game.dropGrenades();
+            game.flyChickens();
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
             untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());

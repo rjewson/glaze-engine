@@ -23,6 +23,8 @@ class CharacterController
 
     private var jumping:Bool = false;
 
+    public var isWalking:Bool = false;
+
     public function new(input:DigitalInput,body:Body) {
         this.input = input;
         this.body = body;
@@ -68,6 +70,8 @@ class CharacterController
             var d = 10;
             if (jumping&&upDuration>1&&upDuration<d) controlForce.y -= 800/d;//(d-upDuration);
         }
+
+        isWalking = body.onGround&&(left>0||right>0);
 
         body.addForce(controlForce);
 

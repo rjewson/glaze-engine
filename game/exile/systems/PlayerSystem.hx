@@ -2,6 +2,7 @@ package exile.systems;
 
 import exile.components.Player;
 import exile.util.CharacterController;
+import glaze.animation.components.SpriteAnimation;
 import glaze.core.DigitalInput;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
@@ -94,12 +95,14 @@ class PlayerSystem extends System {
     var holder:Holder;
     var inventory:Inventory;
 
+    var animation:SpriteAnimation;
+
     var characterController:CharacterController; 
 
     var playerFilter:Filter;
 
     public function new(input:DigitalInput,particleEngine:IParticleEngine) {
-        super([Player,PhysicsCollision,PhysicsBody,Extents]);
+        super([Player,PhysicsCollision,PhysicsBody,SpriteAnimation,Extents]);
         this.input = input;
         this.particleEngine = particleEngine;
     }
@@ -137,6 +140,8 @@ class PlayerSystem extends System {
 
         playerFilter = entity.getComponent(PhysicsCollision).proxy.filter;
 
+        animation = entity.getComponent(SpriteAnimation);
+
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -145,6 +150,12 @@ class PlayerSystem extends System {
     override public function update(timestamp:Float,delta:Float) {
 
         characterController.update();
+
+        if (characterController.isWalking) {
+            animation.animationController.play("run");
+        } else {
+            animation.animationController.play("idle");
+        }
 
         var fire = input.JustPressed(32);
         var search = input.JustPressed(71);
