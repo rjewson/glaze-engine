@@ -24,11 +24,7 @@ import glaze.render.frame.FrameList;
 
 class BeeFactory {
 
-    public static var frameList:FrameList;
-
-	public function new()
-	{
-	    
+	public function new() {
 	} 
 
 	public static function create(engine:Engine,position:Position):Entity {
@@ -39,20 +35,16 @@ class BeeFactory {
         beeBody.globalForceFactor = 0;
         beeBody.maxScalarVelocity = 100; 
           
-        var animationController = new glaze.animation.core.AnimationController(BeeFactory.frameList);
-        animationController.add("fly",[0,1],4);
-        animationController.play("fly");
-
         var bee = engine.createEntity([
             position, 
             new Bee(),
             new Extents((15/2)*1.5,(11/2)*1.5),
-            new Display("bat/bat00.png"), 
+            new Display("bat"), 
             new PhysicsBody(beeBody), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
-            new glaze.animation.components.SpriteAnimation(animationController),
+            new glaze.animation.components.SpriteAnimation("bat",["fly"],"fly"),
             new Light(64,1,1,1,255,255,0),
             new Steering([
                 new Wander()

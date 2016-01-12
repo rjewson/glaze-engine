@@ -1,0 +1,99 @@
+{
+
+	"projectiles":{
+		"frames":[
+			{ "id":"standard",	"name":"projectile1.png",		"scale":{"x":1,"y":1} }
+		]
+	},
+
+	"door":{
+		"frames":[
+			{ "id":"open",		"name":"dooropen.png",		"scale":{"x":1,"y":2} },
+			{ "id":"closed",	"name":"door.png",			"scale":{"x":1,"y":1} }
+		]
+	},
+
+	"switch":{
+		"frames":[
+			{ "id":"on",		"name":"switch1.png",		"scale":{"x":2,"y":2} },
+			{ "id":"off",		"name":"switch2.png",		"scale":{"x":2,"y":2} }
+		]
+	},
+
+
+	"grenade":{
+		"frames":[
+			{ "id":"off",		"name":"grenade.png",		"scale":{"x":2,"y":2} },
+			{ "id":"on",		"name":"grenade2.png",			"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"playa":{
+				"frames":[0,1],	"looped":true,	"fps":3
+			}
+		}
+	},
+
+	"enemies":{
+		"frames":[
+			{ "id":"turret",		"name":"turretA.png",		"scale":{"x":1,"y":1} }
+		]
+	},
+
+	"items":{
+		"frames":[
+			{ "id":"rock",		"name":"rock.png",		"scale":{"x":1,"y":1} }
+		]
+	},
+
+	"player":{
+		"frames":[
+			{ "id":"w1",		"name":"player/player_00.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w2",		"name":"player/player_01.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w3",		"name":"player/player_02.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w4",		"name":"player/player_03.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w5",		"name":"player/player_04.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w6",		"name":"player/player_05.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w7",		"name":"player/player_06.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w8",		"name":"player/player_07.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w9",		"name":"player/player_08.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w10",		"name":"player/player_09.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w11",		"name":"player/player_10.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w12",		"name":"player/player_11.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w13",		"name":"player/player_12.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w14",		"name":"player/player_13.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w15",		"name":"player/player_14.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w16",		"name":"player/player_15.png",		"scale":{"x":3,"y":3} }
+		],
+		"animations":{
+			"idle":		{ "frames":[0],					"fps":0,	"looped":false },
+			"scratch":	{ "frames":[2,1,2,1,2],			"fps":4,	"looped":false },
+			"shrug":	{ "frames":[3,3,3,3,3,3,4,3,3],	"fps":4,	"looped":false },
+			"run":		{ "frames":[6,7,8,9,10,11],		"fps":4,	"looped":true }
+		}
+
+	},
+
+	"chicken":{
+		"frames":[
+			{ "id":"w1",		"name":"chicken/frame-001.png",		"scale":{"x":2,"y":2} },
+			{ "id":"w2",		"name":"chicken/frame-002.png",		"scale":{"x":2,"y":2} },
+			{ "id":"w3",		"name":"chicken/frame-003.png",		"scale":{"x":2,"y":2} },
+			{ "id":"w4",		"name":"chicken/frame-004.png",		"scale":{"x":2,"y":2} },
+			{ "id":"w5",		"name":"chicken/frame-005.png",		"scale":{"x":2,"y":2} },
+			{ "id":"w6",		"name":"chicken/frame-006.png",		"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"walk":		{ "frames":[0,1,2,3,4,5],		"fps":4,	"looped":true }
+		}
+	},
+
+	"bat":{
+		"frames":[
+			{ "id":"fly1",		"name":"bat/bat00.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly2",		"name":"bat/bat01.png",		"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"fly":		{ "frames":[0,1],		"fps":4,	"looped":true }
+		}
+	}
+}

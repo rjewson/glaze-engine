@@ -17,9 +17,12 @@ import glaze.physics.Material;
 import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
+import glaze.render.frame.FrameList;
 
 class StandardBulletFactory {
 	
+    public static var frameList:FrameList;
+
 	public function new()
 	{
 	    
@@ -61,7 +64,7 @@ class StandardBulletFactory {
         var bullet = engine.createEntity([
             position,
             new Extents(3,3),
-            new Display("projectile1.png"), 
+            new Display("projectiles","standard"), 
             new PhysicsBody(bulletBody),
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   

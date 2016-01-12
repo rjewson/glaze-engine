@@ -6,6 +6,7 @@ import glaze.eco.core.System;
 import glaze.engine.components.Display;
 import glaze.engine.components.State;
 import glaze.physics.components.PhysicsCollision;
+import glaze.render.frame.FrameList;
 import glaze.util.StateChangeProxy;
 
 class DoorSystem extends System {
@@ -37,7 +38,8 @@ class DoorSystem extends System {
     	var pc = state.owner.getComponent(PhysicsCollision);
 	    pc.proxy.responseBias.x=0;
 	    var display = state.owner.getComponent(Display);
-	    display.update("dooropen.png");
+	    // display.update("dooropen.png");
+	    display.setFrameId("open");
 	    display.displayObject.scale.setTo(1,2);
 	}
 
@@ -45,7 +47,7 @@ class DoorSystem extends System {
     	var pc = state.owner.getComponent(PhysicsCollision);
 	    pc.proxy.responseBias.x=1;
 	   	var display = state.owner.getComponent(Display);
-	    display.update("door.png");
+	    display.setFrameId("closed");
 	    display.displayObject.scale.setTo(1,1);
 	}
 

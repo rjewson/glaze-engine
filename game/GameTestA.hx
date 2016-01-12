@@ -6,11 +6,13 @@ import exile.components.Player;
 import exile.components.Teleporter;
 import exile.systems.BeeHiveSystem;
 import exile.systems.BeeSystem;
+import exile.systems.ChickenSystem;
 import exile.systems.DoorSystem;
 import exile.systems.GrenadeSystem;
 import exile.systems.PlayerSystem; 
 import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
+import glaze.animation.components.SpriteAnimation;
 import glaze.animation.systems.AnimationSystem;
 import glaze.eco.core.Entity;
 import glaze.engine.actions.FilterSupport;
@@ -71,6 +73,7 @@ class GameTestA extends GameEngine {
      
     public static inline var MAP_DATA:String = "data/testMap.tmx";
     public static inline var TEXTURE_CONFIG:String = "data/sprites.json";
+    public static inline var FRAMES_CONFIG:String = "data/frames.json";
     public static inline var TEXTURE_DATA:String = "data/sprites.png";
 
     public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
@@ -80,19 +83,16 @@ class GameTestA extends GameEngine {
     var tmxMap:TmxMap;
     var player:Entity;
     var playerFilter:Filter;
-    var holderFilter:Filter;
+    var holderFilter:Filter; 
     var renderSystem:RenderSystem;     
     var filterSupport:FilterSupport;
     var messageBus:MessageBus;
-
-    var animationController:glaze.animation.core.AnimationController;
-    var animation:glaze.animation.core.Animation;
-
-    public var door:Entity; 
+ 
+    public var door:Entity;    
    
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
-        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,TILE_MAP_DATA_1,TILE_MAP_DATA_2]);
+        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,TILE_MAP_DATA_1,TILE_MAP_DATA_2,FRAMES_CONFIG]);
     }
 
     override public function initalize() {
@@ -111,34 +111,34 @@ class GameTestA extends GameEngine {
         setupMap();    
                     
         var corephase = engine.createPhase(); 
-        var aiphase = engine.createPhase();//1000/30);
+        var aiphase = engine.createPhase();//1000/30);  
         var physicsPhase = engine.createPhase();//1000/60);    
-        
+         
         messageBus = new MessageBus();
-
+         
         renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
-        
+         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
+
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
-              
-      
-        var spriteRender = new SpriteRenderer();
+
+        var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
         var blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
-     
+
         var tileMap = new TileMap(); 
         renderSystem.renderer.AddRenderer(tileMap);    
         tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
         tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
-        tileMap.TileScale(2);      
-                               
+        tileMap.TileScale(2);        
+                              
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);   
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -165,7 +165,7 @@ class GameTestA extends GameEngine {
                 
         physicsPhase.addSystem(new exile.systems.ProjectileSystem(broadphase));
                   
-        /*     
+        /*      
          * Lighting RnD
          */
         //var lightSystem = new glaze.lighting.systems.LightingSystem(map);
@@ -181,7 +181,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new DoorSystem());                                                 
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
-        aiphase.addSystem(new BeeSystem(broadphase));                                                 
+        aiphase.addSystem(new BeeSystem(broadphase));  
+        aiphase.addSystem(new ChickenSystem(blockParticleEngine));                                               
         aiphase.addSystem(new GrenadeSystem(broadphase)); 
         aiphase.addSystem(new InventorySystem());                                                
 
@@ -190,18 +191,18 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine));
-        corephase.addSystem(new AnimationSystem());
+        corephase.addSystem(new AnimationSystem(renderSystem.frameListManager));
         // and this one
         // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);   
          
-        filterSupport = new FilterSupport(engine);
+        filterSupport = new FilterSupport(engine);  
   
         playerFilter = new Filter();
         playerFilter.maskBits = 0;
         playerFilter.groupIndex = 1; 
 
-        var body = new glaze.physics.Body(new Material(1,0.3,0.2));
+        var body = new glaze.physics.Body(new Material(1,0.3,0.1));
         body.maxScalarVelocity = 0;
         body.maxVelocity.setTo(160,1000);
     
@@ -209,7 +210,8 @@ class GameTestA extends GameEngine {
             new Player(),
             new Position(300,180), 
             new Extents((10*3)/2,(14*3)/2),
-            new Display("player/player_00.png"),
+            new Display("player"),
+            new SpriteAnimation("player",["idle","scratch","shrug","run"],"idle"),
             new PhysicsBody(body),
             new PhysicsCollision(false,playerFilter,[]),
             new Moveable(),
@@ -221,54 +223,10 @@ class GameTestA extends GameEngine {
         // var s = serializer.toString();
         // trace(s);  
 
-        // var unserializer = new haxe.Unserializer(s);
+        // var unserializer = new haxe.Unserializer(s);     
         // trace(unserializer.unserialize());
-
-        var frameList = new FrameList();
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_00.png")));
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_01.png")));
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_02.png")));
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_03.png")));
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_04.png")));
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_05.png"))); //run start
-        frameList.addFrame(new Frame("w1",renderSystem.textureManager.textures.get("player/player_06.png")));
-        frameList.addFrame(new Frame("w2",renderSystem.textureManager.textures.get("player/player_07.png")));
-        frameList.addFrame(new Frame("w3",renderSystem.textureManager.textures.get("player/player_08.png")));
-        frameList.addFrame(new Frame("w4",renderSystem.textureManager.textures.get("player/player_09.png")));
-        frameList.addFrame(new Frame("w5",renderSystem.textureManager.textures.get("player/player_10.png")));
-        frameList.addFrame(new Frame("w6",renderSystem.textureManager.textures.get("player/player_11.png")));
-        frameList.addFrame(new Frame("w7",renderSystem.textureManager.textures.get("player/player_12.png")));
-        frameList.addFrame(new Frame("w8",renderSystem.textureManager.textures.get("player/player_13.png")));
-        frameList.addFrame(new Frame("w9",renderSystem.textureManager.textures.get("player/player_14.png")));
-        frameList.addFrame(new Frame("w10",renderSystem.textureManager.textures.get("player/player_15.png")));
-
-        var batframeList = new FrameList();
-        batframeList.addFrame(new Frame("f1",renderSystem.textureManager.textures.get("bat/bat00.png")));
-        batframeList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("bat/bat01.png")));
-        exile.entities.creatures.BeeFactory.frameList = batframeList;
-
-        var chickenFrameList = new FrameList();
-        chickenFrameList.addFrame(new Frame("f1",renderSystem.textureManager.textures.get("chicken/frame-001.png")));
-        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-002.png")));
-        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-003.png")));
-        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-004.png")));
-        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-005.png")));
-        chickenFrameList.addFrame(new Frame("f2",renderSystem.textureManager.textures.get("chicken/frame-006.png")));
-        exile.entities.creatures.ChickenFactory.frameList = chickenFrameList;
-
-        animationController = new glaze.animation.core.AnimationController(frameList);
-
-        animationController.add("idle",[0],0,false);
-        animationController.add("scratch",[2,1,2,1,2],4,false);
-        animationController.add("shrug",[3,3,3,3,3,3,4,3,3],4,false);
-        animationController.add("run",[6,7,8,9,10,11],4,true);
-        animationController.play("run");
-        player.getComponent(Display).displayObject.scale.setTo(3,3);
-
-        player.addComponent(new glaze.animation.components.SpriteAnimation(animationController));
-
-        // animation = new glaze.animation.core.Animation("animation",[1,2,3,4,5,6],10,true);
-        // animation.play();
+          
+        // player.getComponent(Display).displayObject.scale.setTo(3,3);
 
         renderSystem.CameraTarget(player.getComponent(Position).coords);              
 
@@ -300,14 +258,14 @@ class GameTestA extends GameEngine {
             new EnvironmentForce(new Vector2(0,-40)),
             new Wind(1/100),
             new Active()
-        ],"wind");        
+        ],"wind");         
     }
 
     public function createDoor() {
         door = engine.createEntity([
             new Position(128,32*5.5),  
             new Extents(16,32+16),
-            new Display("door.png"),
+            new Display("door"),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
             new Door(false,""),
@@ -319,14 +277,14 @@ class GameTestA extends GameEngine {
             new Position(336,100),  
             // new Position(432,148),   
             // new Position(200,465),  
-            new Display("turretA.png"), 
-            new Extents(12,12),
+            new Display("switch"), 
+            new Extents(8,8),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
             new CollidableSwitch(1000,["doorA"]),
             new Active()
         ],"turret");        
-
+   
         engine.createEntity([
             new Position(300,32+16),  
             new Extents(16,16),
@@ -341,7 +299,7 @@ class GameTestA extends GameEngine {
         engine.createEntity([
             new Position(20*32,4*32),  
             new Extents(16,16),
-            new Display("turretA.png"), 
+            new Display("enemies","turret"), 
             new PhysicsCollision(false,null,[]),
             new Fixed(),
             new Active(),
@@ -354,7 +312,7 @@ class GameTestA extends GameEngine {
         engine.createEntity([
             new Position(10*32,4*32),  
             new Extents(12,12),
-            new Display("rock.png"), 
+            new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
             new PhysicsBody(body),

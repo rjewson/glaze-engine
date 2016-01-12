@@ -64,9 +64,9 @@ class GrenadeSystem extends System {
                 var age = entity.getComponent(Age);
                 var swapInterval = age.age>1000 ? 50 : 150;
                 if ( (Std.int(age.age/swapInterval) % 2) == 0) {
-                    entity.getComponent(Display).update("grenade2.png");
+                    entity.getComponent(Display).setFrameId("on");
                 } else {
-                    entity.getComponent(Display).update("grenade.png");                    
+                    entity.getComponent(Display).setFrameId("off");                    
                 }
                 if (age.isExpired()) {
                     grenade.pause = 4;

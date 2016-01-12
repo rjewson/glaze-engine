@@ -11,6 +11,7 @@ import glaze.geom.Vector2;
 import glaze.render.display.Camera;
 import glaze.render.display.DisplayObjectContainer;
 import glaze.render.display.Stage;
+import glaze.render.frame.FrameListManager;
 import glaze.render.renderers.webgl.WebGLRenderer;
 import glaze.render.texture.TextureManager;
 import glaze.render.display.Sprite;
@@ -23,6 +24,7 @@ class RenderSystem extends System {
     public var camera:Camera;
     public var renderer:WebGLRenderer;
     public var textureManager:TextureManager;
+    public var frameListManager:FrameListManager;
 
     public var itemContainer:DisplayObjectContainer;
 
@@ -49,6 +51,7 @@ class RenderSystem extends System {
         camera.Resize(renderer.width,renderer.height);
 
         textureManager  = new TextureManager(renderer.gl);
+        frameListManager = new FrameListManager(textureManager);
 
         itemContainer = new DisplayObjectContainer();
         itemContainer.id = "itemContainer";
@@ -58,10 +61,17 @@ class RenderSystem extends System {
     override public function entityAdded(entity:Entity) {
         var position = entity.getComponent(Position);
         var display = entity.getComponent(Display);
-        display.displayObject = new Sprite();//createSprite("",display.textureID);
-        display.onChange = onChange;
-        display.displayObject.position = position.coords;
-        updateSprite(display.displayObject,"",display.textureID);
+        if (display.displayObject==null) {
+            display.displayObject = new Sprite();
+            display.frameList = frameListManager.getFrameList(display.frameListId);
+            if (display.initialFrameId!=null) {
+                display.frame = display.frameList.getFrame(display.initialFrameId);
+            } else {
+                display.frame = display.frameList.frames[0];
+            }
+
+            display.displayObject.position = position.coords;
+        }
         itemContainer.addChild(display.displayObject);
     }
 
@@ -78,10 +88,6 @@ class RenderSystem extends System {
     //Fixme
     public function CameraTarget(target:Vector2) {
         cameraTarget = target;
-    }
-
-    function onChange(display:Display) {
-        updateSprite(display.displayObject,"",display.textureID);
     }
 
     function updateSprite(s:Sprite,id:String,tid:String) {

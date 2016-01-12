@@ -3,26 +3,33 @@ package glaze.engine.components;
 import glaze.geom.Vector2;
 import glaze.eco.core.IComponent;
 import glaze.render.display.Sprite;
+import glaze.render.frame.Frame;
+import glaze.render.frame.FrameList;
 
 class Display implements IComponent {
 
-    public var textureID:String;
-    public var offset:Vector2;
+    public var frame(default, set):Frame;
+    public var frameList:FrameList;
 
+    public var frameListId:String;
+    public var initialFrameId:String;
     public var displayObject:Sprite;
 
-    public var onChange:Display->Void;
-
-    public function new(textureID:String,offset:Vector2=null) {
-    	update(textureID,offset);
+    public function new(frameListId:String, initialFrameId:String=null) {
+    	this.frameListId = frameListId;
+    	this.initialFrameId = initialFrameId;
     }
 
-    public function update(textureID:String,offset:Vector2=null) {
-        this.textureID = textureID;
-        if (offset!=null)
-        	this.offset = offset;
-        if (onChange!=null)
-        	onChange(this);
+    private function set_frame(value:Frame):Frame {
+    	frame = value;
+    	if (displayObject!=null) {
+    		value.updateSprite(displayObject);
+    	}
+        return value;
+    }
+
+    public function setFrameId(id:String) {
+    	this.frame = frameList.getFrame(id);
     }
  
 }

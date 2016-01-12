@@ -40,7 +40,7 @@ glaze_engine_core_GameEngine.prototype = {
 };
 var GameTestA = function() {
 	glaze_engine_core_GameEngine.call(this,js_Boot.__cast(window.document.getElementById("view") , HTMLCanvasElement));
-	this.loadAssets(["data/testMap.tmx","data/sprites.json","data/sprites.png","data/spelunky-tiles.png","data/spelunky0.png","data/spelunky1.png"]);
+	this.loadAssets(["data/testMap.tmx","data/sprites.json","data/sprites.png","data/spelunky-tiles.png","data/spelunky0.png","data/spelunky1.png","data/frames.json"]);
 };
 GameTestA.__name__ = ["GameTestA"];
 GameTestA.main = function() {
@@ -91,6 +91,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var _this1 = this.assets.assets;
 		if(__map_reserved["data/sprites.json"] != null) tmp1 = _this1.getReserved("data/sprites.json"); else tmp1 = _this1.h["data/sprites.json"];
 		this.renderSystem.textureManager.ParseTexturePackerJSON(tmp1,"data/sprites.png");
+		var tmp2;
+		var _this2 = this.assets.assets;
+		if(__map_reserved["data/frames.json"] != null) tmp2 = _this2.getReserved("data/frames.json"); else tmp2 = _this2.h["data/frames.json"];
+		this.renderSystem.frameListManager.ParseFrameListJSON(tmp2);
 		var mapData = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Tile Layer 1"));
 		var collisionData = glaze_tmx_TmxLayer.LayerToCollisionData(this.tmxMap.getLayer("Tile Layer 1"));
 		var spriteRender = new glaze_render_renderers_webgl_SpriteRenderer();
@@ -100,10 +104,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
 		var tileMap = new glaze_render_renderers_webgl_TileMap();
 		this.renderSystem.renderer.AddRenderer(tileMap);
-		var tmp2;
-		var _this2 = this.assets.assets;
-		if(__map_reserved["data/spelunky-tiles.png"] != null) tmp2 = _this2.getReserved("data/spelunky-tiles.png"); else tmp2 = _this2.h["data/spelunky-tiles.png"];
-		tileMap.SetSpriteSheet(tmp2);
+		var tmp3;
+		var _this3 = this.assets.assets;
+		if(__map_reserved["data/spelunky-tiles.png"] != null) tmp3 = _this3.getReserved("data/spelunky-tiles.png"); else tmp3 = _this3.h["data/spelunky-tiles.png"];
+		tileMap.SetSpriteSheet(tmp3);
 		tileMap.SetTileLayerFromData(mapData,"base",1,1);
 		tileMap.tileSize = 16;
 		tileMap.TileScale(2);
@@ -134,135 +138,25 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		aiphase.addSystem(new exile_systems_TeleporterSystem());
 		aiphase.addSystem(new exile_systems_BeeHiveSystem());
 		aiphase.addSystem(new exile_systems_BeeSystem(broadphase));
+		aiphase.addSystem(new exile_systems_ChickenSystem(blockParticleEngine));
 		aiphase.addSystem(new exile_systems_GrenadeSystem(broadphase));
 		aiphase.addSystem(new glaze_engine_systems_InventorySystem());
 		corephase.addSystem(new glaze_engine_systems_DestroySystem());
 		corephase.addSystem(new exile_systems_PlayerSystem(this.input,blockParticleEngine));
 		corephase.addSystem(new glaze_engine_systems_ViewManagementSystem(this.renderSystem.camera));
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(blockParticleEngine));
-		corephase.addSystem(new glaze_animation_systems_AnimationSystem());
+		corephase.addSystem(new glaze_animation_systems_AnimationSystem(this.renderSystem.frameListManager));
 		corephase.addSystem(this.renderSystem);
 		this.filterSupport = new glaze_engine_actions_FilterSupport(this.engine);
 		this.playerFilter = new glaze_physics_collision_Filter();
 		this.playerFilter.maskBits = 0;
 		this.playerFilter.groupIndex = 1;
-		var body = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0.2));
+		var body = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0.1));
 		body.maxScalarVelocity = 0;
-		var _this3 = body.maxVelocity;
-		_this3.x = 160;
-		_this3.y = 1000;
-		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(15.,21.),new glaze_engine_components_Display("player/player_00.png"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
-		var frameList = new glaze_render_frame_FrameList();
-		var tmp3;
-		var _this4 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_00.png"] != null) tmp3 = _this4.getReserved("player/player_00.png"); else tmp3 = _this4.h["player/player_00.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp3));
-		var tmp4;
-		var _this5 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_01.png"] != null) tmp4 = _this5.getReserved("player/player_01.png"); else tmp4 = _this5.h["player/player_01.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp4));
-		var tmp5;
-		var _this6 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_02.png"] != null) tmp5 = _this6.getReserved("player/player_02.png"); else tmp5 = _this6.h["player/player_02.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp5));
-		var tmp6;
-		var _this7 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_03.png"] != null) tmp6 = _this7.getReserved("player/player_03.png"); else tmp6 = _this7.h["player/player_03.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp6));
-		var tmp7;
-		var _this8 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_04.png"] != null) tmp7 = _this8.getReserved("player/player_04.png"); else tmp7 = _this8.h["player/player_04.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp7));
-		var tmp8;
-		var _this9 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_05.png"] != null) tmp8 = _this9.getReserved("player/player_05.png"); else tmp8 = _this9.h["player/player_05.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp8));
-		var tmp9;
-		var _this10 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_06.png"] != null) tmp9 = _this10.getReserved("player/player_06.png"); else tmp9 = _this10.h["player/player_06.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w1",tmp9));
-		var tmp10;
-		var _this11 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_07.png"] != null) tmp10 = _this11.getReserved("player/player_07.png"); else tmp10 = _this11.h["player/player_07.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w2",tmp10));
-		var tmp11;
-		var _this12 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_08.png"] != null) tmp11 = _this12.getReserved("player/player_08.png"); else tmp11 = _this12.h["player/player_08.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w3",tmp11));
-		var tmp12;
-		var _this13 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_09.png"] != null) tmp12 = _this13.getReserved("player/player_09.png"); else tmp12 = _this13.h["player/player_09.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w4",tmp12));
-		var tmp13;
-		var _this14 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_10.png"] != null) tmp13 = _this14.getReserved("player/player_10.png"); else tmp13 = _this14.h["player/player_10.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w5",tmp13));
-		var tmp14;
-		var _this15 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_11.png"] != null) tmp14 = _this15.getReserved("player/player_11.png"); else tmp14 = _this15.h["player/player_11.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w6",tmp14));
-		var tmp15;
-		var _this16 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_12.png"] != null) tmp15 = _this16.getReserved("player/player_12.png"); else tmp15 = _this16.h["player/player_12.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w7",tmp15));
-		var tmp16;
-		var _this17 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_13.png"] != null) tmp16 = _this17.getReserved("player/player_13.png"); else tmp16 = _this17.h["player/player_13.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w8",tmp16));
-		var tmp17;
-		var _this18 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_14.png"] != null) tmp17 = _this18.getReserved("player/player_14.png"); else tmp17 = _this18.h["player/player_14.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w9",tmp17));
-		var tmp18;
-		var _this19 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["player/player_15.png"] != null) tmp18 = _this19.getReserved("player/player_15.png"); else tmp18 = _this19.h["player/player_15.png"];
-		frameList.addFrame(new glaze_render_frame_Frame("w10",tmp18));
-		var batframeList = new glaze_render_frame_FrameList();
-		var tmp19;
-		var _this20 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["bat/bat00.png"] != null) tmp19 = _this20.getReserved("bat/bat00.png"); else tmp19 = _this20.h["bat/bat00.png"];
-		batframeList.addFrame(new glaze_render_frame_Frame("f1",tmp19));
-		var tmp20;
-		var _this21 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["bat/bat01.png"] != null) tmp20 = _this21.getReserved("bat/bat01.png"); else tmp20 = _this21.h["bat/bat01.png"];
-		batframeList.addFrame(new glaze_render_frame_Frame("f2",tmp20));
-		exile_entities_creatures_BeeFactory.frameList = batframeList;
-		var chickenFrameList = new glaze_render_frame_FrameList();
-		var tmp21;
-		var _this22 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-001.png"] != null) tmp21 = _this22.getReserved("chicken/frame-001.png"); else tmp21 = _this22.h["chicken/frame-001.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f1",tmp21));
-		var tmp22;
-		var _this23 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-002.png"] != null) tmp22 = _this23.getReserved("chicken/frame-002.png"); else tmp22 = _this23.h["chicken/frame-002.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f2",tmp22));
-		var tmp23;
-		var _this24 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-003.png"] != null) tmp23 = _this24.getReserved("chicken/frame-003.png"); else tmp23 = _this24.h["chicken/frame-003.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f2",tmp23));
-		var tmp24;
-		var _this25 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-004.png"] != null) tmp24 = _this25.getReserved("chicken/frame-004.png"); else tmp24 = _this25.h["chicken/frame-004.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f2",tmp24));
-		var tmp25;
-		var _this26 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-005.png"] != null) tmp25 = _this26.getReserved("chicken/frame-005.png"); else tmp25 = _this26.h["chicken/frame-005.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f2",tmp25));
-		var tmp26;
-		var _this27 = this.renderSystem.textureManager.textures;
-		if(__map_reserved["chicken/frame-006.png"] != null) tmp26 = _this27.getReserved("chicken/frame-006.png"); else tmp26 = _this27.h["chicken/frame-006.png"];
-		chickenFrameList.addFrame(new glaze_render_frame_Frame("f2",tmp26));
-		exile_entities_creatures_ChickenFactory.frameList = chickenFrameList;
-		this.animationController = new glaze_animation_core_AnimationController(frameList);
-		this.animationController.add("idle",[0],0,false);
-		this.animationController.add("scratch",[2,1,2,1,2],4,false);
-		this.animationController.add("shrug",[3,3,3,3,3,3,4,3,3],4,false);
-		this.animationController.add("run",[6,7,8,9,10,11],4,true);
-		this.animationController.play("run");
-		var _this28 = this.player.map.Display.displayObject.scale;
-		_this28.x = 3;
-		_this28.y = 3;
-		this.player.addComponent(new glaze_animation_components_SpriteAnimation(this.animationController));
+		var _this4 = body.maxVelocity;
+		_this4.x = 160;
+		_this4.y = 1000;
+		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(15.,21.),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","run"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
 		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
@@ -288,12 +182,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.engine.createEntity([new glaze_engine_components_Position(48,528),new glaze_engine_components_Extents(16,256),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_EnvironmentForce(new glaze_geom_Vector2(0,-40)),new glaze_engine_components_Wind(0.01),new glaze_engine_components_Active()],"wind");
 	}
 	,createDoor: function() {
-		this.door = this.engine.createEntity([new glaze_engine_components_Position(128,176.),new glaze_engine_components_Extents(16,48),new glaze_engine_components_Display("door.png"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
-		this.engine.createEntity([new glaze_engine_components_Position(336,100),new glaze_engine_components_Display("turretA.png"),new glaze_engine_components_Extents(12,12),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
+		this.door = this.engine.createEntity([new glaze_engine_components_Position(128,176.),new glaze_engine_components_Extents(16,48),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
+		this.engine.createEntity([new glaze_engine_components_Position(336,100),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
 		this.engine.createEntity([new glaze_engine_components_Position(300,48),new glaze_engine_components_Extents(16,16),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(100,100)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
-		this.engine.createEntity([new glaze_engine_components_Position(640,128),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("turretA.png"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(3)],"BeeHive");
+		this.engine.createEntity([new glaze_engine_components_Position(640,128),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("enemies","turret"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(3)],"BeeHive");
 		var body = new glaze_physics_Body(new glaze_physics_Material());
-		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(12,12),new glaze_engine_components_Display("rock.png"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(12,12),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 	}
 	,createTurret: function() {
 		return;
@@ -729,10 +623,7 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	beeBody.setBounces(0);
 	beeBody.globalForceFactor = 0;
 	beeBody.maxScalarVelocity = 100;
-	var animationController = new glaze_animation_core_AnimationController(exile_entities_creatures_BeeFactory.frameList);
-	animationController.add("fly",[0,1],4);
-	animationController.play("fly");
-	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(11.25,8.25),new glaze_engine_components_Display("bat/bat00.png"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation(animationController),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(11.25,8.25),new glaze_engine_components_Display("bat"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bat",["fly"],"fly"),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
 	var _this = bee.map.Display.displayObject.scale;
 	_this.x = 1.5;
 	_this.y = 1.5;
@@ -750,13 +641,7 @@ exile_entities_creatures_ChickenFactory.create = function(engine,position) {
 	chickenBody.setBounces(3);
 	chickenBody.maxScalarVelocity = 1000;
 	chickenBody.globalForceFactor = 0.5;
-	var animationController = new glaze_animation_core_AnimationController(exile_entities_creatures_ChickenFactory.frameList);
-	animationController.add("walk",[0,1,2,3,4,5],4);
-	animationController.play("walk");
-	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(16.,16.),new glaze_engine_components_Display("chicken/frame-001.png"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(chickenBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation(animationController),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
-	var _this = chicken.map.Display.displayObject.scale;
-	_this.x = 2;
-	_this.y = 2;
+	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(16.,16.),new glaze_engine_components_Display("chicken"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(chickenBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("chicken",["walk"],"walk"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
 	return chicken;
 };
 exile_entities_creatures_ChickenFactory.prototype = {
@@ -770,7 +655,7 @@ exile_entities_projectile_StandardBulletFactory.create = function(engine,positio
 	bulletBody.setMass(0.03);
 	bulletBody.setBounces(3);
 	bulletBody.globalForceFactor = 1;
-	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectile1.png"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 1, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
+	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 1, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
 	var light = engine.createEntity([position,new glaze_lighting_components_Light(64,1,1,1,255,0,0),new glaze_engine_components_Extents(64,64)],"StandardBullet Light");
 	bullet.addChildEntity(light);
 	return bullet;
@@ -882,6 +767,33 @@ exile_systems_BeeSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	}
 	,__class__: exile_systems_BeeSystem
 });
+var exile_systems_ChickenSystem = function(particleEngine) {
+	glaze_eco_core_System.call(this,[exile_components_Chicken,glaze_physics_components_PhysicsBody]);
+	this.particleEngine = particleEngine;
+};
+exile_systems_ChickenSystem.__name__ = ["exile","systems","ChickenSystem"];
+exile_systems_ChickenSystem.__super__ = glaze_eco_core_System;
+exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			if(Math.random() < 0.05) {
+				var body = entity.map.PhysicsBody.body;
+				var dir = Math.random() < 0.5?1:-1;
+				body.addForce(new glaze_geom_Vector2(dir,-1));
+				this.particleEngine.EmitParticle(body.position.x,body.position.y,dir * -10,-100,0,5,600,1,true,true,null,4,255,255,255,255);
+			}
+		}
+	}
+	,__class__: exile_systems_ChickenSystem
+});
 var exile_systems_DoorSystem = function() {
 	glaze_eco_core_System.call(this,[exile_components_Door,glaze_physics_components_PhysicsCollision,glaze_engine_components_State,glaze_engine_components_Display]);
 	this.hasUpdate = false;
@@ -906,7 +818,7 @@ exile_systems_DoorSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		var pc = state.owner.map.PhysicsCollision;
 		pc.proxy.responseBias.x = 0;
 		var display = state.owner.map.Display;
-		display.update("dooropen.png");
+		display.setFrameId("open");
 		var _this = display.displayObject.scale;
 		_this.x = 1;
 		_this.y = 2;
@@ -915,7 +827,7 @@ exile_systems_DoorSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		var pc = state.owner.map.PhysicsCollision;
 		pc.proxy.responseBias.x = 1;
 		var display = state.owner.map.Display;
-		display.update("door.png");
+		display.setFrameId("closed");
 		var _this = display.displayObject.scale;
 		_this.x = 1;
 		_this.y = 1;
@@ -962,7 +874,7 @@ exile_systems_GrenadeSystem.prototype = $extend(glaze_eco_core_System.prototype,
 			if(state.getState() == "on") {
 				var age = entity.map.Age;
 				var swapInterval = age.age > 1000?50:150;
-				if((age.age / swapInterval | 0) % 2 == 0) entity.map.Display.update("grenade2.png"); else entity.map.Display.update("grenade.png");
+				if((age.age / swapInterval | 0) % 2 == 0) entity.map.Display.setFrameId("on"); else entity.map.Display.setFrameId("off");
 				if(age.age > age.ttl) {
 					grenade.pause = 4;
 					continue;
@@ -1554,334 +1466,35 @@ glaze_ai_steering_systems_SteeringSystem.prototype = $extend(glaze_eco_core_Syst
 	}
 	,__class__: glaze_ai_steering_systems_SteeringSystem
 });
-var glaze_animation_components_SpriteAnimation = function(animationController) {
-	this.animationController = animationController;
+var glaze_animation_components_SpriteAnimation = function(frameListId,animations,initialAnimation) {
+	this.frameListId = frameListId;
+	this.animations = animations;
+	this.initialAnimation = initialAnimation;
 };
 glaze_animation_components_SpriteAnimation.__name__ = ["glaze","animation","components","SpriteAnimation"];
 glaze_animation_components_SpriteAnimation.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_animation_components_SpriteAnimation.prototype = {
 	__class__: glaze_animation_components_SpriteAnimation
 };
-var glaze_animation_core_Animation = function(Parent,Name,Frames,FrameRate,Looped,FlipX,FlipY) {
-	if(FlipY == null) FlipY = false;
-	if(FlipX == null) FlipX = false;
-	if(Looped == null) Looped = true;
-	if(FrameRate == null) FrameRate = 0;
-	this.curIndex = 0;
-	this._frameTimer = 0;
-	this.flipY = false;
-	this.flipX = false;
-	this.reversed = false;
-	this.looped = true;
-	this.paused = true;
-	this.finished = true;
-	this.delay = 0;
-	this.curFrame = 0;
-	this.parent = Parent;
-	this.name = Name;
-	this.set_frameRate(FrameRate);
-	this._frames = Frames;
-	this.looped = Looped;
-	this.flipX = FlipX;
-	this.flipY = FlipY;
-};
-glaze_animation_core_Animation.__name__ = ["glaze","animation","core","Animation"];
-glaze_animation_core_Animation.prototype = {
-	play: function(Force,Reversed,Frame) {
-		if(Frame == null) Frame = 0;
-		if(Reversed == null) Reversed = false;
-		if(Force == null) Force = false;
-		if(!Force && !this.finished && this.reversed == Reversed) {
-			this.paused = false;
-			this.finished = false;
-			return;
-		}
-		this.reversed = Reversed;
-		this.paused = false;
-		this._frameTimer = 0;
-		var numFramesMinusOne = this._frames.length - 1;
-		if(Frame >= 0) {
-			Frame = Frame > numFramesMinusOne?numFramesMinusOne:Frame;
-			Frame = this.reversed?numFramesMinusOne - Frame:Frame;
-		}
-		if(this.delay <= 0 || Frame > numFramesMinusOne && !this.reversed || Frame < 0 && this.reversed) this.finished = true; else this.finished = false;
-		if(Frame < 0) this.set_curFrame(Math.floor(Math.random() * numFramesMinusOne)); else this.set_curFrame(Frame);
-		if(this.finished) {
-			var _this = this.parent;
-			if(_this.finishCallback != null) _this.finishCallback(this.name);
-		}
-	}
-	,restart: function() {
-		this.play(true,this.reversed);
-	}
-	,stop: function() {
-		this.finished = true;
-		this.paused = true;
-	}
-	,reset: function() {
-		this.stop();
-		this.set_curFrame(this.reversed?this._frames.length - 1:0);
-	}
-	,finish: function() {
-		this.stop();
-		this.set_curFrame(this.reversed?0:this._frames.length - 1);
-	}
-	,pause: function() {
-		this.paused = true;
-	}
-	,resume: function() {
-		this.paused = false;
-	}
-	,reverse: function() {
-		this.reversed = !this.reversed;
-		if(this.finished) this.play(false,this.reversed);
-	}
-	,update: function(elapsed) {
-		if(this.delay > 0 && !this.finished && !this.paused) {
-			this._frameTimer += elapsed;
-			while(this._frameTimer > this.delay) {
-				this._frameTimer -= this.delay;
-				if(this.looped) {
-					var numFramesMinusOne = this._frames.length - 1;
-					var tempFrame = this.reversed?numFramesMinusOne - this.curFrame:this.curFrame;
-					if(tempFrame == numFramesMinusOne) this.set_curFrame(this.reversed?numFramesMinusOne:0); else this.set_curFrame(this.reversed?this.curFrame - 1:this.curFrame + 1);
-				} else this.set_curFrame(this.reversed?this.curFrame - 1:this.curFrame + 1);
-			}
-		}
-	}
-	,set_frameRate: function(value) {
-		this.delay = 0;
-		this.frameRate = value;
-		if(value > 0) this.delay = 1.0 / value;
-		return value;
-	}
-	,set_curIndex: function(Value) {
-		this.curIndex = Value;
-		if(this.parent != null && this.parent._curAnim == this) this.parent.set_frameIndex(Value);
-		return Value;
-	}
-	,set_curFrame: function(Frame) {
-		var numFramesMinusOne = this._frames.length - 1;
-		var tempFrame = this.reversed?numFramesMinusOne - Frame:Frame;
-		if(tempFrame >= 0) {
-			if(!this.looped && tempFrame > numFramesMinusOne) {
-				this.finished = true;
-				this.curFrame = this.reversed?0:numFramesMinusOne;
-			} else this.curFrame = Frame;
-		} else this.curFrame = Math.floor(Math.random() * numFramesMinusOne);
-		this.set_curIndex(this._frames[this.curFrame]);
-		if(this.finished && this.parent != null) {
-			var _this = this.parent;
-			if(_this.finishCallback != null) _this.finishCallback(this.name);
-		}
-		return Frame;
-	}
-	,get_numFrames: function() {
-		return this._frames.length;
-	}
-	,__class__: glaze_animation_core_Animation
-};
-var glaze_animation_core_AnimationController = function(Frames) {
-	this.frameIndex = -1;
-	this._frames = Frames;
-	this._animations = new haxe_ds_StringMap();
-};
-glaze_animation_core_AnimationController.__name__ = ["glaze","animation","core","AnimationController"];
-glaze_animation_core_AnimationController.prototype = {
-	update: function(elapsed) {
-		if(this._curAnim != null) this._curAnim.update(elapsed);
-	}
-	,add: function(Name,Frames,FrameRate,Looped,FlipX,FlipY) {
-		if(FlipY == null) FlipY = false;
-		if(FlipX == null) FlipX = false;
-		if(Looped == null) Looped = true;
-		if(FrameRate == null) FrameRate = 30;
-		var framesToAdd = Frames;
-		var numFrames = framesToAdd.length - 1;
-		var i = numFrames;
-		while(i >= 0) {
-			if(framesToAdd[i] >= this._frames.frames.length) {
-				if(framesToAdd == Frames) framesToAdd = Frames.slice();
-				framesToAdd.splice(i,1);
-			}
-			i--;
-		}
-		if(framesToAdd.length > 0) {
-			var anim = new glaze_animation_core_Animation(this,Name,framesToAdd,FrameRate,Looped,FlipX,FlipY);
-			var _this = this._animations;
-			if(__map_reserved[Name] != null) _this.setReserved(Name,anim); else _this.h[Name] = anim;
-		}
-	}
-	,remove: function(Name) {
-		var tmp;
-		var _this = this._animations;
-		if(__map_reserved[Name] != null) tmp = _this.getReserved(Name); else tmp = _this.h[Name];
-		var anim = tmp;
-		if(anim != null) this._animations.remove(Name);
-	}
-	,play: function(AnimName,Force,Reversed,Frame) {
-		if(Frame == null) Frame = 0;
-		if(Reversed == null) Reversed = false;
-		if(Force == null) Force = false;
-		if(AnimName == null) {
-			if(this._curAnim != null) this._curAnim.stop();
-			this._curAnim = null;
-		}
-		var tmp;
-		if(!(AnimName == null)) {
-			var tmp2;
-			var _this = this._animations;
-			if(__map_reserved[AnimName] != null) tmp2 = _this.getReserved(AnimName); else tmp2 = _this.h[AnimName];
-			tmp = tmp2 == null;
-		} else tmp = true;
-		if(tmp) return;
-		var oldFlipX = false;
-		var oldFlipY = false;
-		if(this._curAnim != null && AnimName != this._curAnim.name) {
-			oldFlipX = this._curAnim.flipX;
-			oldFlipY = this._curAnim.flipY;
-			this._curAnim.stop();
-		}
-		var tmp1;
-		var _this1 = this._animations;
-		if(__map_reserved[AnimName] != null) tmp1 = _this1.getReserved(AnimName); else tmp1 = _this1.h[AnimName];
-		this._curAnim = tmp1;
-		this._curAnim.play(Force,Reversed,Frame);
-		if(oldFlipX != this._curAnim.flipX || oldFlipY != this._curAnim.flipY) {
-		}
-	}
-	,reset: function() {
-		if(this._curAnim != null) this._curAnim.reset();
-	}
-	,finish: function() {
-		if(this._curAnim != null) this._curAnim.finish();
-	}
-	,stop: function() {
-		if(this._curAnim != null) this._curAnim.stop();
-	}
-	,pause: function() {
-		if(this._curAnim != null) this._curAnim.pause();
-	}
-	,resume: function() {
-		if(this._curAnim != null) this._curAnim.paused = false;
-	}
-	,reverse: function() {
-		if(this._curAnim != null) this._curAnim.reverse();
-	}
-	,getByName: function(Name) {
-		var tmp;
-		var _this = this._animations;
-		if(__map_reserved[Name] != null) tmp = _this.getReserved(Name); else tmp = _this.h[Name];
-		return tmp;
-	}
-	,randomFrame: function() {
-		if(this._curAnim != null) {
-			this._curAnim.stop();
-			this._curAnim = null;
-		}
-		this.set_frameIndex(Math.floor(Math.random() * (this._frames.frames.length - 1)));
-	}
-	,fireCallback: function() {
-		if(this.callback != null) {
-			var name = this._curAnim != null?this._curAnim.name:null;
-			var number = this._curAnim != null?this._curAnim.curFrame:this.frameIndex;
-			this.callback(name,number,this.frameIndex);
-		}
-	}
-	,fireFinishCallback: function(name) {
-		if(this.finishCallback != null) this.finishCallback(name);
-	}
-	,set_frameIndex: function(Frame) {
-		if(this._frames != null) {
-			Frame = Frame % this._frames.frames.length;
-			this.frameIndex = Frame;
-			if(this.callback != null) {
-				var name = this._curAnim != null?this._curAnim.name:null;
-				var number = this._curAnim != null?this._curAnim.curFrame:this.frameIndex;
-				this.callback(name,number,this.frameIndex);
-			}
-		}
-		return this.frameIndex;
-	}
-	,get_frameName: function() {
-		return "todo";
-	}
-	,set_frameName: function(Value) {
-		var tmp;
-		if(this._frames != null) {
-			var _this = this._frames.framesHash;
-			if(__map_reserved[Value] != null) tmp = _this.existsReserved(Value); else tmp = _this.h.hasOwnProperty(Value);
-		} else tmp = false;
-		if(tmp) {
-			if(this._curAnim != null) {
-				this._curAnim.stop();
-				this._curAnim = null;
-			}
-			var tmp1;
-			var _this1 = this._frames.framesHash;
-			if(__map_reserved[Value] != null) tmp1 = _this1.getReserved(Value); else tmp1 = _this1.h[Value];
-			var frame = tmp1;
-			if(frame != null) this.set_frameIndex(HxOverrides.indexOf(this._frames.frames,frame,0));
-		}
-		return Value;
-	}
-	,get_name: function() {
-		var animName = null;
-		if(this._curAnim != null) animName = this._curAnim.name;
-		return animName;
-	}
-	,set_name: function(AnimName) {
-		this.play(AnimName);
-		return AnimName;
-	}
-	,get_curAnim: function() {
-		return this._curAnim;
-	}
-	,set_curAnim: function(Anim) {
-		if(Anim != this._curAnim) {
-			if(this._curAnim != null) this._curAnim.stop();
-			if(Anim != null) Anim.play();
-		}
-		return this._curAnim = Anim;
-	}
-	,get_paused: function() {
-		var paused = false;
-		if(this._curAnim != null) paused = this._curAnim.paused;
-		return paused;
-	}
-	,set_paused: function(Value) {
-		if(this._curAnim != null) {
-			if(Value) this._curAnim.pause(); else this._curAnim.paused = false;
-		}
-		return Value;
-	}
-	,get_finished: function() {
-		var finished = true;
-		if(this._curAnim != null) finished = this._curAnim.finished;
-		return finished;
-	}
-	,set_finished: function(Value) {
-		if(Value == true && this._curAnim != null) this._curAnim.finish();
-		return Value;
-	}
-	,get_frames: function() {
-		return this._frames.frames.length;
-	}
-	,getFrameIndex: function(Frame) {
-		return HxOverrides.indexOf(this._frames.frames,Frame,0);
-	}
-	,getFrame: function() {
-		return this._frames.frames[this.frameIndex];
-	}
-	,__class__: glaze_animation_core_AnimationController
-};
-var glaze_animation_systems_AnimationSystem = function() {
+var glaze_animation_systems_AnimationSystem = function(frameListManager) {
 	glaze_eco_core_System.call(this,[glaze_engine_components_Display,glaze_animation_components_SpriteAnimation]);
+	this.frameListManager = frameListManager;
 };
 glaze_animation_systems_AnimationSystem.__name__ = ["glaze","animation","systems","AnimationSystem"];
 glaze_animation_systems_AnimationSystem.__super__ = glaze_eco_core_System;
 glaze_animation_systems_AnimationSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
+		var animation = entity.map.SpriteAnimation;
+		var frameList = this.frameListManager.getFrameList(animation.frameListId);
+		animation.animationController = new glaze_render_animation_AnimationController(frameList);
+		var _g = 0;
+		var _g1 = animation.animations;
+		while(_g < _g1.length) {
+			var sequence = _g1[_g];
+			++_g;
+			animation.animationController.addAnimation(frameList.getAnimation(sequence).clone(animation.animationController));
+		}
+		animation.animationController.play(animation.initialAnimation);
 	}
 	,entityRemoved: function(entity) {
 	}
@@ -3082,16 +2695,20 @@ glaze_engine_components_Destroy.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Destroy.prototype = {
 	__class__: glaze_engine_components_Destroy
 };
-var glaze_engine_components_Display = function(textureID,offset) {
-	this.update(textureID,offset);
+var glaze_engine_components_Display = function(frameListId,initialFrameId) {
+	this.frameListId = frameListId;
+	this.initialFrameId = initialFrameId;
 };
 glaze_engine_components_Display.__name__ = ["glaze","engine","components","Display"];
 glaze_engine_components_Display.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Display.prototype = {
-	update: function(textureID,offset) {
-		this.textureID = textureID;
-		if(offset != null) this.offset = offset;
-		if(this.onChange != null) this.onChange(this);
+	set_frame: function(value) {
+		this.frame = value;
+		if(this.displayObject != null) value.updateSprite(this.displayObject);
+		return value;
+	}
+	,setFrameId: function(id) {
+		this.set_frame(this.frameList.getFrame(id));
 	}
 	,__class__: glaze_engine_components_Display
 };
@@ -3938,6 +3555,7 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 		this.renderer = new glaze_render_renderers_webgl_WebGLRenderer(this.stage,this.camera,this.canvas,800,640);
 		this.camera.Resize(this.renderer.width,this.renderer.height);
 		this.textureManager = new glaze_render_texture_TextureManager(this.renderer.gl);
+		this.frameListManager = new glaze_render_frame_FrameListManager(this.textureManager);
 		this.itemContainer = new glaze_render_display_DisplayObjectContainer();
 		this.itemContainer.id = "itemContainer";
 		this.camera.addChild(this.itemContainer);
@@ -3945,10 +3563,12 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 	,entityAdded: function(entity) {
 		var position = entity.map.Position;
 		var display = entity.map.Display;
-		display.displayObject = new glaze_render_display_Sprite();
-		display.onChange = $bind(this,this.onChange);
-		display.displayObject.position = position.coords;
-		this.updateSprite(display.displayObject,"",display.textureID);
+		if(display.displayObject == null) {
+			display.displayObject = new glaze_render_display_Sprite();
+			display.frameList = this.frameListManager.getFrameList(display.frameListId);
+			if(display.initialFrameId != null) display.set_frame(display.frameList.getFrame(display.initialFrameId)); else display.set_frame(display.frameList.frames[0]);
+			display.displayObject.position = position.coords;
+		}
 		this.itemContainer.addChild(display.displayObject);
 	}
 	,entityRemoved: function(entity) {
@@ -3961,9 +3581,6 @@ glaze_engine_systems_RenderSystem.prototype = $extend(glaze_eco_core_System.prot
 	}
 	,CameraTarget: function(target) {
 		this.cameraTarget = target;
-	}
-	,onChange: function(display) {
-		this.updateSprite(display.displayObject,"",display.textureID);
 	}
 	,updateSprite: function(s,id,tid) {
 		s.id = id;
@@ -5997,6 +5614,327 @@ glaze_physics_systems_PhysicsUpdateSystem.prototype = $extend(glaze_eco_core_Sys
 	}
 	,__class__: glaze_physics_systems_PhysicsUpdateSystem
 });
+var glaze_render_animation_Animation = function(Parent,Name,Frames,FrameRate,Looped,FlipX,FlipY) {
+	if(FlipY == null) FlipY = false;
+	if(FlipX == null) FlipX = false;
+	if(Looped == null) Looped = true;
+	if(FrameRate == null) FrameRate = 0;
+	this.curIndex = 0;
+	this._frameTimer = 0;
+	this.flipY = false;
+	this.flipX = false;
+	this.reversed = false;
+	this.looped = true;
+	this.paused = true;
+	this.finished = true;
+	this.delay = 0;
+	this.curFrame = 0;
+	this.parent = Parent;
+	this.name = Name;
+	this.set_frameRate(FrameRate);
+	this._frames = Frames;
+	this.looped = Looped;
+	this.flipX = FlipX;
+	this.flipY = FlipY;
+};
+glaze_render_animation_Animation.__name__ = ["glaze","render","animation","Animation"];
+glaze_render_animation_Animation.prototype = {
+	play: function(Force,Reversed,Frame) {
+		if(Frame == null) Frame = 0;
+		if(Reversed == null) Reversed = false;
+		if(Force == null) Force = false;
+		if(!Force && !this.finished && this.reversed == Reversed) {
+			this.paused = false;
+			this.finished = false;
+			return;
+		}
+		this.reversed = Reversed;
+		this.paused = false;
+		this._frameTimer = 0;
+		var numFramesMinusOne = this._frames.length - 1;
+		if(Frame >= 0) {
+			Frame = Frame > numFramesMinusOne?numFramesMinusOne:Frame;
+			Frame = this.reversed?numFramesMinusOne - Frame:Frame;
+		}
+		if(this.delay <= 0 || Frame > numFramesMinusOne && !this.reversed || Frame < 0 && this.reversed) this.finished = true; else this.finished = false;
+		if(Frame < 0) this.set_curFrame(Math.floor(Math.random() * numFramesMinusOne)); else this.set_curFrame(Frame);
+		if(this.finished) {
+			var _this = this.parent;
+			if(_this.finishCallback != null) _this.finishCallback(this.name);
+		}
+	}
+	,restart: function() {
+		this.play(true,this.reversed);
+	}
+	,stop: function() {
+		this.finished = true;
+		this.paused = true;
+	}
+	,reset: function() {
+		this.stop();
+		this.set_curFrame(this.reversed?this._frames.length - 1:0);
+	}
+	,finish: function() {
+		this.stop();
+		this.set_curFrame(this.reversed?0:this._frames.length - 1);
+	}
+	,pause: function() {
+		this.paused = true;
+	}
+	,resume: function() {
+		this.paused = false;
+	}
+	,reverse: function() {
+		this.reversed = !this.reversed;
+		if(this.finished) this.play(false,this.reversed);
+	}
+	,update: function(elapsed) {
+		if(this.delay > 0 && !this.finished && !this.paused) {
+			this._frameTimer += elapsed;
+			while(this._frameTimer > this.delay) {
+				this._frameTimer -= this.delay;
+				if(this.looped) {
+					var numFramesMinusOne = this._frames.length - 1;
+					var tempFrame = this.reversed?numFramesMinusOne - this.curFrame:this.curFrame;
+					if(tempFrame == numFramesMinusOne) this.set_curFrame(this.reversed?numFramesMinusOne:0); else this.set_curFrame(this.reversed?this.curFrame - 1:this.curFrame + 1);
+				} else this.set_curFrame(this.reversed?this.curFrame - 1:this.curFrame + 1);
+			}
+		}
+	}
+	,set_frameRate: function(value) {
+		this.delay = 0;
+		this.frameRate = value;
+		if(value > 0) this.delay = 1.0 / value;
+		return value;
+	}
+	,set_curIndex: function(Value) {
+		this.curIndex = Value;
+		if(this.parent != null && this.parent._curAnim == this) this.parent.set_frameIndex(Value);
+		return Value;
+	}
+	,set_curFrame: function(Frame) {
+		var numFramesMinusOne = this._frames.length - 1;
+		var tempFrame = this.reversed?numFramesMinusOne - Frame:Frame;
+		if(tempFrame >= 0) {
+			if(!this.looped && tempFrame > numFramesMinusOne) {
+				this.finished = true;
+				this.curFrame = this.reversed?0:numFramesMinusOne;
+			} else this.curFrame = Frame;
+		} else this.curFrame = Math.floor(Math.random() * numFramesMinusOne);
+		this.set_curIndex(this._frames[this.curFrame]);
+		if(this.finished && this.parent != null) {
+			var _this = this.parent;
+			if(_this.finishCallback != null) _this.finishCallback(this.name);
+		}
+		return Frame;
+	}
+	,get_numFrames: function() {
+		return this._frames.length;
+	}
+	,clone: function(Parent) {
+		return new glaze_render_animation_Animation(Parent,this.name,this._frames,this.frameRate,this.looped,this.flipX,this.flipY);
+	}
+	,__class__: glaze_render_animation_Animation
+};
+var glaze_render_animation_AnimationController = function(Frames) {
+	this.frameIndex = -1;
+	this._frames = Frames;
+	this._animations = new haxe_ds_StringMap();
+};
+glaze_render_animation_AnimationController.__name__ = ["glaze","render","animation","AnimationController"];
+glaze_render_animation_AnimationController.prototype = {
+	update: function(elapsed) {
+		if(this._curAnim != null) this._curAnim.update(elapsed);
+	}
+	,add: function(Name,Frames,FrameRate,Looped,FlipX,FlipY) {
+		if(FlipY == null) FlipY = false;
+		if(FlipX == null) FlipX = false;
+		if(Looped == null) Looped = true;
+		if(FrameRate == null) FrameRate = 30;
+		var framesToAdd = Frames;
+		var numFrames = framesToAdd.length - 1;
+		var i = numFrames;
+		while(i >= 0) {
+			if(framesToAdd[i] >= this._frames.frames.length) {
+				if(framesToAdd == Frames) framesToAdd = Frames.slice();
+				framesToAdd.splice(i,1);
+			}
+			i--;
+		}
+		if(framesToAdd.length > 0) {
+			var anim = new glaze_render_animation_Animation(this,Name,framesToAdd,FrameRate,Looped,FlipX,FlipY);
+			var _this = this._animations;
+			if(__map_reserved[Name] != null) _this.setReserved(Name,anim); else _this.h[Name] = anim;
+		}
+	}
+	,addAnimation: function(anim) {
+		var _this = this._animations;
+		var key = anim.name;
+		if(__map_reserved[key] != null) _this.setReserved(key,anim); else _this.h[key] = anim;
+	}
+	,remove: function(Name) {
+		var tmp;
+		var _this = this._animations;
+		if(__map_reserved[Name] != null) tmp = _this.getReserved(Name); else tmp = _this.h[Name];
+		var anim = tmp;
+		if(anim != null) this._animations.remove(Name);
+	}
+	,play: function(AnimName,Force,Reversed,Frame) {
+		if(Frame == null) Frame = 0;
+		if(Reversed == null) Reversed = false;
+		if(Force == null) Force = false;
+		if(AnimName == null) {
+			if(this._curAnim != null) this._curAnim.stop();
+			this._curAnim = null;
+		}
+		var tmp;
+		if(!(AnimName == null)) {
+			var tmp2;
+			var _this = this._animations;
+			if(__map_reserved[AnimName] != null) tmp2 = _this.getReserved(AnimName); else tmp2 = _this.h[AnimName];
+			tmp = tmp2 == null;
+		} else tmp = true;
+		if(tmp) return;
+		var oldFlipX = false;
+		var oldFlipY = false;
+		if(this._curAnim != null && AnimName != this._curAnim.name) {
+			oldFlipX = this._curAnim.flipX;
+			oldFlipY = this._curAnim.flipY;
+			this._curAnim.stop();
+		}
+		var tmp1;
+		var _this1 = this._animations;
+		if(__map_reserved[AnimName] != null) tmp1 = _this1.getReserved(AnimName); else tmp1 = _this1.h[AnimName];
+		this._curAnim = tmp1;
+		this._curAnim.play(Force,Reversed,Frame);
+		if(oldFlipX != this._curAnim.flipX || oldFlipY != this._curAnim.flipY) {
+		}
+	}
+	,reset: function() {
+		if(this._curAnim != null) this._curAnim.reset();
+	}
+	,finish: function() {
+		if(this._curAnim != null) this._curAnim.finish();
+	}
+	,stop: function() {
+		if(this._curAnim != null) this._curAnim.stop();
+	}
+	,pause: function() {
+		if(this._curAnim != null) this._curAnim.pause();
+	}
+	,resume: function() {
+		if(this._curAnim != null) this._curAnim.paused = false;
+	}
+	,reverse: function() {
+		if(this._curAnim != null) this._curAnim.reverse();
+	}
+	,getByName: function(Name) {
+		var tmp;
+		var _this = this._animations;
+		if(__map_reserved[Name] != null) tmp = _this.getReserved(Name); else tmp = _this.h[Name];
+		return tmp;
+	}
+	,randomFrame: function() {
+		if(this._curAnim != null) {
+			this._curAnim.stop();
+			this._curAnim = null;
+		}
+		this.set_frameIndex(Math.floor(Math.random() * (this._frames.frames.length - 1)));
+	}
+	,fireCallback: function() {
+		if(this.callback != null) {
+			var name = this._curAnim != null?this._curAnim.name:null;
+			var number = this._curAnim != null?this._curAnim.curFrame:this.frameIndex;
+			this.callback(name,number,this.frameIndex);
+		}
+	}
+	,fireFinishCallback: function(name) {
+		if(this.finishCallback != null) this.finishCallback(name);
+	}
+	,set_frameIndex: function(Frame) {
+		if(this._frames != null) {
+			Frame = Frame % this._frames.frames.length;
+			this.frameIndex = Frame;
+			if(this.callback != null) {
+				var name = this._curAnim != null?this._curAnim.name:null;
+				var number = this._curAnim != null?this._curAnim.curFrame:this.frameIndex;
+				this.callback(name,number,this.frameIndex);
+			}
+		}
+		return this.frameIndex;
+	}
+	,get_frameName: function() {
+		return "todo";
+	}
+	,set_frameName: function(Value) {
+		var tmp;
+		if(this._frames != null) {
+			var _this = this._frames.framesHash;
+			if(__map_reserved[Value] != null) tmp = _this.existsReserved(Value); else tmp = _this.h.hasOwnProperty(Value);
+		} else tmp = false;
+		if(tmp) {
+			if(this._curAnim != null) {
+				this._curAnim.stop();
+				this._curAnim = null;
+			}
+			var tmp1;
+			var _this1 = this._frames.framesHash;
+			if(__map_reserved[Value] != null) tmp1 = _this1.getReserved(Value); else tmp1 = _this1.h[Value];
+			var frame = tmp1;
+			if(frame != null) this.set_frameIndex(HxOverrides.indexOf(this._frames.frames,frame,0));
+		}
+		return Value;
+	}
+	,get_name: function() {
+		var animName = null;
+		if(this._curAnim != null) animName = this._curAnim.name;
+		return animName;
+	}
+	,set_name: function(AnimName) {
+		this.play(AnimName);
+		return AnimName;
+	}
+	,get_curAnim: function() {
+		return this._curAnim;
+	}
+	,set_curAnim: function(Anim) {
+		if(Anim != this._curAnim) {
+			if(this._curAnim != null) this._curAnim.stop();
+			if(Anim != null) Anim.play();
+		}
+		return this._curAnim = Anim;
+	}
+	,get_paused: function() {
+		var paused = false;
+		if(this._curAnim != null) paused = this._curAnim.paused;
+		return paused;
+	}
+	,set_paused: function(Value) {
+		if(this._curAnim != null) {
+			if(Value) this._curAnim.pause(); else this._curAnim.paused = false;
+		}
+		return Value;
+	}
+	,get_finished: function() {
+		var finished = true;
+		if(this._curAnim != null) finished = this._curAnim.finished;
+		return finished;
+	}
+	,set_finished: function(Value) {
+		if(Value == true && this._curAnim != null) this._curAnim.finish();
+		return Value;
+	}
+	,get_frames: function() {
+		return this._frames.frames.length;
+	}
+	,getFrameIndex: function(Frame) {
+		return HxOverrides.indexOf(this._frames.frames,Frame,0);
+	}
+	,getFrame: function() {
+		return this._frames.frames[this.frameIndex];
+	}
+	,__class__: glaze_render_animation_AnimationController
+};
 var glaze_render_display_DisplayObject = function() {
 	this.position = new glaze_geom_Vector2();
 	this.scale = new glaze_geom_Vector2(1,1);
@@ -6445,9 +6383,10 @@ glaze_render_display_Stage.prototype = $extend(glaze_render_display_DisplayObjec
 	}
 	,__class__: glaze_render_display_Stage
 });
-var glaze_render_frame_Frame = function(name,texture) {
+var glaze_render_frame_Frame = function(name,texture,scale) {
 	this.name = name;
 	this.texture = texture;
+	this.scale = scale;
 };
 glaze_render_frame_Frame.__name__ = ["glaze","render","frame","Frame"];
 glaze_render_frame_Frame.prototype = {
@@ -6455,12 +6394,15 @@ glaze_render_frame_Frame.prototype = {
 		sprite.texture = this.texture;
 		sprite.pivot.x = sprite.texture.frame.width * sprite.texture.pivot.x;
 		sprite.pivot.y = (sprite.texture.frame.height + 2) * sprite.texture.pivot.y;
+		sprite.scale.x = this.scale.x;
+		sprite.scale.y = this.scale.y;
 	}
 	,__class__: glaze_render_frame_Frame
 };
 var glaze_render_frame_FrameList = function() {
 	this.frames = [];
 	this.framesHash = new haxe_ds_StringMap();
+	this.animationsHash = new haxe_ds_StringMap();
 };
 glaze_render_frame_FrameList.__name__ = ["glaze","render","frame","FrameList"];
 glaze_render_frame_FrameList.prototype = {
@@ -6470,10 +6412,79 @@ glaze_render_frame_FrameList.prototype = {
 		var key = frame.name;
 		if(__map_reserved[key] != null) _this.setReserved(key,frame); else _this.h[key] = frame;
 	}
+	,getFrame: function(id) {
+		var tmp;
+		var _this = this.framesHash;
+		if(__map_reserved[id] != null) tmp = _this.getReserved(id); else tmp = _this.h[id];
+		return tmp;
+	}
+	,addAnimation: function(animation) {
+		var _this = this.animationsHash;
+		var key = animation.name;
+		if(__map_reserved[key] != null) _this.setReserved(key,animation); else _this.h[key] = animation;
+	}
+	,getAnimation: function(id) {
+		var tmp;
+		var _this = this.animationsHash;
+		if(__map_reserved[id] != null) tmp = _this.getReserved(id); else tmp = _this.h[id];
+		return tmp;
+	}
 	,get_numFrames: function() {
 		return this.frames.length;
 	}
 	,__class__: glaze_render_frame_FrameList
+};
+var glaze_render_frame_FrameListManager = function(textureManager) {
+	this.textureManager = textureManager;
+	this.frameLists = new haxe_ds_StringMap();
+};
+glaze_render_frame_FrameListManager.__name__ = ["glaze","render","frame","FrameListManager"];
+glaze_render_frame_FrameListManager.prototype = {
+	getFrameList: function(id) {
+		var tmp;
+		var _this = this.frameLists;
+		if(__map_reserved[id] != null) tmp = _this.getReserved(id); else tmp = _this.h[id];
+		return tmp;
+	}
+	,ParseFrameListJSON: function(frameListConfig) {
+		if(!(typeof(frameListConfig) == "string")) return;
+		var frameListConfigData = JSON.parse(frameListConfig);
+		var fields = Reflect.fields(frameListConfigData);
+		var _g = 0;
+		while(_g < fields.length) {
+			var prop = fields[_g];
+			++_g;
+			var frameList = new glaze_render_frame_FrameList();
+			var _this = this.frameLists;
+			if(__map_reserved[prop] != null) _this.setReserved(prop,frameList); else _this.h[prop] = frameList;
+			var framelistItem = Reflect.field(frameListConfigData,prop);
+			haxe_Log.trace(framelistItem.frames,{ fileName : "FrameListManager.hx", lineNumber : 52, className : "glaze.render.frame.FrameListManager", methodName : "ParseFrameListJSON"});
+			if(framelistItem.frames != null) {
+				var _g1 = 0;
+				var _g2 = framelistItem.frames;
+				while(_g1 < _g2.length) {
+					var frame = _g2[_g1];
+					++_g1;
+					var tmp;
+					var _this1 = this.textureManager.textures;
+					var key = frame.name;
+					if(__map_reserved[key] != null) tmp = _this1.getReserved(key); else tmp = _this1.h[key];
+					frameList.addFrame(new glaze_render_frame_Frame(frame.id,tmp,frame.scale));
+				}
+				if(framelistItem.animations != null) {
+					var animations = Reflect.fields(framelistItem.animations);
+					var _g11 = 0;
+					while(_g11 < animations.length) {
+						var animationProp = animations[_g11];
+						++_g11;
+						var animation = Reflect.field(framelistItem.animations,animationProp);
+						frameList.addAnimation(new glaze_render_animation_Animation(null,animationProp,animation.frames,animation.fps,animation.looped));
+					}
+				}
+			}
+		}
+	}
+	,__class__: glaze_render_frame_FrameListManager
 };
 var glaze_render_renderers_webgl_IRenderer = function() { };
 glaze_render_renderers_webgl_IRenderer.__name__ = ["glaze","render","renderers","webgl","IRenderer"];
@@ -10007,6 +10018,7 @@ var DataView = (Function("return typeof DataView != 'undefined' ? DataView : nul
 var Uint8Array = (Function("return typeof Uint8Array != 'undefined' ? Uint8Array : null"))() || js_html_compat_Uint8Array._new;
 GameTestA.MAP_DATA = "data/testMap.tmx";
 GameTestA.TEXTURE_CONFIG = "data/sprites.json";
+GameTestA.FRAMES_CONFIG = "data/frames.json";
 GameTestA.TEXTURE_DATA = "data/sprites.png";
 GameTestA.TILE_SPRITE_SHEET = "data/spelunky-tiles.png";
 GameTestA.TILE_MAP_DATA_1 = "data/spelunky0.png";
@@ -10103,7 +10115,7 @@ glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
 glaze_ai_steering_components_Steering.ID = 27;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 10;
+glaze_animation_components_SpriteAnimation.ID = 2;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -10122,7 +10134,7 @@ glaze_engine_components_CollidableSwitch.ID = 7;
 glaze_engine_components_Destroy.NAME = "Destroy";
 glaze_engine_components_Destroy.ID = 12;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 24;
+glaze_engine_components_Display.ID = 3;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
 glaze_engine_components_EnvironmentForce.ID = 6;
 glaze_engine_components_Extents.NAME = "Extents";
