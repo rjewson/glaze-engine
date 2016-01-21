@@ -181,7 +181,7 @@ class PlayerSystem extends System {
             // js.Lib.debug();
             var item = holder.drop();
             if (item!=null) {
-                glaze.util.Ballistics.calcProjectileVelocity(item.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),1000);        
+                glaze.util.Ballistics.calcProjectileVelocity(item.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),700);        
             }
         }
 
@@ -204,7 +204,7 @@ class PlayerSystem extends System {
 
         if (fire) {
             var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter);
-            glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),1500);        
+            glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),2500);        
 
         } 
         //'e' aim

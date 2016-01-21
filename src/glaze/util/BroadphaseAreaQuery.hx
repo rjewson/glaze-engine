@@ -32,15 +32,15 @@ class BroadphaseAreaQuery {
         // this.filterEntity = filterOwner;
 
         function addBroadphaseItem(bfproxy:BFProxy) {
-            // js.Lib.debug();
 
             if (filterEntity!=null&&bfproxy.entity==filterEntity)
                 return;
 			
 			if (visibleCheck) {
 				ray.initalize(position,bfproxy.entity.getComponent(Position).coords,0,null);
-				broadphase.CastRay(ray,null,true,true);
-				if (!ray.hit)
+				//js.Lib.debug();
+				broadphase.CastRay(ray,null,false,false); //Dont check ray against static and dynamic items
+				if (ray.hit)
 					return;
            }
 
@@ -49,7 +49,7 @@ class BroadphaseAreaQuery {
             item.perspective = aabb.position;
         }
 
-        broadphase.QueryArea(aabb,addBroadphaseItem,true,true);
+        broadphase.QueryArea(aabb,addBroadphaseItem,true,true); //Check static and dynamic items
 
 	}
 

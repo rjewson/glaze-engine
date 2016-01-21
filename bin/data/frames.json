@@ -8,8 +8,8 @@
 
 	"door":{
 		"frames":[
-			{ "id":"open",		"name":"dooropen.png",		"scale":{"x":1,"y":2} },
-			{ "id":"closed",	"name":"door.png",			"scale":{"x":1,"y":1} }
+			{ "id":"closed",	"name":"door/closed.png",	"scale":{"x":4,"y":4} },
+			{ "id":"open",		"name":"door/open.png",		"scale":{"x":4,"y":4} }
 		]
 	},
 
@@ -23,8 +23,8 @@
 
 	"grenade":{
 		"frames":[
-			{ "id":"off",		"name":"grenade.png",		"scale":{"x":2,"y":2} },
-			{ "id":"on",		"name":"grenade2.png",			"scale":{"x":2,"y":2} }
+			{ "id":"off",		"name":"grenade/basic1.png",		"scale":{"x":2,"y":2} },
+			{ "id":"on",		"name":"grenade/basic2.png",		"scale":{"x":2,"y":2} }
 		],
 		"animations":{
 			"playa":{
@@ -41,7 +41,7 @@
 
 	"items":{
 		"frames":[
-			{ "id":"rock",		"name":"rock.png",		"scale":{"x":1,"y":1} }
+			{ "id":"rock",		"name":"rock.png",		"scale":{"x":2,"y":2} }
 		]
 	},
 
@@ -89,11 +89,38 @@
 
 	"bat":{
 		"frames":[
-			{ "id":"fly1",		"name":"bat/bat00.png",		"scale":{"x":2,"y":2} },
-			{ "id":"fly2",		"name":"bat/bat01.png",		"scale":{"x":2,"y":2} }
+			{ "id":"fly1",		"name":"bat/bat00.png",		"scale":{"x":1.5,"y":1.5} },
+			{ "id":"fly2",		"name":"bat/bat01.png",		"scale":{"x":1.5,"y":1.5} }
 		],
 		"animations":{
 			"fly":		{ "frames":[0,1],		"fps":4,	"looped":true }
 		}
+	},
+
+	"fish2":{
+		"frames":[
+			{ "id":"swim1",		"name":"fish2/fish1.png",		"scale":{"x":2,"y":2} },
+			{ "id":"swim2",		"name":"fish2/fish2.png",		"scale":{"x":2,"y":2} },
+			{ "id":"swim3",		"name":"fish2/fish3.png",		"scale":{"x":2,"y":2} },
+			{ "id":"swim4",		"name":"fish2/fish4.png",		"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"swim":		{ "frames":[0,1,2,3],		"fps":2,	"looped":true }
+		}
+	},
+
+	"blob":{
+		"frames":[
+			{ "id":"b1",		"name":"blob/green1.png",		"scale":{"x":2,"y":2} },
+			{ "id":"b2",		"name":"blob/green2.png",		"scale":{"x":2,"y":2} },
+			{ "id":"b3",		"name":"blob/green3.png",		"scale":{"x":2,"y":2} },
+			{ "id":"b4",		"name":"blob/green4.png",		"scale":{"x":2,"y":2} },
+			{ "id":"b5",		"name":"blob/green5.png",		"scale":{"x":2,"y":2} },
+			{ "id":"b6",		"name":"blob/green6.png",		"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"blob":		{ "frames":[0,1,2,3,4,5],		"fps":4,	"looped":true }
+		}
 	}
+
 }

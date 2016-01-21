@@ -43,7 +43,7 @@ class ProjectileSystem extends System {
             projectile.age-=delta;
             var health = entity.getComponent(Health);
             if ((projectile.age<0 || projectile.bounce<=0 || health.currentHealth<0) && entity.getComponent(Destroy)==null) {
-                entity.addComponent(new Destroy(2)); 
+                entity.addComponent(new Destroy(1)); 
                 entity.getComponent(glaze.engine.components.ParticleEmitters).emitters.push(new glaze.particle.emitter.Explosion(10,50));
                 exile.util.CombatUtils.explode(entity.getComponent(Position).coords,64,100,entity);
             }

@@ -33,8 +33,8 @@ class StandardBulletFactory {
         var bulletBody = new Body(new Material());
         bulletBody.setMass(0.03);
         bulletBody.setBounces(3);     
-        bulletBody.globalForceFactor = 1;
-        // bulletBody.isBullet = true;
+        bulletBody.globalForceFactor = 0.5;
+        bulletBody.isBullet = true;
 /*
         var data = '
         {
@@ -81,13 +81,13 @@ class StandardBulletFactory {
         ],"StandardBullet");              
                 
 
-        var light = engine.createEntity([
-            position,
-            new Light(64,1,1,1,255,0,0),
-            new Extents(64,64)
-        ],"StandardBullet Light");
+        // var light = engine.createEntity([
+        //     position,
+        //     new Light(64,1,1,1,255,0,0),
+        //     new Extents(64,64)
+        // ],"StandardBullet Light");
 
-        bullet.addChildEntity(light);
+        // bullet.addChildEntity(light);
 
         return bullet;
 

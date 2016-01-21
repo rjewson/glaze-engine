@@ -54,8 +54,6 @@ class BeeFactory {
             new Active()
         ],"bee"); 
 
-        bee.getComponent(Display).displayObject.scale.setTo(1.5,1.5);
-
         return bee; 	    
 	}
 

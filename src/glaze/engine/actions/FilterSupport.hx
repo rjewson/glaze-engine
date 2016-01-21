@@ -17,6 +17,10 @@ class FilterSupport {
 		ray = new Ray();
 	}
 
+	public function FilterStaticItems(eci:EntityCollectionItem):Bool {
+		return eci.entity.getComponent(glaze.engine.components.Fixed)==null;
+	}
+
 	public function FilterVisibleAgainstMap(eci:EntityCollectionItem):Bool {
 		// js.Lib.debug();
 		ray.initalize(eci.perspective,eci.entity.getComponent(Position).coords,0,null);

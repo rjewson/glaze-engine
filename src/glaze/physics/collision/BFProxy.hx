@@ -16,6 +16,9 @@ typedef ContactCallback = BFProxy -> BFProxy -> Contact -> Void;
 class BFProxy 
 {
 
+    public var id:Int;
+    public static var nextID:Int = 0;
+
     public var aabb:AABB;
 
     public var offset:Vector2;
@@ -30,12 +33,16 @@ class BFProxy
 
     public var filter:Filter;
 
+    public var userData1:Int = -1;
+    public var userData2:Int = -1;
+
     public var contactCallbacks:Array<ContactCallback> = [];
 
     public function new() {
         aabb = new AABB();
         offset = new Vector2();
         responseBias = new Vector2(1,1);
+        id = nextID++;
     }
 
     public function setBody(body:Body) {
@@ -56,6 +63,10 @@ class BFProxy
         bfproxy.aabb.position.setTo(x,y);
         bfproxy.isStatic = true;
         return bfproxy;
+    }
+
+    inline public static function HashBodyIDs(a:Int, b:Int):Int {
+        return (a < b) ? (a << 16) | b : (b << 16) | a;
     }
 
 }

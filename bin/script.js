@@ -39,6 +39,7 @@ glaze_engine_core_GameEngine.prototype = {
 	,__class__: glaze_engine_core_GameEngine
 };
 var GameTestA = function() {
+	this.killChickens = false;
 	glaze_engine_core_GameEngine.call(this,js_Boot.__cast(window.document.getElementById("view") , HTMLCanvasElement));
 	this.loadAssets(["data/testMap.tmx","data/sprites.json","data/sprites.png","data/spelunky-tiles.png","data/spelunky0.png","data/spelunky1.png","data/frames.json"]);
 };
@@ -52,13 +53,19 @@ GameTestA.main = function() {
 	window.document.getElementById("startbutton").addEventListener("click",function(event1) {
 		game.loop.start();
 	});
-	window.document.getElementById("debugbutton").addEventListener("click",function(event2) {
+	window.document.getElementById("debug1button").addEventListener("click",function(event2) {
 		game.flyChickens();
 	});
-	window.document.getElementById("entities").addEventListener("click",function(event3) {
+	window.document.getElementById("debug2button").addEventListener("click",function(event3) {
+		game.dropGrenades();
+	});
+	window.document.getElementById("debug3button").addEventListener("click",function(event4) {
+		game.broadphase.dump();
+	});
+	window.document.getElementById("entities").addEventListener("click",function(event5) {
 		window.writeResult(glaze_debug_DebugEngine.GetAllEntities());
 	});
-	window.document.getElementById("systems").addEventListener("click",function(event4) {
+	window.document.getElementById("systems").addEventListener("click",function(event6) {
 		window.writeResult(glaze_debug_DebugEngine.GetAllSystems());
 	});
 };
@@ -74,8 +81,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			var i = _g++;
 			var p1 = i >> 5;
 			bs._bits[p1] = bs._bits[p1] | 1 << (i & 31);
-			haxe_Log.trace(bs.toString(),{ fileName : "GameTestA.hx", lineNumber : 107, className : "GameTestA", methodName : "initalize"});
-			haxe_Log.trace(bs.containsAll(mustHave),{ fileName : "GameTestA.hx", lineNumber : 108, className : "GameTestA", methodName : "initalize"});
+			haxe_Log.trace(bs.toString(),{ fileName : "GameTestA.hx", lineNumber : 112, className : "GameTestA", methodName : "initalize"});
+			haxe_Log.trace(bs.containsAll(mustHave),{ fileName : "GameTestA.hx", lineNumber : 113, className : "GameTestA", methodName : "initalize"});
 		}
 		this.setupMap();
 		var corephase = this.engine.createPhase();
@@ -100,8 +107,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var spriteRender = new glaze_render_renderers_webgl_SpriteRenderer();
 		spriteRender.AddStage(this.renderSystem.stage);
 		this.renderSystem.renderer.AddRenderer(spriteRender);
-		var blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679);
-		this.renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
+		this.blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679);
+		this.renderSystem.renderer.AddRenderer(this.blockParticleEngine.renderer);
 		var tileMap = new glaze_render_renderers_webgl_TileMap();
 		this.renderSystem.renderer.AddRenderer(tileMap);
 		var tmp3;
@@ -114,37 +121,39 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var map = new glaze_physics_collision_Map(collisionData);
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
 		physicsPhase.addSystem(new glaze_ai_steering_systems_SteeringSystem());
-		var broadphase = new glaze_physics_collision_broadphase_BruteforceBroadphase(map,new glaze_physics_collision_Intersect());
-		exile_util_CombatUtils.setBroadphase(broadphase);
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsStaticSystem(broadphase));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsMoveableSystem(broadphase));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(broadphase));
+		this.nf = new glaze_physics_collision_Intersect();
+		this.broadphase = new glaze_physics_collision_broadphase_BruteforceBroadphase(map,this.nf);
+		exile_util_CombatUtils.setBroadphase(this.broadphase);
+		physicsPhase.addSystem(new glaze_physics_systems_PhysicsStaticSystem(this.broadphase));
+		physicsPhase.addSystem(new glaze_physics_systems_PhysicsMoveableSystem(this.broadphase));
+		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(this.broadphase));
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsConstraintSystem());
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
 		physicsPhase.addSystem(new glaze_physics_systems_ContactRouterSystem());
-		physicsPhase.addSystem(new glaze_engine_systems_WaterSystem(blockParticleEngine));
+		physicsPhase.addSystem(new glaze_engine_systems_WaterSystem(this.blockParticleEngine));
 		physicsPhase.addSystem(new glaze_engine_systems_environment_EnvironmentForceSystem());
-		physicsPhase.addSystem(new glaze_engine_systems_environment_WindRenderSystem(blockParticleEngine));
+		physicsPhase.addSystem(new glaze_engine_systems_environment_WindRenderSystem(this.blockParticleEngine));
 		physicsPhase.addSystem(new glaze_engine_systems_HolderSystem());
 		physicsPhase.addSystem(new glaze_engine_systems_HeldSystem());
 		physicsPhase.addSystem(new glaze_engine_systems_HoldableSystem());
 		physicsPhase.addSystem(new glaze_engine_systems_HealthSystem());
 		physicsPhase.addSystem(new glaze_engine_systems_AgeSystem());
-		physicsPhase.addSystem(new exile_systems_ProjectileSystem(broadphase));
+		physicsPhase.addSystem(new exile_systems_ProjectileSystem(this.broadphase));
 		aiphase.addSystem(new glaze_engine_systems_BehaviourSystem());
 		aiphase.addSystem(new glaze_engine_systems_StateSystem(this.messageBus));
 		aiphase.addSystem(new glaze_engine_systems_CollidableSwitchSystem(this.messageBus));
 		aiphase.addSystem(new exile_systems_DoorSystem());
 		aiphase.addSystem(new exile_systems_TeleporterSystem());
 		aiphase.addSystem(new exile_systems_BeeHiveSystem());
-		aiphase.addSystem(new exile_systems_BeeSystem(broadphase));
-		aiphase.addSystem(new exile_systems_ChickenSystem(blockParticleEngine));
-		aiphase.addSystem(new exile_systems_GrenadeSystem(broadphase));
+		aiphase.addSystem(new exile_systems_BeeSystem(this.broadphase));
+		var chickenSystem = new exile_systems_ChickenSystem(this.blockParticleEngine);
+		aiphase.addSystem(chickenSystem);
+		aiphase.addSystem(new exile_systems_GrenadeSystem(this.broadphase));
 		aiphase.addSystem(new glaze_engine_systems_InventorySystem());
 		corephase.addSystem(new glaze_engine_systems_DestroySystem());
-		corephase.addSystem(new exile_systems_PlayerSystem(this.input,blockParticleEngine));
+		corephase.addSystem(new exile_systems_PlayerSystem(this.input,this.blockParticleEngine));
 		corephase.addSystem(new glaze_engine_systems_ViewManagementSystem(this.renderSystem.camera));
-		corephase.addSystem(new glaze_engine_systems_ParticleSystem(blockParticleEngine));
+		corephase.addSystem(new glaze_engine_systems_ParticleSystem(this.blockParticleEngine));
 		corephase.addSystem(new glaze_animation_systems_AnimationSystem(this.renderSystem.frameListManager));
 		corephase.addSystem(this.renderSystem);
 		this.filterSupport = new glaze_engine_actions_FilterSupport(this.engine);
@@ -157,15 +166,16 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		_this4.x = 160;
 		_this4.y = 1000;
 		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(15.,21.),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","run"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
+		chickenSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
 		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_WaterFactory);
 		tmxFactory.parseObjectGroup("Objects");
-		this.createTurret();
 		this.createWind();
 		this.createDoor();
-		exile_entities_creatures_ChickenFactory.create(this.engine,new glaze_engine_components_Position(300,160));
+		exile_entities_creatures_ChickenFactory.create(this.engine,this.mapPosition(9,2));
+		exile_entities_creatures_FishFactory.create(this.engine,this.mapPosition(37,21));
 		this.loop.start();
 	}
 	,setupMap: function() {
@@ -178,19 +188,35 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		if(__map_reserved["data/spelunky-tiles.png"] != null) tmp1 = _this1.getReserved("data/spelunky-tiles.png"); else tmp1 = _this1.h["data/spelunky-tiles.png"];
 		this.tmxMap.tilesets[0].set_image(tmp1);
 	}
+	,mapPosition: function(xTiles,yTiles) {
+		return new glaze_engine_components_Position(xTiles * 32,yTiles * 32);
+	}
 	,createWind: function() {
-		this.engine.createEntity([new glaze_engine_components_Position(48,528),new glaze_engine_components_Extents(16,256),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_EnvironmentForce(new glaze_geom_Vector2(0,-40)),new glaze_engine_components_Wind(0.01),new glaze_engine_components_Active()],"wind");
+		this.engine.createEntity([this.mapPosition(1.5,14.5),new glaze_engine_components_Extents(16,256),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_EnvironmentForce(new glaze_geom_Vector2(0,-40)),new glaze_engine_components_Wind(0.01),new glaze_engine_components_Active()],"wind");
+		this.engine.createEntity([new glaze_engine_components_Position(1264,880),new glaze_engine_components_Extents(192,48.),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_EnvironmentForce(new glaze_geom_Vector2(-10,0)),new glaze_engine_components_Wind(0.01),new glaze_engine_components_Active()],"wind2");
 	}
 	,createDoor: function() {
-		this.door = this.engine.createEntity([new glaze_engine_components_Position(128,176.),new glaze_engine_components_Extents(16,48),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
-		this.engine.createEntity([new glaze_engine_components_Position(336,100),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
-		this.engine.createEntity([new glaze_engine_components_Position(300,48),new glaze_engine_components_Extents(16,16),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(100,100)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
-		this.engine.createEntity([new glaze_engine_components_Position(640,128),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("enemies","turret"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(3)],"BeeHive");
-		var body = new glaze_physics_Body(new glaze_physics_Material());
-		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(12,12),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.door = this.engine.createEntity([new glaze_engine_components_Position(144.,196),new glaze_engine_components_Extents(1,32),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
+		this.engine.createEntity([new glaze_engine_components_Position(170,42),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
+		this.engine.createEntity([new glaze_engine_components_Position(784,192),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(784.,80.)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
+		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body()),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.engine.createEntity([new glaze_engine_components_Position(288,192),new glaze_engine_components_Extents(8,5),new glaze_engine_components_Display("blob"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(glaze_physics_Body.Create(null,0.1,0,1,100)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active(),new glaze_animation_components_SpriteAnimation("blob",["blob"],"blob"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(4,1,4)])],"blob");
 	}
 	,createTurret: function() {
-		return;
+		var behavior = new glaze_ai_behaviortree_Sequence();
+		var child = new glaze_engine_actions_Delay(400,100);
+		behavior.children.add(child);
+		var child1 = new glaze_engine_actions_InitEntityCollection();
+		behavior.children.add(child1);
+		var child2 = new glaze_engine_actions_QueryEntitiesInArea(200);
+		behavior.children.add(child2);
+		var child3 = new glaze_engine_actions_SortEntities(glaze_ds_EntityCollectionItem.SortClosestFirst);
+		behavior.children.add(child3);
+		var child4 = new glaze_engine_actions_FilterEntities([($_=this.filterSupport,$bind($_,$_.FilterStaticItems)),($_=this.filterSupport,$bind($_,$_.FilterVisibleAgainstMap))]);
+		behavior.children.add(child4);
+		var child5 = new glaze_ai_behaviortree_Action("fireBulletAtEntity",this);
+		behavior.children.add(child5);
+		this.engine.createEntity([new glaze_engine_components_Position(864,320),new glaze_engine_components_Display("enemies","turret"),new glaze_engine_components_Extents(12,12),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Script(behavior),new glaze_engine_components_Active()],"turret");
 	}
 	,fireBullet: function(pos,target,velocity,ttl,gff) {
 		if(gff == null) gff = 1;
@@ -204,11 +230,6 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	}
 	,dropGrenades: function() {
 		exile_entities_weapon_HandGrenadeFactory.create(this.engine,350,150);
-		exile_entities_weapon_HandGrenadeFactory.create(this.engine,400,150);
-		exile_entities_weapon_HandGrenadeFactory.create(this.engine,450,150);
-		exile_entities_weapon_HandGrenadeFactory.create(this.engine,500,150);
-		exile_entities_weapon_HandGrenadeFactory.create(this.engine,550,150);
-		exile_entities_weapon_HandGrenadeFactory.create(this.engine,600,150);
 	}
 	,flyChickens: function() {
 		var _g = 0;
@@ -219,8 +240,18 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			chickie.map.PhysicsBody.body.addForce(new glaze_geom_Vector2(Math.floor(Math.random() * 2000 + -1000),Math.floor(Math.random() * 1100 + -1000)));
 		}
 	}
+	,destroyChickens: function() {
+		var cs = this.engine.getSystem(exile_systems_ChickenSystem);
+		var explosion = new glaze_particle_emitter_Explosion(10,50);
+		var entity = cs.view.entities[0];
+		if(entity != null) {
+			entity.addComponent(new glaze_engine_components_Destroy(1));
+			explosion.update(1,entity,this.blockParticleEngine);
+		} else this.killChickens = false;
+	}
 	,preUpdate: function() {
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
+		if(this.killChickens) this.destroyChickens();
 	}
 	,__class__: GameTestA
 });
@@ -624,9 +655,6 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	beeBody.globalForceFactor = 0;
 	beeBody.maxScalarVelocity = 100;
 	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(11.25,8.25),new glaze_engine_components_Display("bat"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bat",["fly"],"fly"),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
-	var _this = bee.map.Display.displayObject.scale;
-	_this.x = 1.5;
-	_this.y = 1.5;
 	return bee;
 };
 exile_entities_creatures_BeeFactory.prototype = {
@@ -637,15 +665,25 @@ var exile_entities_creatures_ChickenFactory = function() {
 exile_entities_creatures_ChickenFactory.__name__ = ["exile","entities","creatures","ChickenFactory"];
 exile_entities_creatures_ChickenFactory.create = function(engine,position) {
 	var chickenBody = new glaze_physics_Body(new glaze_physics_Material());
-	chickenBody.setMass(0.01);
+	chickenBody.setMass(0.1);
 	chickenBody.setBounces(3);
 	chickenBody.maxScalarVelocity = 1000;
 	chickenBody.globalForceFactor = 0.5;
-	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(16.,16.),new glaze_engine_components_Display("chicken"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(chickenBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("chicken",["walk"],"walk"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
+	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(12.,16.),new glaze_engine_components_Display("chicken"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(chickenBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("chicken",["walk"],"walk"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
 	return chicken;
 };
 exile_entities_creatures_ChickenFactory.prototype = {
 	__class__: exile_entities_creatures_ChickenFactory
+};
+var exile_entities_creatures_FishFactory = function() {
+};
+exile_entities_creatures_FishFactory.__name__ = ["exile","entities","creatures","FishFactory"];
+exile_entities_creatures_FishFactory.create = function(engine,position) {
+	var fish = engine.createEntity([position,new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("fish2"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(glaze_physics_Body.Create(null,0.1,0,0.5,100)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active(),new glaze_animation_components_SpriteAnimation("fish2",["swim"],"swim"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(18,1,4)])],"fish");
+	return fish;
+};
+exile_entities_creatures_FishFactory.prototype = {
+	__class__: exile_entities_creatures_FishFactory
 };
 var exile_entities_projectile_StandardBulletFactory = function() {
 };
@@ -654,10 +692,9 @@ exile_entities_projectile_StandardBulletFactory.create = function(engine,positio
 	var bulletBody = new glaze_physics_Body(new glaze_physics_Material());
 	bulletBody.setMass(0.03);
 	bulletBody.setBounces(3);
-	bulletBody.globalForceFactor = 1;
+	bulletBody.globalForceFactor = 0.5;
+	bulletBody.isBullet = true;
 	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 1, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
-	var light = engine.createEntity([position,new glaze_lighting_components_Light(64,1,1,1,255,0,0),new glaze_engine_components_Extents(64,64)],"StandardBullet Light");
-	bullet.addChildEntity(light);
 	return bullet;
 };
 exile_entities_projectile_StandardBulletFactory.prototype = {
@@ -668,7 +705,7 @@ exile_entities_weapon_HandGrenadeFactory.__name__ = ["exile","entities","weapon"
 exile_entities_weapon_HandGrenadeFactory.create = function(engine,x,y) {
 	var body = new glaze_physics_Body(new glaze_physics_Material());
 	body.maxScalarVelocity = 200;
-	var grenade = engine.createEntity([new glaze_engine_components_Position(x,y),new glaze_engine_components_Display("grenade.png"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new exile_components_Grenade(),new glaze_engine_components_Health(100,100,0),new glaze_engine_components_State(["off","on"],0,[]),new glaze_engine_components_Active()],"grenade" + exile_entities_weapon_HandGrenadeFactory.count++);
+	var grenade = engine.createEntity([new glaze_engine_components_Position(x,y),new glaze_engine_components_Display("grenade","off"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new exile_components_Grenade(),new glaze_engine_components_Health(100,100,0),new glaze_engine_components_State(["off","on"],0,[]),new glaze_engine_components_Active()],"grenade" + exile_entities_weapon_HandGrenadeFactory.count++);
 	return grenade;
 };
 var glaze_eco_core_System = function(componentSignature) {
@@ -784,11 +821,22 @@ exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
-			if(Math.random() < 0.05) {
-				var body = entity.map.PhysicsBody.body;
-				var dir = Math.random() < 0.5?1:-1;
-				body.addForce(new glaze_geom_Vector2(dir,-1));
-				this.particleEngine.EmitParticle(body.position.x,body.position.y,dir * -10,-100,0,5,600,1,true,true,null,4,255,255,255,255);
+			var dist = 1000000;
+			var body = entity.map.PhysicsBody.body;
+			var dir = 0;
+			if(this.scaredOfPosition != null) {
+				dist = body.position.distSqrd(this.scaredOfPosition.coords);
+				dir = body.position.x - this.scaredOfPosition.coords.x < 0?-1:1;
+			}
+			if(dist < 4096) {
+				if(Math.random() < 0.1) {
+					body.addForce(new glaze_geom_Vector2(dir * 10,-10));
+					this.particleEngine.EmitParticle(body.position.x,body.position.y,dir * -10,-100,0,5,800,1,false,true,null,4,255,255,255,255);
+				}
+			} else if(Math.random() < 0.02) {
+				var dir1 = Math.random() < 0.5?1:-1;
+				body.addForce(new glaze_geom_Vector2(dir1 * 10,-10));
+				this.particleEngine.EmitParticle(body.position.x,body.position.y,dir1 * -20,-100,0,5,800,1,false,true,null,4,255,255,255,255);
 			}
 		}
 	}
@@ -819,18 +867,12 @@ exile_systems_DoorSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		pc.proxy.responseBias.x = 0;
 		var display = state.owner.map.Display;
 		display.setFrameId("open");
-		var _this = display.displayObject.scale;
-		_this.x = 1;
-		_this.y = 2;
 	}
 	,closeDoor2: function(state) {
 		var pc = state.owner.map.PhysicsCollision;
 		pc.proxy.responseBias.x = 1;
 		var display = state.owner.map.Display;
 		display.setFrameId("closed");
-		var _this = display.displayObject.scale;
-		_this.x = 1;
-		_this.y = 1;
 	}
 	,__class__: exile_systems_DoorSystem
 });
@@ -949,7 +991,7 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		tmp4 = _this5.keyMap[74] == _this5.frameRef - 1;
 		if(tmp4) {
 			var item = this.holder.drop();
-			if(item != null) glaze_util_Ballistics.calcProjectileVelocity(item.map.PhysicsBody.body,this.input.ViewCorrectedMousePosition(),1000);
+			if(item != null) glaze_util_Ballistics.calcProjectileVelocity(item.map.PhysicsBody.body,this.input.ViewCorrectedMousePosition(),700);
 		}
 		var tmp5;
 		var _this6 = this.input;
@@ -970,7 +1012,7 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		if(tmp7) this.inventory.retrieve();
 		if(fire) {
 			var bullet = exile_entities_projectile_StandardBulletFactory.create(this.engine,this.position.clone(),this.playerFilter);
-			glaze_util_Ballistics.calcProjectileVelocity(bullet.map.PhysicsBody.body,this.input.ViewCorrectedMousePosition(),1500);
+			glaze_util_Ballistics.calcProjectileVelocity(bullet.map.PhysicsBody.body,this.input.ViewCorrectedMousePosition(),2500);
 		}
 		if(this.input.keyMap[69] > 0) {
 			var vel = this.input.ViewCorrectedMousePosition().clone();
@@ -1016,7 +1058,7 @@ exile_systems_ProjectileSystem.prototype = $extend(glaze_eco_core_System.prototy
 			projectile.age -= delta;
 			var health = entity.map.Health;
 			if((projectile.age < 0 || projectile.bounce <= 0 || health.currentHealth < 0) && entity.map.Destroy == null) {
-				entity.addComponent(new glaze_engine_components_Destroy(2));
+				entity.addComponent(new glaze_engine_components_Destroy(1));
 				entity.map.ParticleEmitters.emitters.push(new glaze_particle_emitter_Explosion(10,50));
 				exile_util_CombatUtils.explode(entity.map.Position.coords,64,100,entity);
 			}
@@ -1360,12 +1402,15 @@ glaze_ai_steering_behaviors_Behavior.prototype = {
 	}
 	,__class__: glaze_ai_steering_behaviors_Behavior
 };
-var glaze_ai_steering_behaviors_Wander = function() {
+var glaze_ai_steering_behaviors_Wander = function(circleRadius,circleDistance,wanderChange) {
+	if(wanderChange == null) wanderChange = 4;
+	if(circleDistance == null) circleDistance = 1;
+	if(circleRadius == null) circleRadius = 8;
 	glaze_ai_steering_behaviors_Behavior.call(this,1,140);
-	this.circleRadius = 8;
-	this.circleDistance = 1;
+	this.circleRadius = circleRadius;
+	this.circleDistance = circleRadius;
 	this.wanderAngle = Math.random() * (Math.PI * 2);
-	this.wanderChange = 4;
+	this.wanderChange = wanderChange;
 };
 glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behaviors","Wander"];
 glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
@@ -2140,12 +2185,12 @@ glaze_ds_EntityCollection.prototype = {
 					node1.prev = item;
 				}
 			} else {
-				var node2 = _this1.tail;
+				var node11 = _this1.tail;
 				_this1.length++;
-				item.prev = node2;
-				item.next = node2.next;
-				if(node2.next == null) _this1.tail = item; else node2.next.prev = item;
-				node2.next = item;
+				item.prev = node11;
+				item.next = node11.next;
+				if(node11.next == null) _this1.tail = item; else node11.next.prev = item;
+				node11.next = item;
 			}
 		}
 	}
@@ -2248,6 +2293,7 @@ glaze_eco_core_Engine.prototype = {
 		}(this));
 	}
 	,update: function(timestamp,delta) {
+		this.timestamp = timestamp;
 		var _g = 0;
 		var _g1 = this.phases;
 		while(_g < _g1.length) {
@@ -2582,7 +2628,10 @@ var glaze_engine_actions_FilterSupport = function(engine) {
 };
 glaze_engine_actions_FilterSupport.__name__ = ["glaze","engine","actions","FilterSupport"];
 glaze_engine_actions_FilterSupport.prototype = {
-	FilterVisibleAgainstMap: function(eci) {
+	FilterStaticItems: function(eci) {
+		return eci.entity.map.Fixed == null;
+	}
+	,FilterVisibleAgainstMap: function(eci) {
 		this.ray.initalize(eci.perspective,eci.entity.map.Position.coords,0,null);
 		this.broadphase.CastRay(this.ray,null,false,false);
 		return !this.ray.hit;
@@ -2704,7 +2753,7 @@ glaze_engine_components_Display.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Display.prototype = {
 	set_frame: function(value) {
 		this.frame = value;
-		if(this.displayObject != null) value.updateSprite(this.displayObject);
+		if(this.displayObject != null) this.frame.updateSprite(this.displayObject);
 		return value;
 	}
 	,setFrameId: function(id) {
@@ -2900,6 +2949,13 @@ glaze_engine_components_State.prototype = {
 		this.states.push(state);
 	}
 	,__class__: glaze_engine_components_State
+};
+var glaze_engine_components_Storeable = function() {
+};
+glaze_engine_components_Storeable.__name__ = ["glaze","engine","components","Storeable"];
+glaze_engine_components_Storeable.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_Storeable.prototype = {
+	__class__: glaze_engine_components_Storeable
 };
 var glaze_engine_components_Viewable = function() {
 };
@@ -3302,7 +3358,7 @@ glaze_engine_systems_BehaviourSystem.prototype = $extend(glaze_eco_core_System.p
 });
 var glaze_engine_systems_CollidableSwitchSystem = function(bus) {
 	this.ts = 0;
-	glaze_eco_core_System.call(this,[glaze_engine_components_CollidableSwitch,glaze_physics_components_PhysicsCollision]);
+	glaze_eco_core_System.call(this,[glaze_engine_components_CollidableSwitch,glaze_physics_components_PhysicsCollision,glaze_engine_components_Display]);
 	this.bus = bus;
 };
 glaze_engine_systems_CollidableSwitchSystem.__name__ = ["glaze","engine","systems","CollidableSwitchSystem"];
@@ -3321,7 +3377,11 @@ glaze_engine_systems_CollidableSwitchSystem.prototype = $extend(glaze_eco_core_S
 	}
 	,onCollision: function(a,b,c) {
 		var collidableSwitch = a.entity.map.CollidableSwitch;
-		if(collidableSwitch.trigger(this.ts)) this.bus.triggerAll(collidableSwitch.triggerChannels,null);
+		if(collidableSwitch.trigger(this.ts)) {
+			this.bus.triggerAll(collidableSwitch.triggerChannels,null);
+			var display = a.entity.map.Display;
+			if(display.frame.name == "on") display.setFrameId("off"); else display.setFrameId("on");
+		}
 	}
 	,__class__: glaze_engine_systems_CollidableSwitchSystem
 });
@@ -3389,11 +3449,20 @@ glaze_engine_systems_HeldSystem.prototype = $extend(glaze_eco_core_System.protot
 		var _this2 = entity.map.PhysicsBody.body.position;
 		_this2.x = holderPos.x;
 		_this2.y = holderPos.y;
+		if(entity.map.Storeable == null) {
+			var holderBody = holder.parent.map.PhysicsBody.body;
+			if(holderBody != null) holderBody.setMass(holderBody.mass + 2);
+		}
 	}
 	,entityRemoved: function(entity) {
-		entity.map.Held.holder.map.Holder.drop();
+		var holder = entity.map.Held.holder;
+		holder.map.Holder.drop();
 		var body = entity.map.PhysicsBody.body;
 		body.skip = false;
+		if(entity.map.Storeable == null) {
+			var holderBody = holder.parent.map.PhysicsBody.body;
+			if(holderBody != null) holderBody.setMass(holderBody.mass - 2);
+		}
 	}
 	,update: function(timestamp,delta) {
 		var _g = 0;
@@ -4208,6 +4277,9 @@ glaze_geom_Vector2.prototype = {
 	,length: function() {
 		return Math.sqrt(this.x * this.x + this.y * this.y);
 	}
+	,lengthSqrd: function() {
+		return this.x * this.x + this.y * this.y;
+	}
 	,clampScalar: function(max) {
 		var l = Math.sqrt(this.x * this.x + this.y * this.y);
 		if(l > max) {
@@ -4526,6 +4598,9 @@ var glaze_physics_Body = function(material) {
 	this.inWater = false;
 	this.onGroundPrev = false;
 	this.onGround = false;
+	this.isSleeping = false;
+	this.canSleep = false;
+	this.motion = 0;
 	this.dt = 0;
 	this.invMass = 1;
 	this.mass = 1;
@@ -4546,10 +4621,18 @@ var glaze_physics_Body = function(material) {
 	this.predictedPosition = new glaze_geom_Vector2();
 	this.positionCorrection = new glaze_geom_Vector2();
 	this.position = new glaze_geom_Vector2();
-	this.material = material;
+	this.material = material == null?new glaze_physics_Material():material;
 	this.setMass(1);
 };
 glaze_physics_Body.__name__ = ["glaze","physics","Body"];
+glaze_physics_Body.Create = function(material,mass,bounces,globalForceFactor,maxScalarVelocity) {
+	var body = new glaze_physics_Body(material);
+	body.setMass(mass);
+	body.setBounces(bounces);
+	body.globalForceFactor = globalForceFactor;
+	body.maxScalarVelocity = maxScalarVelocity;
+	return body;
+};
 glaze_physics_Body.prototype = {
 	update: function(dt,globalForces,globalDamping) {
 		this.dt = dt;
@@ -4606,6 +4689,12 @@ glaze_physics_Body.prototype = {
 		this.onGround = false;
 		this.inWater = false;
 		this.stepContactCount = 0;
+		var tmp;
+		var _this11 = this.velocity;
+		tmp = _this11.x * _this11.x + _this11.y * _this11.y;
+		this.motion = 0.99332805041467 * this.motion + 0.00667194958533001703 * tmp;
+		this.motion = Math.min(this.motion,0.009);
+		this.canSleep = this.motion < 0.0009;
 		this.toi = Infinity;
 	}
 	,respondStaticCollision: function(contact) {
@@ -4638,7 +4727,7 @@ glaze_physics_Body.prototype = {
 	}
 	,t: function(msg) {
 		if(this.debug > 0) {
-			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 135, className : "glaze.physics.Body", methodName : "t"});
+			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 149, className : "glaze.physics.Body", methodName : "t"});
 			this.debug--;
 		}
 	}
@@ -4762,12 +4851,15 @@ glaze_physics_Material.prototype = {
 };
 var glaze_physics_collision_BFProxy = function() {
 	this.contactCallbacks = [];
+	this.userData2 = -1;
+	this.userData1 = -1;
 	this.isActive = true;
 	this.isSensor = false;
 	this.isStatic = false;
 	this.aabb = new glaze_geom_AABB();
 	this.offset = new glaze_geom_Vector2();
 	this.responseBias = new glaze_geom_Vector2(1,1);
+	this.id = glaze_physics_collision_BFProxy.nextID++;
 };
 glaze_physics_collision_BFProxy.__name__ = ["glaze","physics","collision","BFProxy"];
 glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh,filter) {
@@ -4781,6 +4873,9 @@ glaze_physics_collision_BFProxy.CreateStaticFeature = function(x,y,hw,hh,filter)
 	_this1.y = y;
 	bfproxy.isStatic = true;
 	return bfproxy;
+};
+glaze_physics_collision_BFProxy.HashBodyIDs = function(a,b) {
+	return a < b?a << 16 | b:b << 16 | a;
 };
 glaze_physics_collision_BFProxy.prototype = {
 	setBody: function(body) {
@@ -4837,6 +4932,8 @@ glaze_physics_collision_Filter.prototype = {
 	__class__: glaze_physics_collision_Filter
 };
 var glaze_physics_collision_Intersect = function() {
+	this.collideCount = 0;
+	this.ray = new glaze_physics_collision_Ray();
 	this.contact = new glaze_physics_collision_Contact();
 };
 glaze_physics_collision_Intersect.__name__ = ["glaze","physics","collision","Intersect"];
@@ -4941,6 +5038,7 @@ glaze_physics_collision_Intersect.AABBvsStaticSolidAABB = function(aabb_position
 };
 glaze_physics_collision_Intersect.prototype = {
 	Collide: function(proxyA,proxyB) {
+		this.collideCount++;
 		if(proxyA.isStatic && proxyB.isStatic || proxyA.isSensor && proxyB.isSensor) return false;
 		if(!proxyA.isActive || !proxyB.isActive) return false;
 		if(!glaze_physics_collision_Filter.CHECK(proxyA.filter,proxyB.filter)) return false;
@@ -4967,14 +5065,22 @@ glaze_physics_collision_Intersect.prototype = {
 				staticProxy = proxyB;
 				dynamicProxy = proxyA;
 			}
-			glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(dynamicProxy.aabb.position,dynamicProxy.aabb.extents,staticProxy.aabb.position,staticProxy.aabb.extents,staticProxy.responseBias,this.contact);
-			collided = dynamicProxy.body.respondStaticCollision(this.contact);
+			if(dynamicProxy.body.isBullet) {
+				collided = this.BulletAABB(dynamicProxy,staticProxy);
+				if(collided) dynamicProxy.body.respondBulletCollision(this.contact);
+			} else {
+				glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(dynamicProxy.aabb.position,dynamicProxy.aabb.extents,staticProxy.aabb.position,staticProxy.aabb.extents,staticProxy.responseBias,this.contact);
+				collided = dynamicProxy.body.respondStaticCollision(this.contact);
+			}
 		}
 		if(collided == true) {
 			proxyA.collide(proxyB,this.contact);
 			proxyB.collide(proxyA,this.contact);
 		}
 		return collided;
+	}
+	,BulletAABB: function(segmentProxy,staticProxy) {
+		return glaze_physics_collision_Intersect.StaticAABBvsSweeptAABB(staticProxy.aabb.position,staticProxy.aabb.extents,segmentProxy.aabb.position,segmentProxy.aabb.extents,segmentProxy.body.delta,this.contact);
 	}
 	,RayAABB: function(ray,proxy) {
 		if(glaze_physics_collision_Intersect.StaticSegmentvsStaticAABB(proxy.aabb.position,proxy.aabb.extents,ray.origin,ray.delta,0,0,this.contact)) {
@@ -5127,13 +5233,13 @@ glaze_physics_collision_Map.prototype = {
 		var transitionEdgeNormalY = 0;
 		while(true) {
 			if(tMaxX < tMaxY) {
-				distX = tMaxX * d.x;
-				distY = tMaxX * d.y;
+				distX += tMaxX * d.x;
+				distY += tMaxX * d.y;
 				tMaxX += tDeltaX;
 				x += stepX;
 			} else {
-				distX = tMaxY * d.x;
-				distY = tMaxY * d.y;
+				distX += tMaxY * d.x;
+				distY += tMaxY * d.y;
 				tMaxY += tDeltaY;
 				y += stepY;
 			}
@@ -5257,6 +5363,7 @@ glaze_physics_collision_broadphase_BruteforceBroadphase.prototype = {
 		while(_g < count) {
 			var i = _g++;
 			var dynamicProxy = this.dynamicProxies[i];
+			if(dynamicProxy.body == null) haxe_Log.trace("!=" + dynamicProxy.entity.name,{ fileName : "BruteforceBroadphase.hx", lineNumber : 41, className : "glaze.physics.collision.broadphase.BruteforceBroadphase", methodName : "collide"});
 			if(!dynamicProxy.isSensor && dynamicProxy.body != null) this.map.testCollision(dynamicProxy);
 			var _g1 = 0;
 			var _g2 = this.staticProxies;
@@ -5328,7 +5435,362 @@ glaze_physics_collision_broadphase_BruteforceBroadphase.prototype = {
 			}
 		}
 	}
+	,dump: function() {
+		haxe_Log.trace("(" + this.dynamicProxies.length + "," + this.staticProxies.length + ")",{ fileName : "BruteforceBroadphase.hx", lineNumber : 95, className : "glaze.physics.collision.broadphase.BruteforceBroadphase", methodName : "dump"});
+	}
 	,__class__: glaze_physics_collision_broadphase_BruteforceBroadphase
+};
+var glaze_physics_collision_broadphase_uniformgrid_Cell = function(map,nf,index,coords,aabb2) {
+	this.map = map;
+	this.nf = nf;
+	this.index = index;
+	this.coords = coords;
+	this.aabb2 = aabb2;
+	this.staticProxies = [];
+	this.dynamicProxies = [];
+};
+glaze_physics_collision_broadphase_uniformgrid_Cell.__name__ = ["glaze","physics","collision","broadphase","uniformgrid","Cell"];
+glaze_physics_collision_broadphase_uniformgrid_Cell.prototype = {
+	addProxy: function(proxy) {
+		var target = proxy.isStatic?this.staticProxies:this.dynamicProxies;
+		target.push(proxy);
+	}
+	,removeProxy: function(proxy) {
+		var target = proxy.isStatic?this.staticProxies:this.dynamicProxies;
+		return HxOverrides.remove(target,proxy);
+	}
+	,collide: function() {
+		var count = this.dynamicProxies.length;
+		var _g = 0;
+		while(_g < count) {
+			var i = _g++;
+			var dynamicProxy = this.dynamicProxies[i];
+			if(!dynamicProxy.isSensor && dynamicProxy.body != null) this.map.testCollision(dynamicProxy);
+			var _g1 = 0;
+			var _g2 = this.staticProxies;
+			while(_g1 < _g2.length) {
+				var staticProxy = _g2[_g1];
+				++_g1;
+				this.nf.Collide(dynamicProxy,staticProxy);
+			}
+			var _g11 = i + 1;
+			while(_g11 < count) {
+				var j = _g11++;
+				var dynamicProxyB = this.dynamicProxies[j];
+				this.nf.Collide(dynamicProxy,dynamicProxyB);
+			}
+		}
+	}
+	,__class__: glaze_physics_collision_broadphase_uniformgrid_Cell
+};
+var glaze_physics_collision_broadphase_uniformgrid_UniformGrid = function(map,nf,worldGridWidth,worldGridHeight,cellSize) {
+	this.map = map;
+	this.nf = nf;
+	this.target = new glaze_geom_Vector2();
+	this.staticProxies = [];
+	this.dynamicProxies = [];
+	this.grid = new glaze_ds_Array2D(worldGridWidth,worldGridHeight,cellSize);
+	this.pairs = { };
+	this.step = 0;
+	this.init();
+};
+glaze_physics_collision_broadphase_uniformgrid_UniformGrid.__name__ = ["glaze","physics","collision","broadphase","uniformgrid","UniformGrid"];
+glaze_physics_collision_broadphase_uniformgrid_UniformGrid.__interfaces__ = [glaze_physics_collision_broadphase_IBroadphase];
+glaze_physics_collision_broadphase_uniformgrid_UniformGrid.prototype = {
+	init: function() {
+		var index = 0;
+		var _g1 = 0;
+		var _g = this.grid.gridWidth;
+		while(_g1 < _g) {
+			var y = _g1++;
+			var _g3 = 0;
+			var _g2 = this.grid.gridHeight;
+			while(_g3 < _g2) {
+				var x = _g3++;
+				this.grid.data.push(new glaze_physics_collision_broadphase_uniformgrid_Cell(this.map,this.nf,index++,new glaze_geom_Vector2(x,y),new glaze_geom_AABB2(y * this.grid.cellSize,(x + 1) * this.grid.cellSize,(y + 1) * this.grid.cellSize,x * this.grid.cellSize)));
+			}
+		}
+		var _g11 = 0;
+		var _g4 = this.grid.gridWidth;
+		while(_g11 < _g4) {
+			var x1 = _g11++;
+			var _g31 = 0;
+			var _g21 = this.grid.gridHeight;
+			while(_g31 < _g21) {
+				var y1 = _g31++;
+				var tmp;
+				var _this = this.grid;
+				if(x1 >= _this.gridWidth || y1 >= _this.gridHeight || x1 < 0 || y1 < 0) tmp = null; else tmp = _this.data[y1 * _this.gridWidth + x1];
+				var cell = tmp;
+				var tmp1;
+				var _this1 = this.grid;
+				var x2 = x1 + 1;
+				if(x2 >= _this1.gridWidth || y1 >= _this1.gridHeight || x2 < 0 || y1 < 0) tmp1 = null; else tmp1 = _this1.data[y1 * _this1.gridWidth + x2];
+				cell.adjacentRight = tmp1;
+				var tmp2;
+				var _this2 = this.grid;
+				var y2 = y1 + 1;
+				if(x1 >= _this2.gridWidth || y2 >= _this2.gridHeight || x1 < 0 || y2 < 0) tmp2 = null; else tmp2 = _this2.data[y2 * _this2.gridWidth + x1];
+				cell.adjacentDown = tmp2;
+				var tmp3;
+				var _this3 = this.grid;
+				var x3 = x1 + 1;
+				var y3 = y1 + 1;
+				if(x3 >= _this3.gridWidth || y3 >= _this3.gridHeight || x3 < 0 || y3 < 0) tmp3 = null; else tmp3 = _this3.data[y3 * _this3.gridWidth + x3];
+				cell.adjacentRightDown = tmp3;
+			}
+		}
+	}
+	,addProxy: function(proxy) {
+		this.hashProxy(proxy);
+	}
+	,removeProxy: function(proxy) {
+		if(proxy.userData1 >= 0) {
+			var oldCell = this.grid.data[proxy.userData1];
+			oldCell.removeProxy(proxy);
+			var oldRight = (proxy.userData2 & 1) > 0;
+			var oldDown = (proxy.userData2 & 2) > 0;
+			if(oldRight && oldCell.adjacentRight != null) oldCell.adjacentRight.removeProxy(proxy);
+			if(oldDown && oldCell.adjacentDown != null) oldCell.adjacentDown.removeProxy(proxy);
+			if(oldRight && oldDown && oldCell.adjacentRightDown != null) oldCell.adjacentRightDown.removeProxy(proxy);
+		}
+	}
+	,collide: function() {
+		this.step++;
+		var _g = 0;
+		var _g1 = this.grid.data;
+		while(_g < _g1.length) {
+			var cell = _g1[_g];
+			++_g;
+			var index = cell.dynamicProxies.length;
+			while(--index >= 0) {
+				var proxy = cell.dynamicProxies[index];
+				if(proxy.userData1 == cell.index) this.hashProxy(proxy);
+			}
+		}
+		var _g2 = 0;
+		var _g11 = this.grid.data;
+		while(_g2 < _g11.length) {
+			var cell1 = _g11[_g2];
+			++_g2;
+			var count = cell1.dynamicProxies.length;
+			var _g21 = 0;
+			while(_g21 < count) {
+				var i = _g21++;
+				var dynamicProxy = cell1.dynamicProxies[i];
+				if(!dynamicProxy.isSensor && dynamicProxy.body != null && dynamicProxy.userData1 == cell1.index) this.map.testCollision(dynamicProxy);
+				var _g3 = 0;
+				var _g4 = cell1.staticProxies;
+				while(_g3 < _g4.length) {
+					var staticProxy = _g4[_g3];
+					++_g3;
+					var hash = (function($this) {
+						var $r;
+						var a = staticProxy.id;
+						var b = dynamicProxy.id;
+						$r = a < b?a << 16 | b:b << 16 | a;
+						return $r;
+					}(this));
+					if(this.pairs[hash] != this.step) {
+						if(this.nf.Collide(dynamicProxy,staticProxy)) this.pairs[hash] = this.step;
+					} else {
+					}
+				}
+				var _g31 = i + 1;
+				while(_g31 < count) {
+					var j = _g31++;
+					var dynamicProxyB = cell1.dynamicProxies[j];
+					this.nf.Collide(dynamicProxy,dynamicProxyB);
+				}
+			}
+		}
+	}
+	,QueryArea: function(aabb,result,checkDynamic,checkStatic) {
+		if(checkStatic == null) checkStatic = true;
+		if(checkDynamic == null) checkDynamic = true;
+		var startX = (aabb.position.x - aabb.extents.x) * this.grid.invCellSize | 0;
+		var startY = (aabb.position.y - aabb.extents.y) * this.grid.invCellSize | 0;
+		var endX = ((aabb.position.x + aabb.extents.x) * this.grid.invCellSize | 0) + 1;
+		var endY = ((aabb.position.y + aabb.extents.y) * this.grid.invCellSize | 0) + 1;
+		var _g = startX;
+		while(_g < endX) {
+			var x = _g++;
+			var _g1 = startY;
+			while(_g1 < endY) {
+				var y = _g1++;
+				var tmp;
+				var _this = this.grid;
+				if(x >= _this.gridWidth || y >= _this.gridHeight || x < 0 || y < 0) tmp = null; else tmp = _this.data[y * _this.gridWidth + x];
+				var cell = tmp;
+				if(cell == null) continue;
+				if(checkDynamic) {
+					var _g2 = 0;
+					var _g3 = cell.dynamicProxies;
+					while(_g2 < _g3.length) {
+						var proxy = _g3[_g2];
+						++_g2;
+						var tmp1;
+						if(!proxy.isSensor) {
+							var aabb1 = proxy.aabb;
+							if(Math.abs(aabb.position.x - aabb1.position.x) > aabb.extents.x + aabb1.extents.x) tmp1 = false; else if(Math.abs(aabb.position.y - aabb1.position.y) > aabb.extents.y + aabb1.extents.y) tmp1 = false; else tmp1 = true;
+						} else tmp1 = false;
+						if(tmp1) result(proxy);
+					}
+				}
+				if(checkStatic) {
+					var _g21 = 0;
+					var _g31 = cell.staticProxies;
+					while(_g21 < _g31.length) {
+						var proxy1 = _g31[_g21];
+						++_g21;
+						var tmp2;
+						if(!proxy1.isSensor) {
+							var aabb2 = proxy1.aabb;
+							if(Math.abs(aabb.position.x - aabb2.position.x) > aabb.extents.x + aabb2.extents.x) tmp2 = false; else if(Math.abs(aabb.position.y - aabb2.position.y) > aabb.extents.y + aabb2.extents.y) tmp2 = false; else tmp2 = true;
+						} else tmp2 = false;
+						if(tmp2) result(proxy1);
+					}
+				}
+			}
+		}
+	}
+	,CastRay: function(ray,result,checkDynamic,checkStatic) {
+		if(checkStatic == null) checkStatic = true;
+		if(checkDynamic == null) checkDynamic = true;
+		var _this = this.target;
+		var v = ray.origin;
+		_this.x = v.x;
+		_this.y = v.y;
+		var _this1 = this.target;
+		var v1 = ray.delta;
+		_this1.x += v1.x;
+		_this1.y += v1.y;
+		var tmp;
+		var value = Math.min(ray.origin.x,this.target.x);
+		tmp = value * this.grid.invCellSize | 0;
+		var startX = tmp;
+		var tmp1;
+		var value1 = Math.min(ray.origin.y,this.target.y);
+		tmp1 = value1 * this.grid.invCellSize | 0;
+		var startY = tmp1;
+		var tmp2;
+		var value2 = Math.max(ray.origin.x,this.target.x);
+		tmp2 = value2 * this.grid.invCellSize | 0;
+		var endX = tmp2 + 1;
+		var tmp3;
+		var value3 = Math.max(ray.origin.y,this.target.y);
+		tmp3 = value3 * this.grid.invCellSize | 0;
+		var endY = tmp3 + 1;
+		this.map.castRay(ray);
+		var _g = startX;
+		while(_g < endX) {
+			var x = _g++;
+			var _g1 = startY;
+			while(_g1 < endY) {
+				var y = _g1++;
+				var tmp4;
+				var _this2 = this.grid;
+				if(x >= _this2.gridWidth || y >= _this2.gridHeight || x < 0 || y < 0) tmp4 = null; else tmp4 = _this2.data[y * _this2.gridWidth + x];
+				var cell = tmp4;
+				if(cell == null) continue;
+				if(checkDynamic) {
+					var _g2 = 0;
+					var _g3 = cell.dynamicProxies;
+					while(_g2 < _g3.length) {
+						var proxy = _g3[_g2];
+						++_g2;
+						if(!proxy.isSensor) this.nf.RayAABB(ray,proxy);
+					}
+				}
+				if(checkStatic) {
+					var _g21 = 0;
+					var _g31 = cell.staticProxies;
+					while(_g21 < _g31.length) {
+						var proxy1 = _g31[_g21];
+						++_g21;
+						if(!proxy1.isSensor) this.nf.RayAABB(ray,proxy1);
+					}
+				}
+			}
+		}
+	}
+	,hashProxy: function(proxy) {
+		var tmp;
+		var _this = proxy.aabb;
+		tmp = _this.position.x - _this.extents.x;
+		var x = tmp * this.grid.invCellSize | 0;
+		var tmp1;
+		var _this1 = proxy.aabb;
+		tmp1 = _this1.position.y - _this1.extents.y;
+		var y = tmp1 * this.grid.invCellSize | 0;
+		var tmp2;
+		var _this2 = this.grid;
+		tmp2 = _this2.data[y * _this2.gridWidth + x];
+		var newCell = tmp2;
+		var tmp3;
+		var _this3 = proxy.aabb;
+		tmp3 = _this3.position.x + _this3.extents.x;
+		var right = tmp3 > newCell.aabb2.r;
+		var tmp4;
+		var _this4 = proxy.aabb;
+		tmp4 = _this4.position.y + _this4.extents.y;
+		var down = tmp4 > newCell.aabb2.b;
+		var occupancyHash = 0;
+		if(right) occupancyHash |= 1;
+		if(down) occupancyHash |= 2;
+		if(newCell.index == proxy.userData1 && occupancyHash == proxy.userData2) return;
+		this.removeProxy(proxy);
+		proxy.userData1 = newCell.index;
+		proxy.userData2 = occupancyHash;
+		newCell.addProxy(proxy);
+		if(right) newCell.adjacentRight.addProxy(proxy);
+		if(down) newCell.adjacentDown.addProxy(proxy);
+		if(right && down) newCell.adjacentRightDown.addProxy(proxy);
+	}
+	,dump: function() {
+		var result = [];
+		var staticCount = 0;
+		var dynamicCount = 0;
+		var _g1 = 0;
+		var _g = this.grid.gridHeight;
+		while(_g1 < _g) {
+			var y = _g1++;
+			var row = [];
+			var _g3 = 0;
+			var _g2 = this.grid.gridWidth;
+			while(_g3 < _g2) {
+				var x = _g3++;
+				var cell = (function($this) {
+					var $r;
+					var _this = $this.grid;
+					$r = _this.data[y * _this.gridWidth + x];
+					return $r;
+				}(this));
+				var _g4 = 0;
+				var _g5 = cell.dynamicProxies;
+				while(_g4 < _g5.length) {
+					var proxy = _g5[_g4];
+					++_g4;
+					if(proxy.userData1 == cell.index) {
+						dynamicCount++;
+						if(x == 1 && y == 1) haxe_Log.trace(proxy.entity.name,{ fileName : "UniformGrid.hx", lineNumber : 264, className : "glaze.physics.collision.broadphase.uniformgrid.UniformGrid", methodName : "dump"});
+					}
+				}
+				var _g41 = 0;
+				var _g51 = cell.staticProxies;
+				while(_g41 < _g51.length) {
+					var proxy1 = _g51[_g41];
+					++_g41;
+					if(proxy1.userData1 == cell.index) staticCount++;
+				}
+				row.push(cell.dynamicProxies.length + "," + cell.staticProxies.length);
+			}
+			result.push(row);
+		}
+		console.table(result);
+		haxe_Log.trace("(" + dynamicCount + "," + staticCount + ")",{ fileName : "UniformGrid.hx", lineNumber : 277, className : "glaze.physics.collision.broadphase.uniformgrid.UniformGrid", methodName : "dump"});
+	}
+	,__class__: glaze_physics_collision_broadphase_uniformgrid_UniformGrid
 };
 var glaze_physics_components_ContactRouter = function(contactProcessors) {
 	this.contactProcessors = contactProcessors;
@@ -6458,7 +6920,6 @@ glaze_render_frame_FrameListManager.prototype = {
 			var _this = this.frameLists;
 			if(__map_reserved[prop] != null) _this.setReserved(prop,frameList); else _this.h[prop] = frameList;
 			var framelistItem = Reflect.field(frameListConfigData,prop);
-			haxe_Log.trace(framelistItem.frames,{ fileName : "FrameListManager.hx", lineNumber : 52, className : "glaze.render.frame.FrameListManager", methodName : "ParseFrameListJSON"});
 			if(framelistItem.frames != null) {
 				var _g1 = 0;
 				var _g2 = framelistItem.frames;
@@ -6490,86 +6951,6 @@ var glaze_render_renderers_webgl_IRenderer = function() { };
 glaze_render_renderers_webgl_IRenderer.__name__ = ["glaze","render","renderers","webgl","IRenderer"];
 glaze_render_renderers_webgl_IRenderer.prototype = {
 	__class__: glaze_render_renderers_webgl_IRenderer
-};
-var glaze_render_renderers_webgl_FBOLighting = function() {
-	this.fullReset = true;
-	this.maxLights = 32;
-};
-glaze_render_renderers_webgl_FBOLighting.__name__ = ["glaze","render","renderers","webgl","FBOLighting"];
-glaze_render_renderers_webgl_FBOLighting.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
-glaze_render_renderers_webgl_FBOLighting.prototype = {
-	Init: function(gl,camera) {
-		this.gl = gl;
-		this.camera = camera;
-		this.gridSize = 4;
-		this.viewportSize = new glaze_geom_Vector2();
-		this.scaledViewportSize = new Float32Array(2);
-		this.quadVertBuffer = gl.createBuffer();
-		gl.bindBuffer(34962,this.quadVertBuffer);
-		var quadVerts = new Float32Array([-1,1,1,1,1,-1,1,-1,-1,-1,-1,1]);
-		gl.bufferData(34962,quadVerts,35044);
-		gl.bufferData(34962,quadVerts,35044);
-		this.screenShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER));
-		this.surfaceShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER,glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER));
-		this.surface = new glaze_render_texture_BaseTexture(gl,800 / this.gridSize | 0,640 / this.gridSize | 0);
-		this.lightData = new Float32Array(this.maxLights * 4 * 4);
-		this.lightDataTexture = new glaze_render_texture_BaseTexture(gl,this.lightData.length,1,true);
-		this.reset();
-	}
-	,Resize: function(width,height) {
-		this.viewportSize.x = width;
-		this.viewportSize.y = height;
-	}
-	,reset: function() {
-		this.indexRun = 0;
-		this.lightCount = 0;
-	}
-	,addLight: function(x,y,intensity,red,green,blue) {
-		if(this.lightCount++ == this.maxLights - 1) return;
-		this.lightData[this.indexRun++] = x;
-		this.lightData[this.indexRun++] = y;
-		this.lightData[this.indexRun++] = intensity;
-		this.lightData[this.indexRun++] = (red << 16 | green << 8 | blue) / 16777216;
-	}
-	,drawSurface: function() {
-		this.addLight(0,0,0,0,0,0);
-		var x = this.camera.position.x;
-		var y = this.camera.position.y;
-		this.lightDataTexture.bind(0);
-		this.gl.texImage2D(3553,0,6408,8,8,0,6408,5126,this.lightData);
-		this.gl.clearColor(1,1,1,1);
-		this.gl.clear(16384);
-		this.gl.colorMask(true,true,true,true);
-		this.gl.useProgram(this.surfaceShader.program);
-		this.gl.uniform2fv(this.surfaceShader.uniform.viewportSize,this.scaledViewportSize);
-		this.gl.uniform2f(this.surfaceShader.uniform.resolution,800,640);
-		this.gl.uniform2f(this.surfaceShader.uniform.viewOffset,-x,-y);
-		this.gl.uniform2f(this.surfaceShader.uniform.gridSize,this.gridSize,this.gridSize);
-		this.gl.uniform1i(this.surfaceShader.uniform.numLights,this.maxLights);
-		this.gl.uniform1i(this.surfaceShader.uniform.texture,0);
-		this.gl.bindBuffer(34962,this.quadVertBuffer);
-		this.gl.vertexAttribPointer(this.surfaceShader.attribute.position,2,5126,false,0,0);
-		this.gl.drawArrays(4,0,6);
-	}
-	,Render: function(clip) {
-		var x = this.camera.position.x;
-		var y = this.camera.position.y;
-		this.surface.drawTo($bind(this,this.drawSurface));
-		this.gl.enable(3042);
-		this.gl.blendFunc(774,0);
-		this.gl.useProgram(this.screenShader.program);
-		this.gl.uniform2fv(this.screenShader.uniform.viewportSize,this.scaledViewportSize);
-		this.gl.uniform2f(this.screenShader.uniform.resolution,800,640);
-		this.gl.uniform2f(this.screenShader.uniform.textureOffset,-x % this.gridSize,-y % this.gridSize);
-		this.surface.bind(0);
-		this.gl.uniform1i(this.screenShader.uniform.texture,0);
-		this.gl.bindBuffer(34962,this.quadVertBuffer);
-		this.gl.vertexAttribPointer(this.screenShader.attribute.position,2,5126,false,0,0);
-		this.gl.drawArrays(4,0,6);
-		this.surface.unbind(0);
-		this.gl.disable(3042);
-	}
-	,__class__: glaze_render_renderers_webgl_FBOLighting
 };
 var glaze_render_renderers_webgl_PointSpriteLightMapRenderer = function() {
 	this.first = true;
@@ -8195,8 +8576,8 @@ glaze_util_BroadphaseAreaQuery.prototype = {
 			if(filterEntity != null && bfproxy.entity == filterEntity) return;
 			if(visibleCheck) {
 				_g.ray.initalize(position,bfproxy.entity.map.Position.coords,0,null);
-				_g.broadphase.CastRay(_g.ray,null,true,true);
-				if(!_g.ray.hit) return;
+				_g.broadphase.CastRay(_g.ray,null,false,false);
+				if(_g.ray.hit) return;
 			}
 			var item = _g.entityCollection.addItem(bfproxy.entity);
 			item.distance = bfproxy.aabb.position.distSqrd(_g.aabb.position);
@@ -10031,21 +10412,21 @@ Xml.DocType = 4;
 Xml.ProcessingInstruction = 5;
 Xml.Document = 6;
 exile_components_Bee.NAME = "Bee";
-exile_components_Bee.ID = 28;
+exile_components_Bee.ID = 29;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 32;
+exile_components_BeeHive.ID = 55;
 exile_components_Chicken.NAME = "Chicken";
-exile_components_Chicken.ID = 35;
+exile_components_Chicken.ID = 12;
 exile_components_Door.NAME = "Door";
-exile_components_Door.ID = 31;
+exile_components_Door.ID = 33;
 exile_components_Grenade.NAME = "Grenade";
-exile_components_Grenade.ID = 13;
+exile_components_Grenade.ID = 14;
 exile_components_Player.NAME = "Player";
-exile_components_Player.ID = 30;
+exile_components_Player.ID = 32;
 exile_components_Projectile.NAME = "Projectile";
-exile_components_Projectile.ID = 34;
+exile_components_Projectile.ID = 35;
 exile_components_Teleporter.NAME = "Teleporter";
-exile_components_Teleporter.ID = 29;
+exile_components_Teleporter.ID = 46;
 exile_entities_weapon_HandGrenadeFactory.count = 0;
 exile_util_CharacterController.WALK_FORCE = 20;
 exile_util_CharacterController.AIR_CONTROL_FORCE = 10;
@@ -10113,9 +10494,9 @@ glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
 glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
 glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
-glaze_ai_steering_components_Steering.ID = 27;
+glaze_ai_steering_components_Steering.ID = 44;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 2;
+glaze_animation_components_SpriteAnimation.ID = 32;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -10126,69 +10507,72 @@ glaze_ds_EntityCollection.itempool = (function($this) {
 glaze_eco_core_Entity.DESTROY = "destroy";
 glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_Active.NAME = "Active";
-glaze_engine_components_Active.ID = 26;
+glaze_engine_components_Active.ID = 27;
 glaze_engine_components_Age.NAME = "Age";
-glaze_engine_components_Age.ID = 25;
+glaze_engine_components_Age.ID = 43;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_CollidableSwitch.ID = 7;
 glaze_engine_components_Destroy.NAME = "Destroy";
-glaze_engine_components_Destroy.ID = 12;
+glaze_engine_components_Destroy.ID = 13;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 3;
+glaze_engine_components_Display.ID = 42;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
-glaze_engine_components_EnvironmentForce.ID = 6;
+glaze_engine_components_EnvironmentForce.ID = 29;
 glaze_engine_components_Extents.NAME = "Extents";
-glaze_engine_components_Extents.ID = 23;
+glaze_engine_components_Extents.ID = 41;
 glaze_engine_components_Fixed.NAME = "Fixed";
 glaze_engine_components_Fixed.ID = 5;
 glaze_engine_components_Health.NAME = "Health";
-glaze_engine_components_Health.ID = 22;
+glaze_engine_components_Health.ID = 23;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 33;
+glaze_engine_components_Held.ID = 56;
 glaze_engine_components_Holdable.NAME = "Holdable";
-glaze_engine_components_Holdable.ID = 4;
+glaze_engine_components_Holdable.ID = 28;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 9;
+glaze_engine_components_Holder.ID = 50;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 8;
+glaze_engine_components_Inventory.ID = 49;
 glaze_engine_components_Moveable.NAME = "Moveable";
-glaze_engine_components_Moveable.ID = 21;
+glaze_engine_components_Moveable.ID = 22;
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 20;
+glaze_engine_components_ParticleEmitters.ID = 54;
 glaze_engine_components_Position.NAME = "Position";
-glaze_engine_components_Position.ID = 19;
+glaze_engine_components_Position.ID = 39;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 18;
+glaze_engine_components_Script.ID = 53;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 11;
+glaze_engine_components_State.ID = 51;
+glaze_engine_components_Storeable.NAME = "Storeable";
+glaze_engine_components_Storeable.ID = 36;
 glaze_engine_components_Viewable.NAME = "Viewable";
-glaze_engine_components_Viewable.ID = 14;
+glaze_engine_components_Viewable.ID = 34;
 glaze_engine_components_Water.NAME = "Water";
-glaze_engine_components_Water.ID = 2;
+glaze_engine_components_Water.ID = 26;
 glaze_engine_components_Wind.NAME = "Wind";
-glaze_engine_components_Wind.ID = 3;
+glaze_engine_components_Wind.ID = 27;
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
-glaze_lighting_components_Light.ID = 17;
+glaze_lighting_components_Light.ID = 37;
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
+glaze_physics_Body.SLEEP_BIAS = 0.99332805041467;
+glaze_physics_Body.SLEEP_EPSILON = 0.0009;
+glaze_physics_collision_BFProxy.nextID = 0;
 glaze_physics_collision_Intersect.epsilon = 1e-8;
 glaze_physics_collision_Map.COLLIDABLE = 1;
 glaze_physics_collision_Map.ONE_WAY = 2;
 glaze_physics_collision_Map.CORRECTION = .0;
 glaze_physics_collision_Map.ROUNDDOWN = .01;
 glaze_physics_collision_Map.ROUNDUP = .5;
+glaze_physics_collision_broadphase_uniformgrid_UniformGrid.RIGHT = 1;
+glaze_physics_collision_broadphase_uniformgrid_UniformGrid.DOWN = 2;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
-glaze_physics_components_ContactRouter.ID = 1;
+glaze_physics_components_ContactRouter.ID = 48;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
-glaze_physics_components_PhysicsBody.ID = 16;
+glaze_physics_components_PhysicsBody.ID = 36;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 15;
+glaze_physics_components_PhysicsCollision.ID = 52;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
-glaze_physics_components_PhysicsConstraints.ID = 0;
-glaze_render_renderers_webgl_FBOLighting.SURFACE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
-glaze_render_renderers_webgl_FBOLighting.SURFACE_FRAGMENT_SHADER = ["precision mediump float;","precision mediump int;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 viewOffset;","uniform vec2 gridSize;","uniform int maxLights;","vec4 accumulatedLight = vec4(0.0,0.0,0.0,1.0);","void applyLight(vec2 tilePos,vec4 light)","{","   vec2 dist = tilePos-light.xy;","   float intensity = 1.0 - (dist.x*dist.x+dist.y*dist.y)/(light.z*light.z);","   intensity = clamp(intensity,0.0,1.0);","   intensity = intensity * intensity;","   vec3 unpackedValues = vec3(1.0, 256.0, 65536.0);","   unpackedValues = fract(unpackedValues * light.w);","   accumulatedLight.xyz =  max(unpackedValues*intensity,accumulatedLight.xyz);","}","void main(void) {","   vec2 tilePos = viewOffset + (gl_FragCoord.xy * gridSize) + gridSize/2.0;","   float index = 0.0;","   for (int i=0; i<32; i++) {","       vec4 lightData = texture2D(texture,vec2(index,0.0));","       if (lightData.z==0.0) break;","       applyLight(tilePos,lightData);","       index+=1.0/32.0;","   }","   gl_FragColor = accumulatedLight;","}"];
-glaze_render_renderers_webgl_FBOLighting.SCREEN_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","void main(void) {","   gl_Position = vec4(position, 0.0, 1.0);","}"];
-glaze_render_renderers_webgl_FBOLighting.SCREEN_FRAGMENT_SHADER = ["precision mediump float;","uniform sampler2D texture;","uniform vec2 resolution;","uniform vec2 textureOffset;","void main(void) {","    vec2 uv = (gl_FragCoord.xy)/(resolution.xy);","    uv.y = 1.0-uv.y;","    gl_FragColor = texture2D(texture,uv);","}"];
+glaze_physics_components_PhysicsConstraints.ID = 24;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];

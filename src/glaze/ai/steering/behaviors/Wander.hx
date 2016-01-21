@@ -17,12 +17,12 @@ class Wander extends Behavior
 	public var wanderAngle : Float;
 	public var wanderChange : Float;
 
-	public function new() {
+	public function new(circleRadius:Int = 8,circleDistance:Int = 1,wanderChange:Float = 4) {
 		super(SteeringSettings.wanderWeight, SteeringSettings.wanderPriority);
-		circleRadius = 8;
-		circleDistance = 1;
+		this.circleRadius = circleRadius;
+		this.circleDistance = circleRadius;
 		wanderAngle = Random.RandomFloat(0, Math.PI * 2);
-		wanderChange = 4;
+		this.wanderChange = wanderChange;
 	}
 
 	override public function calculate(agent:Body,result:Vector2) {

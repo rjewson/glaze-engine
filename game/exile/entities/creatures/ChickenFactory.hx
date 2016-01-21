@@ -19,6 +19,7 @@ import glaze.engine.components.Position;
 import glaze.engine.components.Script;
 import glaze.lighting.components.Light;
 import glaze.physics.Body;
+import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.Material;
@@ -33,7 +34,7 @@ class ChickenFactory {
 	public static function create(engine:Engine,position:Position):Entity {
 
         var chickenBody = new Body(new Material());
-        chickenBody.setMass(0.01);
+        chickenBody.setMass(0.1);
         chickenBody.setBounces(3);     
         chickenBody.maxScalarVelocity = 1000; 
         chickenBody.globalForceFactor = 0.5;
@@ -41,9 +42,9 @@ class ChickenFactory {
         var chicken = engine.createEntity([
             position, 
             new Chicken(),
-            new Extents((16/2)*2,(16/2)*2),
+            new Extents((12/2)*2,(16/2)*2),
             new Display("chicken"), 
-            new PhysicsCollision(false,new glaze.physics.collision.Filter(),[]),
+            new PhysicsCollision(false,new Filter(),[]),
             new PhysicsBody(chickenBody), 
             new Moveable(),
             new Holdable(),

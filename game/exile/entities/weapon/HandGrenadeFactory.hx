@@ -28,7 +28,7 @@ class HandGrenadeFactory {
  
         var grenade = engine.createEntity([
             new Position(x,y),  
-            new Display("grenade.png"), 
+            new Display("grenade","off"), 
             new Extents(8,8),
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),

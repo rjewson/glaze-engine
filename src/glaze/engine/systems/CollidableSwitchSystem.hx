@@ -5,6 +5,7 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.CollidableSwitch;
 import glaze.engine.components.Destroy;
+import glaze.engine.components.Display;
 import glaze.engine.components.Script;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
@@ -17,7 +18,7 @@ class CollidableSwitchSystem extends System {
     var ts:Float = 0;
 
     public function new(bus:MessageBus) {
-        super([CollidableSwitch,PhysicsCollision]);
+        super([CollidableSwitch,PhysicsCollision,Display]);
         this.bus = bus;
         // hasUpdate = false;
     }
@@ -39,8 +40,15 @@ class CollidableSwitchSystem extends System {
 
     function onCollision(a:BFProxy,b:BFProxy,c:Contact) {
         var collidableSwitch = a.entity.getComponent(CollidableSwitch);
-        if (collidableSwitch.trigger(ts))
+        if (collidableSwitch.trigger(ts)) {
             bus.triggerAll(collidableSwitch.triggerChannels,null);
+            var display = a.entity.getComponent(Display);
+            if (display.frame.name=="on")
+                display.setFrameId("off");
+            else
+                display.setFrameId("on");
+
+        }
     }
 
 }

@@ -4,19 +4,24 @@ package glaze.physics.collision;
 import glaze.geom.Vector2;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
+import glaze.physics.collision.Ray;
 
-class Intersect 
+class Intersect
 {
 
     public static inline var epsilon:Float = 1e-8;
     
     public var contact:Contact = new Contact();
+    public var ray:Ray = new Ray();
+
+    public var collideCount:Int = 0;
 
     public function new() {
+        // js.Lib.debug();
     }
 
     public function Collide(proxyA:BFProxy,proxyB:BFProxy):Bool {
-        
+        collideCount++;
         //Exit on static vs statics, they should never be sent but you never know
         //Sensors dont trigger other sensors
         if ((proxyA.isStatic && proxyB.isStatic) || (proxyA.isSensor && proxyB.isSensor))
@@ -106,15 +111,23 @@ class Intersect
                 dynamicProxy = proxyA;
             }
             //Test
-            Intersect.AABBvsStaticSolidAABB(
+            if (dynamicProxy.body.isBullet) {
+                collided = BulletAABB(dynamicProxy,staticProxy);
+                if (collided) {
+                    dynamicProxy.body.respondBulletCollision(contact);
+                }
+            } else {
+                Intersect.AABBvsStaticSolidAABB(
                     dynamicProxy.aabb.position,
                     dynamicProxy.aabb.extents,
                     staticProxy.aabb.position,
                     staticProxy.aabb.extents,
                     staticProxy.responseBias,
                     contact);
-            //We have to the response process and get the result
-            collided = dynamicProxy.body.respondStaticCollision(contact);
+                //We have to the response process and get the result
+                collided = dynamicProxy.body.respondStaticCollision(contact);
+            }
+           
         }
 
         if (collided==true) {
@@ -123,6 +136,11 @@ class Intersect
         }
 
         return collided;
+    }
+
+    public function BulletAABB(segmentProxy:BFProxy,staticProxy:BFProxy):Bool {
+        // return Intersect.StaticSegmentvsStaticAABB(staticProxy.aabb.position,staticProxy.aabb.extents,segmentProxy.body.position,segmentProxy.body.delta,0,0,contact);
+        return Intersect.StaticAABBvsSweeptAABB(staticProxy.aabb.position,staticProxy.aabb.extents,segmentProxy.aabb.position,segmentProxy.aabb.extents,segmentProxy.body.delta,contact);
     }
 
     public function RayAABB(ray:Ray,proxy:BFProxy):Bool {

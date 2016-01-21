@@ -9,6 +9,7 @@ import glaze.engine.components.Holdable;
 import glaze.engine.components.Holder;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
+import glaze.engine.components.Storeable;
 import glaze.engine.components.Viewable;
 import glaze.engine.components.Water;
 import glaze.particle.IParticleEngine;
@@ -37,13 +38,28 @@ class HeldSystem extends System {
 
         entity.getComponent(Position).coords.copy(holderPos);
         entity.getComponent(PhysicsBody).body.position.copy(holderPos);
+
+        if (entity.getComponent(Storeable)==null) {
+            var holderBody = holder.parent.getComponent(PhysicsBody).body;
+            if (holderBody!=null) {
+                holderBody.setMass(holderBody.mass+2);
+            }
+        }
     }
 
     override public function entityRemoved(entity:Entity) {
-        // js.Lib.debug();
-        entity.getComponent(Held).holder.getComponent(Holder).drop();
+        var holder = entity.getComponent(Held).holder;
+        holder.getComponent(Holder).drop();
         var body = entity.getComponent(PhysicsBody).body;
         body.skip = false;
+
+        if (entity.getComponent(Storeable)==null) {
+            var holderBody = holder.parent.getComponent(PhysicsBody).body;
+            if (holderBody!=null) {
+                holderBody.setMass(holderBody.mass-2);
+            }
+        }
+
     }
 
     override public function update(timestamp:Float,delta:Float) {

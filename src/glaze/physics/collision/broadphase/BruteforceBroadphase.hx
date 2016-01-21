@@ -12,6 +12,8 @@ class BruteforceBroadphase implements IBroadphase
 
     public var staticProxies:Array<BFProxy>;
     public var dynamicProxies:Array<BFProxy>;
+    public var sleepingProxies:Array<BFProxy>;
+
     public var map:Map;
     public var nf:Intersect;
 
@@ -20,6 +22,7 @@ class BruteforceBroadphase implements IBroadphase
         this.nf = nf;
         staticProxies  = new Array<BFProxy>();
         dynamicProxies = new Array<BFProxy>();
+        sleepingProxies = new Array<BFProxy>();
     }
 
     public function addProxy(proxy:BFProxy) {
@@ -38,7 +41,7 @@ class BruteforceBroadphase implements IBroadphase
         for (i in 0...count) {
 
             var dynamicProxy = dynamicProxies[i];
-
+if (dynamicProxy.body==null) trace("!="+dynamicProxy.entity.name);
             //First test against map
             if (!dynamicProxy.isSensor&&dynamicProxy.body!=null)
                 map.testCollision( dynamicProxy );
@@ -90,5 +93,11 @@ class BruteforceBroadphase implements IBroadphase
         }
 
     }
+
+    public function dump() {
+        trace("("+dynamicProxies.length+","+staticProxies.length+")");
+    }
+
+
 
 }

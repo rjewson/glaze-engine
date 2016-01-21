@@ -38,9 +38,7 @@ class DoorSystem extends System {
     	var pc = state.owner.getComponent(PhysicsCollision);
 	    pc.proxy.responseBias.x=0;
 	    var display = state.owner.getComponent(Display);
-	    // display.update("dooropen.png");
 	    display.setFrameId("open");
-	    display.displayObject.scale.setTo(1,2);
 	}
 
 	public function closeDoor2(state:State) {
@@ -48,7 +46,6 @@ class DoorSystem extends System {
 	    pc.proxy.responseBias.x=1;
 	   	var display = state.owner.getComponent(Display);
 	    display.setFrameId("closed");
-	    display.displayObject.scale.setTo(1,1);
 	}
 
 }

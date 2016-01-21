@@ -23,7 +23,7 @@ class Display implements IComponent {
     private function set_frame(value:Frame):Frame {
     	frame = value;
     	if (displayObject!=null) {
-    		value.updateSprite(displayObject);
+            frame.updateSprite(displayObject);
     	}
         return value;
     }

@@ -3,9 +3,13 @@ package glaze.physics;
 
 import glaze.geom.Vector2;
 import glaze.physics.collision.Contact;
+import glaze.physics.Material;
 
 class Body 
 {
+
+    public static inline var SLEEP_BIAS : Float = 0.99332805041467;
+    public static inline var SLEEP_EPSILON : Float = 0.0009;
 
     public var position:Vector2 = new Vector2();
     public var positionCorrection:Vector2 = new Vector2();
@@ -40,6 +44,10 @@ class Body
 
     public var dt:Float = 0;
 
+    public var motion:Float = 0;
+    public var canSleep:Bool = false;
+    public var isSleeping:Bool = false;
+
     public var onGround:Bool = false;
     public var onGroundPrev:Bool = false;
     public var inWater:Bool = false;
@@ -52,8 +60,10 @@ class Body
 
     public var skip:Bool = false;
 
-    public function new(material:Material) {
-        this.material = material;
+    // public var sweep:AABB2 = new glaze.geom.AABB2();
+
+    public function new(material:Material = null) {
+        this.material = material==null ? new Material() : material;
         setMass(1);
     }
 
@@ -90,6 +100,10 @@ class Body
         onGround = false;
         inWater = false;
         stepContactCount = 0;
+
+        motion = (SLEEP_BIAS * motion) + ((1 - SLEEP_BIAS) * velocity.lengthSqrd());
+        motion = Math.min(motion,10*SLEEP_EPSILON);
+        canSleep = motion<SLEEP_EPSILON;
 
         toi = Math.POSITIVE_INFINITY;
     }
@@ -215,6 +229,15 @@ class Body
 
     inline function get_canBounce():Bool {
         return bounceCount!=totalBounceCount;
+    }
+
+    public static function Create(material:Material,mass:Float,bounces:Int,globalForceFactor:Float,maxScalarVelocity:Float):Body {
+        var body = new Body(material);
+        body.setMass(mass);
+        body.setBounces(bounces);     
+        body.globalForceFactor = globalForceFactor;
+        body.maxScalarVelocity = maxScalarVelocity; 
+        return body;
     }
 
 }
