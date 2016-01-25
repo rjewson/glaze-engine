@@ -69,7 +69,7 @@ class StandardBulletFactory {
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
-            new Projectile({ttl:1000,bounce:1,power:10,range:32}),
+            new Projectile({ttl:1000,bounce:10,power:10,range:32}),
             new Health(10,10,0),
             new Age(1000),
             new Active()

@@ -8,6 +8,7 @@ import exile.systems.BeeSystem;
 import exile.systems.ChickenSystem;
 import exile.systems.DoorSystem;
 import exile.systems.GrenadeSystem;
+import exile.systems.MaggotSystem;
 import exile.systems.PlayerSystem;
 import exile.systems.TeleporterSystem;
 import glaze.ai.steering.systems.SteeringSystem;
@@ -142,7 +143,7 @@ class GameTestA extends GameEngine {
         tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
-        tileMap.TileScale(2);         
+        tileMap.TileScale(2);          
                               
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);   
@@ -174,7 +175,7 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new glaze.engine.systems.HealthSystem());
         physicsPhase.addSystem(new glaze.engine.systems.AgeSystem());
                 
-        physicsPhase.addSystem(new exile.systems.ProjectileSystem(broadphase));
+        physicsPhase.addSystem(new exile.systems.ProjectileSystem());
                   
         /*      
          * Lighting RnD
@@ -194,7 +195,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new BeeHiveSystem());                                                 
         aiphase.addSystem(new BeeSystem(broadphase));  
         var chickenSystem:ChickenSystem = new ChickenSystem(blockParticleEngine);
-        aiphase.addSystem(chickenSystem);                                               
+        aiphase.addSystem(chickenSystem); 
+        aiphase.addSystem(new MaggotSystem(broadphase,blockParticleEngine));                                              
         aiphase.addSystem(new GrenadeSystem(broadphase)); 
         aiphase.addSystem(new InventorySystem());                                                
 
@@ -249,11 +251,12 @@ class GameTestA extends GameEngine {
         tmxFactory.registerFactory(WaterFactory);
         tmxFactory.parseObjectGroup("Objects");
 
-        // createTurret();    
+        createTurret();    
         createWind();
         createDoor();
 
         exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
+        exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
         exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
 
         loop.start();
@@ -420,6 +423,8 @@ class GameTestA extends GameEngine {
         for (i in 0 ... 10) {
             var pos = player.getComponent(Position).clone();
             var chickie = exile.entities.creatures.ChickenFactory.create(engine,pos);
+            // var chickie = exile.entities.creatures.MaggotFactory.create(engine,pos);
+
             chickie.getComponent(PhysicsBody).body.addForce(new Vector2(RandomInteger(-1000,1000),RandomInteger(-1000,100)));
 
         }

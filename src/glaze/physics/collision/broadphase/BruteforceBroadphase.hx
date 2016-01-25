@@ -36,23 +36,44 @@ class BruteforceBroadphase implements IBroadphase
     }
 
     public function collide() {
-        // trace("bfcount="+dynamicProxies.length);
-        var count = dynamicProxies.length;
-        for (i in 0...count) {
+
+        //Loop back over the proxies
+        var i = dynamicProxies.length;
+        while (--i>=0) {
 
             var dynamicProxy = dynamicProxies[i];
-if (dynamicProxy.body==null) trace("!="+dynamicProxy.entity.name);
-            //First test against map
-            if (!dynamicProxy.isSensor&&dynamicProxy.body!=null)
-                map.testCollision( dynamicProxy );
+
+            //Has body (therefore is in control)
+            if (dynamicProxy.body!=null) {
+                if (!dynamicProxy.isSensor)
+                    //First test against map
+                    map.testCollision( dynamicProxy );
+                //if it can sleep, sleep it
+                if (dynamicProxy.body.canSleep) {
+                    sleep(dynamicProxy);
+                }
+            }
 
             //Next test against all static proxies
             for (staticProxy in staticProxies) {
                 nf.Collide(dynamicProxy,staticProxy);
             }
 
+            //Now check against the sleepers
+            var k = sleepingProxies.length;
+            while (--k>=0) {
+                var sleepingProxy = sleepingProxies[k];
+                //its awake now?
+                if (!sleepingProxy.body.canSleep) {
+                    wake(sleepingProxy);
+                } else {
+                    nf.Collide(dynamicProxy,sleepingProxy);                    
+                }
+            }
+
             //Finally test against dynamic
-            for (j in i+1...count) {
+            var j = i;
+            while (--j>=0) {
                 var dynamicProxyB = dynamicProxies[j];
                 nf.Collide(dynamicProxy,dynamicProxyB);
             }
@@ -92,6 +113,20 @@ if (dynamicProxy.body==null) trace("!="+dynamicProxy.entity.name);
                     nf.RayAABB(ray,proxy);
         }
 
+    }
+
+    public function wake(proxy:BFProxy) {
+        sleepingProxies.remove(proxy);
+        proxy.body.isSleeping = false;
+        dynamicProxies.push(proxy);
+        trace("wake:"+proxy.entity.id);
+    }
+
+    public function sleep(proxy:BFProxy) {
+        dynamicProxies.remove(proxy);
+        proxy.body.isSleeping = true;
+        sleepingProxies.push(proxy);
+        trace("sleep:"+proxy.entity.id);
     }
 
     public function dump() {

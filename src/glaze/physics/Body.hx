@@ -10,6 +10,7 @@ class Body
 
     public static inline var SLEEP_BIAS : Float = 0.99332805041467;
     public static inline var SLEEP_EPSILON : Float = 0.0009;
+    public static inline var WAKE_MOTION : Float = 10;
 
     public var position:Vector2 = new Vector2();
     public var positionCorrection:Vector2 = new Vector2();
@@ -44,7 +45,7 @@ class Body
 
     public var dt:Float = 0;
 
-    public var motion:Float = 0;
+    public var motion:Float = WAKE_MOTION;
     public var canSleep:Bool = false;
     public var isSleeping:Bool = false;
 
@@ -69,7 +70,12 @@ class Body
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {
         this.dt = dt;
-        if (skip) return;
+        if (skip||isSleeping) return;
+
+        motion = (SLEEP_BIAS * motion) + ((1 - SLEEP_BIAS) * velocity.lengthSqrd());
+        motion = Math.min(motion,10*SLEEP_EPSILON);
+        canSleep = motion<SLEEP_EPSILON;
+
         //Add global forces to local ones
         forces.plusMultEquals(globalForces,globalForceFactor);
         velocity.plusEquals(forces);
@@ -100,10 +106,6 @@ class Body
         onGround = false;
         inWater = false;
         stepContactCount = 0;
-
-        motion = (SLEEP_BIAS * motion) + ((1 - SLEEP_BIAS) * velocity.lengthSqrd());
-        motion = Math.min(motion,10*SLEEP_EPSILON);
-        canSleep = motion<SLEEP_EPSILON;
 
         toi = Math.POSITIVE_INFINITY;
     }
@@ -163,7 +165,7 @@ class Body
     }
 
     public function updatePosition() {
-        if (skip) return;
+        if (skip||isSleeping) return;
         //Its a bullet and it hit something?
         if (isBullet) {
             if (toi<Math.POSITIVE_INFINITY) {
@@ -211,15 +213,23 @@ class Body
 
     public function addForce(f:Vector2) {
         forces.plusMultEquals(f,invMass);
+        wake();
     }
 
     public function addMasslessForce(f:Vector2) {
         forces.plusEquals(f);
+        wake();
     }
 
     public function setMass(mass) {
         this.mass = mass;
         this.invMass = 1/mass;
+    }
+
+    public function setPosition(x:Float,y:Float) {
+        position.setTo(x,y);
+        // js.Lib.debug();
+        wake();
     }
 
     public function setBounces(count:Int) {
@@ -229,6 +239,11 @@ class Body
 
     inline function get_canBounce():Bool {
         return bounceCount!=totalBounceCount;
+    }
+
+    inline function wake() {
+        canSleep = false;
+        motion = WAKE_MOTION;
     }
 
     public static function Create(material:Material,mass:Float,bounces:Int,globalForceFactor:Float,maxScalarVelocity:Float):Body {

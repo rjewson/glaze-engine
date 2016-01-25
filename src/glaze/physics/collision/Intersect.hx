@@ -82,11 +82,6 @@ class Intersect
                         proxyB.body.delta,
                         contact)==true) {
                     proxyB.body.respondBulletCollision(contact);
-
-                    // var response = contact.normal.clone();
-                    // response.x *= -100;
-                    // response.y *= -100;
-                    //proxyA.body.addForce(response);
                     collided=true;
                 } 
             } else {
@@ -97,7 +92,6 @@ class Intersect
                         proxyB.aabb.position,
                         proxyB.aabb.extents,
                         contact); 
-                // if (collided==true) trace("hit");           
             }
         } else {
             //Were just left with static<>dynamic collisions

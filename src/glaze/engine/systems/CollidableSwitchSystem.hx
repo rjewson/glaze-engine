@@ -15,7 +15,6 @@ import glaze.util.MessageBus;
 class CollidableSwitchSystem extends System {
 
     var bus:MessageBus;
-    var ts:Float = 0;
 
     public function new(bus:MessageBus) {
         super([CollidableSwitch,PhysicsCollision,Display]);
@@ -35,12 +34,11 @@ class CollidableSwitchSystem extends System {
     }
 
     override public function update(timestamp:Float,delta:Float) {
-        ts = timestamp;
     }
 
     function onCollision(a:BFProxy,b:BFProxy,c:Contact) {
         var collidableSwitch = a.entity.getComponent(CollidableSwitch);
-        if (collidableSwitch.trigger(ts)) {
+        if (collidableSwitch.trigger(engine.timestamp)) {
             bus.triggerAll(collidableSwitch.triggerChannels,null);
             var display = a.entity.getComponent(Display);
             if (display.frame.name=="on")

@@ -22,7 +22,6 @@ class CombatUtils {
 	}
 
 	public static function explode(position:Vector2,radius:Float,power:Float,ignoreEntity:Entity) {
-        // js.Lib.debug();
 	    CombatUtils.bfAreaQuery.query(position,64,ignoreEntity,true);
 	    var item = bfAreaQuery.entityCollection.entities.head;
         while (item!=null) {

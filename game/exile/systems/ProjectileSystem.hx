@@ -7,20 +7,13 @@ import glaze.engine.components.Destroy;
 import glaze.engine.components.Health;
 import glaze.engine.components.Position;
 import glaze.physics.collision.BFProxy;
-import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
 
 class ProjectileSystem extends System {
 
-    var broadphase:IBroadphase;
-    var bfAreaQuery:glaze.util.BroadphaseAreaQuery;
-
-
-    public function new(broadphase:IBroadphase) {
+    public function new() {
         super([Projectile,PhysicsCollision,Health]);
-        this.broadphase = broadphase;
-        bfAreaQuery = new glaze.util.BroadphaseAreaQuery(broadphase);
     }
 
     override public function entityAdded(entity:Entity) {

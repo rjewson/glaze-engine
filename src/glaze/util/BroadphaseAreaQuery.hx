@@ -14,7 +14,8 @@ class BroadphaseAreaQuery {
 	var ray:Ray;
 	public var entityCollection:EntityCollection;
 	var aabb:glaze.geom.AABB;
-	// var filterEntity:Entity;
+	var filterEntity:Entity;
+	var visibleCheck:Bool;
 
 	public function new(broadphase:IBroadphase) {
 		this.broadphase = broadphase;
@@ -29,28 +30,29 @@ class BroadphaseAreaQuery {
 		
 		aabb.position.copy(position);
         aabb.extents.setTo(range,range);
-        // this.filterEntity = filterOwner;
-
-        function addBroadphaseItem(bfproxy:BFProxy) {
-
-            if (filterEntity!=null&&bfproxy.entity==filterEntity)
-                return;
-			
-			if (visibleCheck) {
-				ray.initalize(position,bfproxy.entity.getComponent(Position).coords,0,null);
-				//js.Lib.debug();
-				broadphase.CastRay(ray,null,false,false); //Dont check ray against static and dynamic items
-				if (ray.hit)
-					return;
-           }
-
-            var item = entityCollection.addItem(bfproxy.entity);
-            item.distance = bfproxy.aabb.position.distSqrd(aabb.position);
-            item.perspective = aabb.position;
-        }
+        this.filterEntity = filterEntity;
+        this.visibleCheck = visibleCheck;
 
         broadphase.QueryArea(aabb,addBroadphaseItem,true,true); //Check static and dynamic items
-
 	}
+
+	function addBroadphaseItem(bfproxy:BFProxy) {
+
+        if (filterEntity!=null&&bfproxy.entity==filterEntity)
+            return;
+		
+		if (visibleCheck) {
+			ray.initalize(aabb.position,bfproxy.entity.getComponent(Position).coords,0,null);
+			//js.Lib.debug();
+			broadphase.CastRay(ray,null,false,false); //Dont check ray against static and dynamic items
+			if (ray.hit)
+				return;
+       }
+
+        var item = entityCollection.addItem(bfproxy.entity);
+        item.distance = bfproxy.aabb.position.distSqrd(aabb.position);
+        item.perspective = aabb.position;
+    }
+
 
 }

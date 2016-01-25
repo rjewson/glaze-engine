@@ -179,13 +179,13 @@ class Map
         while (true) {
 
             if (tMaxX < tMaxY) {
-                distX += tMaxX * d.x;
-                distY += tMaxX * d.y;
+                distX = tMaxX * d.x;
+                distY = tMaxX * d.y;
                 tMaxX += tDeltaX;
                 x += stepX;
             } else {
-                distX += tMaxY * d.x;
-                distY += tMaxY * d.y;
+                distX = tMaxY * d.x;
+                distY = tMaxY * d.y;
                 tMaxY += tDeltaY;
                 y += stepY;
             }

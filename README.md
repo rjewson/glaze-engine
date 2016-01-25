@@ -27,3 +27,10 @@ haxelib install compiletime
 
 TODO
 Add static, dynamic and kinematic components
+
+Map
+Static Solid	
+Static Sensor
+
+Dynamic [Map,All Static,Dynamic Sensors]
+Dynamic [Map,All Static,Dynamic Sensors,Dynamic] < Is this rays/projectiles only?

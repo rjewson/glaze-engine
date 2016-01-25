@@ -68,7 +68,8 @@ class HeldSystem extends System {
             var holderPos = holder.getComponent(glaze.engine.components.Position).coords;
 
             entity.getComponent(Position).coords.copy(holderPos);
-            entity.getComponent(PhysicsBody).body.position.copy(holderPos);
+            // entity.getComponent(PhysicsBody).body.position.copy(holderPos);
+            entity.getComponent(PhysicsBody).body.setPosition(holderPos.x,holderPos.y); //position.copy(holderPos);
         }
 
     }
