@@ -8,11 +8,12 @@ class PhysicsCollision implements IComponent {
     
     public var proxy:BFProxy;
 
-    public function new(isSensor:Bool,filter:Filter,contactCallbacks:Array<ContactCallback>) {
+    public function new(isSensor:Bool,filter:Filter,contactCallbacks:Array<ContactCallback>,limitToStaticCheck:Bool=false) {
         proxy = new BFProxy();
         proxy.isSensor = isSensor;
         proxy.filter = filter;
     	proxy.contactCallbacks = contactCallbacks;
+    	proxy.limitToStaticCheck = limitToStaticCheck;
     }
 
 }

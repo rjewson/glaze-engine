@@ -2,7 +2,8 @@
 
 	"projectiles":{
 		"frames":[
-			{ "id":"standard",	"name":"projectile1.png",		"scale":{"x":1,"y":1} }
+			{ "id":"standard",	"name":"projectile1.png",				"scale":{"x":1,"y":1} },
+			{ "id":"plasma",	"name":"explosion/1/frame4.png",		"scale":{"x":2,"y":2} }
 		]
 	},
 

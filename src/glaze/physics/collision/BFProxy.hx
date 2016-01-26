@@ -30,6 +30,7 @@ class BFProxy
     public var isStatic:Bool = false;
     public var isSensor:Bool = false;
     public var isActive:Bool = true;
+    public var limitToStaticCheck:Bool = false;
 
     public var filter:Filter;
 

@@ -6,7 +6,7 @@
         <key>texturePackerVersion</key>
         <string>4.0.1</string>
         <key>fileName</key>
-        <string>/Users/richard.jewson/Workspace/glaze/glaze-engine/bin/data/sprites.tps</string>
+        <string>/Users/richard.jewson/Workspace/glaze/glaze-engine/resources/sprites.tps</string>
         <key>autoSDSettings</key>
         <array>
             <struct type="AutoSDSettings">
@@ -38,7 +38,7 @@
         <key>dataFormat</key>
         <string>json</string>
         <key>textureFileName</key>
-        <filename>sprites.png</filename>
+        <filename>../bin/data/sprites.png</filename>
         <key>flipPVR</key>
         <false/>
         <key>pvrCompressionQuality</key>
@@ -147,7 +147,7 @@
             <key>data</key>
             <struct type="DataFile">
                 <key>name</key>
-                <filename>sprites.json</filename>
+                <filename>../bin/data/sprites.json</filename>
             </struct>
         </map>
         <key>multiPack</key>

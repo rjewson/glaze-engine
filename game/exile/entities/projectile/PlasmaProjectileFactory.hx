@@ -20,7 +20,7 @@ import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.render.frame.FrameList;
 
-class StandardBulletFactory {
+class PlasmaProjectileFactory {
 	
 	public function new() {
 	} 
@@ -28,46 +28,20 @@ class StandardBulletFactory {
 	public static function create(engine:Engine,position:Position,filter:Filter,targetPosition:Vector2):Entity {
 
         var bulletBody = new Body(new Material());
-        bulletBody.setMass(0.03);
-        bulletBody.setBounces(3);     
-        bulletBody.globalForceFactor = 0.5;
+        bulletBody.setMass(0.3);
+        bulletBody.setBounces(0);     
+        bulletBody.globalForceFactor = 0.1;
         bulletBody.isBullet = true;
 
-/*
-        var data = '
-        {
-            "type":"Sequence",
-            "children": [
-                {
-                    "type":"Monitor",
-                    "children": [
-                        {
-                            "type":"glaze.engine.actions.Delay",
-                            "params":[1000,100]
-                        },
-                        {
-                            "type":"glaze.engine.actions.CollisionMonitor"
-                        }
-                    ]
-                },
-                {
-                    "type":"glaze.engine.actions.DestroyEntity"
-                }
-
-            ]
-        }';
-		var include:glaze.engine.actions.CollisionMonitor;
-        var behavior = glaze.ai.behaviortree.BehaviorTree.fromJSON(data);
-*/
         var bullet = engine.createEntity([
             position,
             new Extents(3,3),
-            new Display("projectiles","standard"), 
+            new Display("projectiles","plasma"), 
             new PhysicsBody(bulletBody),
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   
-            new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),
-            new Projectile({ttl:1000,bounce:10,power:10,range:32}),
+            new ParticleEmitters([new glaze.particle.emitter.FireballEmitter(0,10)]),
+            new Projectile({ttl:1000,bounce:1,power:10,range:32}),
             new Health(10,10,0),
             new Age(1000),
             new Active()
@@ -78,7 +52,7 @@ class StandardBulletFactory {
             //     ])
         ],"StandardBullet");              
                 
-        glaze.util.Ballistics.calcProjectileVelocity(bulletBody,targetPosition,2500);        
+        glaze.util.Ballistics.calcProjectileVelocity(bulletBody,targetPosition,600);        
 
         // var light = engine.createEntity([
         //     position,

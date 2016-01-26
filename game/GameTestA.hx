@@ -93,6 +93,7 @@ class GameTestA extends GameEngine {
     public var broadphase:glaze.physics.collision.broadphase.IBroadphase;
 
     public var killChickens:Bool = false;
+    public var shakeIt:Float = 0;
  
     public var door:Entity;    
    
@@ -136,11 +137,13 @@ class GameTestA extends GameEngine {
  
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
-
+ 
         var tileMap = new TileMap(); 
         renderSystem.renderer.AddRenderer(tileMap);    
         tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
         tileMap.SetTileLayerFromData(mapData,"base",1,1);
+        // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
+        // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);          
@@ -186,7 +189,7 @@ class GameTestA extends GameEngine {
         //This one
         // var lightSystem = new glaze.lighting.systems.PointLightingSystem(map);
         // renderSystem.renderer.AddRenderer(lightSystem.renderer);
-
+    
         aiphase.addSystem(new BehaviourSystem());  
         aiphase.addSystem(new StateSystem(messageBus));  
         aiphase.addSystem(new CollidableSwitchSystem(messageBus));  
@@ -214,7 +217,7 @@ class GameTestA extends GameEngine {
   
         playerFilter = new Filter();
         playerFilter.maskBits = 0;
-        playerFilter.groupIndex = 1; 
+        playerFilter.groupIndex = -1; 
 
         var body = new glaze.physics.Body(new Material(1,0.3,0.1));
         body.maxScalarVelocity = 0;
@@ -311,7 +314,7 @@ class GameTestA extends GameEngine {
         ],"door");        
 
         var doorSwitch = engine.createEntity([
-            new Position((5*32)+10,(1*32)+10),  
+            new Position((5*32)+8,(1*32)+10),  
             new Display("switch"), 
             new Extents(8,8),
             new PhysicsCollision(false,null,[]),
@@ -375,14 +378,14 @@ class GameTestA extends GameEngine {
 
     public function createTurret() { 
         var behavior = new glaze.ai.behaviortree.Sequence();   
-        behavior.addChild(new glaze.engine.actions.Delay(400,100));
+        behavior.addChild(new glaze.engine.actions.Delay(600,100));
         behavior.addChild(new glaze.engine.actions.InitEntityCollection());
         behavior.addChild(new glaze.engine.actions.QueryEntitiesInArea(200));
         behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
         behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterStaticItems,filterSupport.FilterVisibleAgainstMap]));
         behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
-         var turret = engine.createEntity([
-            new Position(27*32,10*32),  
+        var turret = engine.createEntity([
+            new Position(27*32,9.3*32),  
             new Display("enemies","turret"), 
             new Extents(12,12),
             new PhysicsCollision(false,playerFilter,[]),
@@ -390,12 +393,12 @@ class GameTestA extends GameEngine {
             new Script(behavior),
             new Active()
         ],"turret");        
-
+        turret.getComponent(Display).displayObject.rotation=Math.PI;
     }
           
-    public function fireBullet(pos:Vector2,target:Vector2,velocity:Float,ttl:Float,gff:Float=1):Void {
-        var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,new Position(pos.x,pos.y),playerFilter);
-        glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
+    public function fireBullet(pos:Vector2,target:Vector2):Void {
+        var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,new Position(pos.x,pos.y),playerFilter,target);
+        // glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
     }    
     
     function fireBulletAtEntity(context:glaze.ai.behaviortree.BehaviorContext) {
@@ -403,10 +406,7 @@ class GameTestA extends GameEngine {
         if (ec.length==0) return;
         fireBullet(
             context.entity.getComponent(Position).coords.clone(),
-            ec.entities.head.entity.getComponent(Position).coords.clone(),
-            1000,
-            1000,
-            0.1);  
+            ec.entities.head.entity.getComponent(Position).coords.clone());  
     }
 
     public function dropGrenades() {
@@ -426,7 +426,7 @@ class GameTestA extends GameEngine {
             // var chickie = exile.entities.creatures.MaggotFactory.create(engine,pos);
 
             chickie.getComponent(PhysicsBody).body.addForce(new Vector2(RandomInteger(-1000,1000),RandomInteger(-1000,100)));
-
+  
         }
     }
 
@@ -449,6 +449,11 @@ class GameTestA extends GameEngine {
         if (killChickens) {
             destroyChickens();
         }
+        if (shakeIt>1) {
+            trace("shakeit");
+            renderSystem.camera.shake.setTo(glaze.util.Random.RandomFloat(-shakeIt,shakeIt),glaze.util.Random.RandomFloat(-shakeIt,shakeIt)); 
+            shakeIt*=0.9;
+        }
     }
 
     public static function main() {
@@ -470,6 +475,12 @@ class GameTestA extends GameEngine {
         Browser.document.getElementById("debug3button").addEventListener("click",function(event){
             // game.killChickens = true;
             untyped game.broadphase.dump();
+        });    
+        Browser.document.getElementById("debug4button").addEventListener("click",function(event){
+            game.shakeIt = 15;
+        });        
+        Browser.document.getElementById("debug5button").addEventListener("click",function(event){
+            // game.shakeIt = false;
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
             untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());

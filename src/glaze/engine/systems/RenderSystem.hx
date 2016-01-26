@@ -43,7 +43,8 @@ class RenderSystem extends System {
         camera = new Camera();
         
         camera.worldExtentsAABB = new glaze.geom.AABB2( 0 , 4096 , 4096 , 0 );
-        camera.worldExtentsAABB.expand(-16);
+        camera.worldExtentsAABB.expand(64);
+        // camera.worldExtentsAABB.expand(-16);
 
         stage.addChild(camera);
 
@@ -105,7 +106,7 @@ class RenderSystem extends System {
         s.position.y = 0;
         s.pivot.x = s.texture.frame.width * s.texture.pivot.x;
         s.pivot.y = s.texture.frame.height * s.texture.pivot.y;
-        // s.scale.setTo(10,10);
+        // s.scale.setTo(10,10); 
         return s;
     }
 

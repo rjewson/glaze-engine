@@ -65,11 +65,6 @@ class Intersect
                         proxyA.body.delta,
                         contact)==true) {
                     proxyA.body.respondBulletCollision(contact);
-
-                    // var response = contact.normal.clone();
-                    // response.x *= -100;
-                    // response.y *= -100;
-                    // proxyA.body.addForce(response);
                     collided=true;
                 }
             } else if (proxyB.body.isBullet) {

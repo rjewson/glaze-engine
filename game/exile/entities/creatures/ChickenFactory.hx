@@ -42,7 +42,7 @@ class ChickenFactory {
         var chicken = engine.createEntity([
             position, 
             new Chicken(),
-            new Extents((12/2)*2,(16/2)*2),
+            new Extents((12/2)*2,(15/2)*2),
             new Display("chicken"), 
             new PhysicsCollision(false,new Filter(),[]),
             new PhysicsBody(chickenBody), 

@@ -84,6 +84,10 @@ class BruteforceBroadphase implements IBroadphase
     public function QueryArea(aabb:glaze.geom.AABB,result:BFProxy->Void,checkDynamic:Bool = true,checkStatic:Bool = true) {
         
         if (checkDynamic) {
+            for (proxy in sleepingProxies) {
+                if (!proxy.isSensor&&aabb.overlap(proxy.aabb)) 
+                    result(proxy);
+            }
             for (proxy in dynamicProxies) {
                 if (!proxy.isSensor&&aabb.overlap(proxy.aabb)) 
                     result(proxy);
@@ -102,6 +106,9 @@ class BruteforceBroadphase implements IBroadphase
     public function CastRay(ray:Ray,result:BFProxy->Void,checkDynamic:Bool = true,checkStatic:Bool = true) {
         map.castRay(ray);
         if (checkDynamic) {
+            for (proxy in sleepingProxies)
+                if (!proxy.isSensor) 
+                    nf.RayAABB(ray,proxy);
             for (proxy in dynamicProxies)
                 if (!proxy.isSensor) 
                     nf.RayAABB(ray,proxy);

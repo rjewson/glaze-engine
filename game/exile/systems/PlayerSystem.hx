@@ -101,6 +101,8 @@ class PlayerSystem extends System {
 
     var playerFilter:Filter;
 
+    var currentWeapon:Int = 0;
+
     public function new(input:DigitalInput,particleEngine:IParticleEngine) {
         super([Player,PhysicsCollision,PhysicsBody,SpriteAnimation,Extents]);
         this.input = input;
@@ -203,8 +205,11 @@ class PlayerSystem extends System {
         }
 
         if (fire) {
-            var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter);
-            glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),2500);        
+            if (currentWeapon==0)
+                exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter,input.ViewCorrectedMousePosition());
+            if (currentWeapon==1)
+                exile.entities.projectile.PlasmaProjectileFactory.create(engine,position.clone(),playerFilter,input.ViewCorrectedMousePosition());
+            // glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),2500);        
 
         } 
         //'e' aim
@@ -215,6 +220,11 @@ class PlayerSystem extends System {
             vel.multEquals(3000); 
             particleEngine.EmitParticle(position.coords.x,position.coords.y,vel.x,vel.y,0,0,200,1,false,true,null,4,255,255,255,255);
         }
+
+        if (input.JustPressed(49))
+            currentWeapon = 0;
+        if (input.JustPressed(50))
+            currentWeapon = 1;
 
     }
 

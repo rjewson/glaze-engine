@@ -34,3 +34,5 @@ Static Sensor
 
 Dynamic [Map,All Static,Dynamic Sensors]
 Dynamic [Map,All Static,Dynamic Sensors,Dynamic] < Is this rays/projectiles only?
+
+https://waffle.io/rjewson/glaze-engine
