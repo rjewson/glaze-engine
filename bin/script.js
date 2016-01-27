@@ -205,11 +205,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.engine.createEntity([new glaze_engine_components_Position(1264,880),new glaze_engine_components_Extents(192,48.),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_EnvironmentForce(new glaze_geom_Vector2(-10,0)),new glaze_engine_components_Wind(0.01),new glaze_engine_components_Active()],"wind2");
 	}
 	,createDoor: function() {
-		this.door = this.engine.createEntity([new glaze_engine_components_Position(144.,196),new glaze_engine_components_Extents(1,32),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
+		this.door = this.engine.createEntity([new glaze_engine_components_Position(144.,196),new glaze_engine_components_Extents(3,34),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
 		this.engine.createEntity([new glaze_engine_components_Position(168,42),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
 		this.engine.createEntity([new glaze_engine_components_Position(784,192),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(784.,80.)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
 		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body()),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 		this.engine.createEntity([new glaze_engine_components_Position(288,192),new glaze_engine_components_Extents(8,5),new glaze_engine_components_Display("blob"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(glaze_physics_Body.Create(null,0.1,0,1,100)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active(),new glaze_animation_components_SpriteAnimation("blob",["blob"],"blob"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(4,1,4)])],"blob");
+		this.engine.createEntity([new glaze_engine_components_Position(112.,48.),new glaze_engine_components_Display("insects","hive"),new glaze_engine_components_Extents(5,7),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active()],"turret");
 	}
 	,createTurret: function() {
 		var behavior = new glaze_ai_behaviortree_Sequence();
@@ -264,7 +265,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 453, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 462, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -688,7 +689,7 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	beeBody.setBounces(0);
 	beeBody.globalForceFactor = 0;
 	beeBody.maxScalarVelocity = 100;
-	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(11.25,8.25),new glaze_engine_components_Display("bat"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bat",["fly"],"fly"),new glaze_lighting_components_Light(64,1,1,1,255,255,0),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["beefly"],"beefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
 	return bee;
 };
 exile_entities_creatures_BeeFactory.prototype = {
@@ -759,7 +760,7 @@ exile_entities_projectile_StandardBulletFactory.create = function(engine,positio
 	bulletBody.setBounces(3);
 	bulletBody.globalForceFactor = 0.5;
 	bulletBody.isBullet = true;
-	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 10, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
+	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 3, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
 	glaze_util_Ballistics.calcProjectileVelocity(bulletBody,targetPosition,2500);
 	return bullet;
 };
@@ -1176,7 +1177,13 @@ exile_systems_ProjectileSystem.prototype = $extend(glaze_eco_core_System.prototy
 		}
 	}
 	,callback: function(a,b,contact) {
-		if(b != null && b.isSensor) return;
+		if(b != null) {
+			if(b.isSensor) return;
+			if(b.entity.map.Moveable != null) {
+				a.entity.map.Projectile.bounce = 0;
+				return;
+			}
+		}
 		a.entity.map.Projectile.bounce--;
 	}
 	,__class__: exile_systems_ProjectileSystem

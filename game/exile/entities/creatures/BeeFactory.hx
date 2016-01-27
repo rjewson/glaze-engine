@@ -38,14 +38,14 @@ class BeeFactory {
         var bee = engine.createEntity([
             position, 
             new Bee(),
-            new Extents((15/2)*1.5,(11/2)*1.5),
-            new Display("bat"), 
+            new Extents((3/2)*1,(3/2)*1),
+            new Display("insects"), 
             new PhysicsBody(beeBody), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
-            new glaze.animation.components.SpriteAnimation("bat",["fly"],"fly"),
-            new Light(64,1,1,1,255,255,0),
+            new glaze.animation.components.SpriteAnimation("insects",["beefly"],"beefly"),
+            // new Light(64,1,1,1,255,255,0),
             new Steering([
                 new Wander()
                 ]),

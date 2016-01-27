@@ -304,7 +304,7 @@ class GameTestA extends GameEngine {
 
         door = engine.createEntity([
             new Position(32*4.5,(32*6)+4),  
-            new Extents(1,32),
+            new Extents(3,34),
             new Display("door"),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
@@ -373,6 +373,15 @@ class GameTestA extends GameEngine {
                 new glaze.ai.steering.behaviors.Wander(4,1,4)
             ])
         ],"blob"); 
+
+        engine.createEntity([
+            new Position(3.5*32,1.5*32),  
+            new Display("insects","hive"), 
+            new Extents(5,7),
+            new PhysicsCollision(false,playerFilter,[]),
+            new Fixed(),
+            new Active()
+        ],"turret");  
 
     }
 
@@ -457,7 +466,7 @@ class GameTestA extends GameEngine {
     }
 
     public static function main() {
-        var game = new GameTestA();
+        var game = new GameTestA(); 
         glaze.debug.DebugEngine.gameEngine = game;
 
         Browser.document.getElementById("stopbutton").addEventListener("click",function(event){

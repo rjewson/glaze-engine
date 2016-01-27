@@ -5,6 +5,7 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Destroy;
 import glaze.engine.components.Health;
+import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
@@ -44,8 +45,14 @@ class ProjectileSystem extends System {
     }
 
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {
-        if (b!=null && b.isSensor)
-            return;
+        if (b!=null) {
+            if (b.isSensor)
+                return;
+            if (b.entity.getComponent(Moveable)!=null) {
+                a.entity.getComponent(Projectile).bounce = 0;
+                return;
+            }
+        }
         a.entity.getComponent(Projectile).bounce--;
     }
 
