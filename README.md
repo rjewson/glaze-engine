@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/rjewson/glaze-engine.png?label=ready&title=Ready)](https://waffle.io/rjewson/glaze-engine)
 # glaze-engine
 
 A 2D webgl browser game engine.
