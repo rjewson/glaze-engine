@@ -1,6 +1,7 @@
 package exile.entities.creatures;
 
 import exile.components.Bee;
+import glaze.ai.steering.behaviors.Seek;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
 import glaze.eco.core.Engine;
@@ -32,8 +33,8 @@ class BeeFactory {
         var beeBody = new Body(new Material());
         beeBody.setMass(0.1);
         beeBody.setBounces(0);     
-        beeBody.globalForceFactor = 0;
-        beeBody.maxScalarVelocity = 100; 
+        beeBody.globalForceFactor = 0.0;
+        beeBody.maxScalarVelocity = 200; 
           
         var bee = engine.createEntity([
             position, 
@@ -43,11 +44,12 @@ class BeeFactory {
             new PhysicsBody(beeBody), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
-            // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(50,10)]),
+            // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(100,10)]),
             new glaze.animation.components.SpriteAnimation("insects",["beefly"],"beefly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                new Wander()
+                new Wander(),
+                new Seek(position.coords.clone(),(128*128))
                 ]),
             new Age(10000),
             new Health(10,10,0),

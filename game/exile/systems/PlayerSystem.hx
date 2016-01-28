@@ -173,7 +173,7 @@ class PlayerSystem extends System {
                 playerLight.addComponent(new Viewable());
         }
         //u    
-        if (input.JustPressed(85)) {
+        if (input.Pressed(85)) {
             exile.entities.creatures.BeeFactory.create(engine,position.clone());
         }
         

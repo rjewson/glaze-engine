@@ -322,7 +322,7 @@ class GameTestA extends GameEngine {
             new CollidableSwitch(1000,["doorA"]),
             new Active()
         ],"turret");        
-   
+    
         engine.createEntity([
             new Position((32*24)+16,(32*6)),  
             new Extents(16,32),
@@ -334,15 +334,15 @@ class GameTestA extends GameEngine {
             new Active()
             ],"teleporter");
 
-        // engine.createEntity([
-        //     new Position(20*32,4*32),  
-        //     new Extents(16,16),
-        //     new Display("enemies","turret"), 
-        //     new PhysicsCollision(false,null,[]),
-        //     new Fixed(),
-        //     new Active(),
-        //     new BeeHive(3)
-        // ],"BeeHive"); 
+        engine.createEntity([
+            new Position(18.5*32,2.5*32),  
+            new Extents(16,16),
+            new Display("insects","hive"), 
+            new PhysicsCollision(false,null,[]),
+            new Fixed(),
+            new Active(),
+            new exile.components.BeeHive(5)
+        ],"BeeHive"); 
 
 
         // var body = new glaze.physics.Body(new Material());

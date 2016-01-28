@@ -20,10 +20,10 @@ class RandomSpray implements IParticleEmitter
     }
 
     public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
-        var position = entity.getComponent(Position).coords;
         if (time-lastTime<rate) 
             return;
         lastTime = time;
+        var position = entity.getComponent(Position).coords;
         var angle = glaze.util.Random.RandomFloat(0,2*Math.PI);
         var vx = Math.cos(angle) * speed;
         var vy = Math.sin(angle) * speed;

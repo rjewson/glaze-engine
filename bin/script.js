@@ -208,6 +208,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.door = this.engine.createEntity([new glaze_engine_components_Position(144.,196),new glaze_engine_components_Extents(3,34),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
 		this.engine.createEntity([new glaze_engine_components_Position(168,42),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
 		this.engine.createEntity([new glaze_engine_components_Position(784,192),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(784.,80.)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
+		this.engine.createEntity([new glaze_engine_components_Position(592.,80.),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("insects","hive"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(5)],"BeeHive");
 		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body()),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 		this.engine.createEntity([new glaze_engine_components_Position(288,192),new glaze_engine_components_Extents(8,5),new glaze_engine_components_Display("blob"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(glaze_physics_Body.Create(null,0.1,0,1,100)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active(),new glaze_animation_components_SpriteAnimation("blob",["blob"],"blob"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(4,1,4)])],"blob");
 		this.engine.createEntity([new glaze_engine_components_Position(112.,48.),new glaze_engine_components_Display("insects","hive"),new glaze_engine_components_Extents(5,7),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active()],"turret");
@@ -687,9 +688,9 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	var beeBody = new glaze_physics_Body(new glaze_physics_Material());
 	beeBody.setMass(0.1);
 	beeBody.setBounces(0);
-	beeBody.globalForceFactor = 0;
-	beeBody.maxScalarVelocity = 100;
-	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["beefly"],"beefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander()]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	beeBody.globalForceFactor = 0.0;
+	beeBody.maxScalarVelocity = 200;
+	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["beefly"],"beefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(),new glaze_ai_steering_behaviors_Seek(position.coords.clone(),16384)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
 	return bee;
 };
 exile_entities_creatures_BeeFactory.prototype = {
@@ -1084,38 +1085,35 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 			var lightActive = this.playerLight.map.Viewable;
 			if(lightActive != null) this.playerLight.removeComponent(lightActive); else this.playerLight.addComponent(new glaze_engine_components_Viewable());
 		}
+		if(this.input.keyMap[85] > 0) exile_entities_creatures_BeeFactory.create(this.engine,this.position.clone());
 		var tmp2;
 		var _this3 = this.input;
-		tmp2 = _this3.keyMap[85] == _this3.frameRef - 1;
-		if(tmp2) exile_entities_creatures_BeeFactory.create(this.engine,this.position.clone());
+		tmp2 = _this3.keyMap[72] == _this3.frameRef - 1;
+		this.holder.activate = tmp2;
 		var tmp3;
 		var _this4 = this.input;
-		tmp3 = _this4.keyMap[72] == _this4.frameRef - 1;
-		this.holder.activate = tmp3;
-		var tmp4;
-		var _this5 = this.input;
-		tmp4 = _this5.keyMap[74] == _this5.frameRef - 1;
-		if(tmp4) {
+		tmp3 = _this4.keyMap[74] == _this4.frameRef - 1;
+		if(tmp3) {
 			var item = this.holder.drop();
 			if(item != null) glaze_util_Ballistics.calcProjectileVelocity(item.map.PhysicsBody.body,this.input.ViewCorrectedMousePosition(),700);
 		}
-		var tmp5;
-		var _this6 = this.input;
-		tmp5 = _this6.keyMap[81] == _this6.frameRef - 1;
-		if(tmp5) {
+		var tmp4;
+		var _this5 = this.input;
+		tmp4 = _this5.keyMap[81] == _this5.frameRef - 1;
+		if(tmp4) {
 			if(this.holder.heldItem != null) {
 				var state = this.holder.heldItem.map.State;
 				if(state != null) state.incrementState();
 			}
 		}
+		var tmp5;
+		var _this6 = this.input;
+		tmp5 = _this6.keyMap[90] == _this6.frameRef - 1;
+		if(tmp5) this.inventory.store();
 		var tmp6;
 		var _this7 = this.input;
-		tmp6 = _this7.keyMap[90] == _this7.frameRef - 1;
-		if(tmp6) this.inventory.store();
-		var tmp7;
-		var _this8 = this.input;
-		tmp7 = _this8.keyMap[88] == _this8.frameRef - 1;
-		if(tmp7) this.inventory.retrieve();
+		tmp6 = _this7.keyMap[88] == _this7.frameRef - 1;
+		if(tmp6) this.inventory.retrieve();
 		if(fire) {
 			if(this.currentWeapon == 0) exile_entities_projectile_StandardBulletFactory.create(this.engine,this.position.clone(),this.playerFilter,this.input.ViewCorrectedMousePosition());
 			if(this.currentWeapon == 1) exile_entities_projectile_PlasmaProjectileFactory.create(this.engine,this.position.clone(),this.playerFilter,this.input.ViewCorrectedMousePosition());
@@ -1130,14 +1128,14 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 			vel.y *= 3000;
 			this.particleEngine.EmitParticle(this.position.coords.x,this.position.coords.y,vel.x,vel.y,0,0,200,1,false,true,null,4,255,255,255,255);
 		}
+		var tmp7;
+		var _this8 = this.input;
+		tmp7 = _this8.keyMap[49] == _this8.frameRef - 1;
+		if(tmp7) this.currentWeapon = 0;
 		var tmp8;
 		var _this9 = this.input;
-		tmp8 = _this9.keyMap[49] == _this9.frameRef - 1;
-		if(tmp8) this.currentWeapon = 0;
-		var tmp9;
-		var _this10 = this.input;
-		tmp9 = _this10.keyMap[50] == _this10.frameRef - 1;
-		if(tmp9) this.currentWeapon = 1;
+		tmp8 = _this9.keyMap[50] == _this9.frameRef - 1;
+		if(tmp8) this.currentWeapon = 1;
 	}
 	,callback: function(a,b,contact) {
 	}
@@ -1520,10 +1518,54 @@ glaze_ai_steering_behaviors_Behavior.prototype = {
 	}
 	,__class__: glaze_ai_steering_behaviors_Behavior
 };
+var glaze_ai_steering_behaviors_Seek = function(target,seekDistSq) {
+	if(seekDistSq == null) seekDistSq = 0;
+	glaze_ai_steering_behaviors_Behavior.call(this,1,70);
+	this.target = target;
+	this.seekDistSq = seekDistSq;
+};
+glaze_ai_steering_behaviors_Seek.__name__ = ["glaze","ai","steering","behaviors","Seek"];
+glaze_ai_steering_behaviors_Seek.calc = function(agent,result,target,seekDistSq) {
+	if(seekDistSq == null) seekDistSq = 0;
+	var dX = target.x - agent.position.x + 0.000001;
+	var dY = target.y - agent.position.y + 0.000001;
+	var d = dX * dX + dY * dY;
+	if(seekDistSq > 0 && d < seekDistSq) return;
+	var t = Math.sqrt(d);
+	result.x = dX / t;
+	result.x *= 100;
+	result.x -= agent.velocity.x * 0.016;
+	result.y = dY / t;
+	result.y *= 100;
+	result.y -= agent.velocity.y * 0.016;
+};
+glaze_ai_steering_behaviors_Seek.__super__ = glaze_ai_steering_behaviors_Behavior;
+glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
+	calculate: function(agent,result) {
+		var target = this.target;
+		var seekDistSq = this.seekDistSq;
+		var dX = target.x - agent.position.x + 0.000001;
+		var dY = target.y - agent.position.y + 0.000001;
+		var d = dX * dX + dY * dY;
+		if(seekDistSq > 0 && d < seekDistSq) {
+		} else {
+			var t = Math.sqrt(d);
+			result.x = dX / t;
+			result.x *= 100;
+			result.x -= agent.velocity.x * 0.016;
+			result.y = dY / t;
+			result.y *= 100;
+			result.y -= agent.velocity.y * 0.016;
+		}
+	}
+	,__class__: glaze_ai_steering_behaviors_Seek
+});
 var glaze_ai_steering_behaviors_Wander = function(circleRadius,circleDistance,wanderChange) {
 	if(wanderChange == null) wanderChange = 4;
 	if(circleDistance == null) circleDistance = 1;
 	if(circleRadius == null) circleRadius = 8;
+	this.displacement = new glaze_geom_Vector2();
+	this.circleCenter = new glaze_geom_Vector2();
 	glaze_ai_steering_behaviors_Behavior.call(this,1,140);
 	this.circleRadius = circleRadius;
 	this.circleDistance = circleRadius;
@@ -1534,21 +1576,30 @@ glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behavior
 glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Wander.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
 	calculate: function(agent,result) {
-		var circleCenter = agent.velocity.clone();
-		circleCenter.normalize();
+		var _this = this.circleCenter;
+		var v = agent.velocity;
+		_this.x = v.x;
+		_this.y = v.y;
+		this.circleCenter.normalize();
+		var _this1 = this.circleCenter;
 		var s = this.circleDistance;
-		circleCenter.x *= s;
-		circleCenter.y *= s;
-		var displacement = new glaze_geom_Vector2(0,-1);
+		_this1.x *= s;
+		_this1.y *= s;
+		var _this2 = this.displacement;
+		_this2.x = 0;
+		_this2.y = -1;
+		var _this3 = this.displacement;
 		var s1 = this.circleRadius;
-		displacement.x *= s1;
-		displacement.y *= s1;
-		displacement.setAngle(this.wanderAngle);
+		_this3.x *= s1;
+		_this3.y *= s1;
+		this.displacement.setAngle(this.wanderAngle);
 		this.wanderAngle += Math.random() * this.wanderChange - this.wanderChange * .5;
-		result.x += circleCenter.x;
-		result.y += circleCenter.y;
-		result.x += displacement.x;
-		result.y += displacement.y;
+		var v1 = this.circleCenter;
+		result.x += v1.x;
+		result.y += v1.y;
+		var v2 = this.displacement;
+		result.x += v2.x;
+		result.y += v2.y;
 	}
 	,__class__: glaze_ai_steering_behaviors_Wander
 });
@@ -10785,7 +10836,7 @@ glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER 
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 vTextureCoord;","varying float vColor;","uniform sampler2D uSampler;","void main(void) {","gl_FragColor = texture2D(uSampler,vTextureCoord) * vColor;","}"];
 glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","attribute vec2 texture;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform vec2 viewOffset;","uniform vec2 viewportSize;","uniform vec2 inverseTileTextureSize;","uniform float inverseTileSize;","void main(void) {","   pixelCoord = (texture * viewportSize) + viewOffset;","   texCoord = pixelCoord * inverseTileTextureSize * inverseTileSize;","   gl_Position = vec4(position, 0.0, 1.0);","}"];
-glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform sampler2D tiles;","uniform sampler2D sprites;","uniform vec2 inverseTileTextureSize;","uniform vec2 inverseSpriteTextureSize;","uniform float tileSize;","void main(void) {","   vec4 tile = texture2D(tiles, texCoord);","   if(tile.x == 1.0 && tile.y == 1.0) { discard; }","   vec2 spriteOffset = floor(tile.xy * 256.0) * tileSize;","   vec2 spriteCoord = mod(pixelCoord, tileSize);","   gl_FragColor = texture2D(sprites, (spriteOffset + spriteCoord) * inverseSpriteTextureSize);","}"];
+glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform sampler2D tiles;","uniform sampler2D sprites;","uniform vec2 inverseTileTextureSize;","uniform vec2 inverseSpriteTextureSize;","uniform float tileSize;","void main(void) {","   vec4 tile = texture2D(tiles, texCoord);","   vec2 spriteOffset = floor(tile.xy * 256.0) * tileSize;","   vec2 spriteCoord = mod(pixelCoord, tileSize);","   gl_FragColor = texture2D(sprites, (spriteOffset + spriteCoord) * inverseSpriteTextureSize);","}"];
 glaze_tmx_TmxLayer.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 glaze_util_Random.PseudoRandomSeed = 3489752;
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";

@@ -26,23 +26,24 @@ class Seek extends Behavior
 
 	//Hand optimized as called so often
 	public static inline function calc(agent : Body, result:Vector2, target : Vector2, seekDistSq : Float = 0) {
-				
-		var dX:Float = target.x - agent.position.x;
-		var dY:Float = target.y - agent.position.y;
+		// js.Lib.debug();		
+		var dX:Float = target.x - agent.position.x +0.000001;
+		var dY:Float = target.y - agent.position.y +0.000001;
 		var d:Float = dX * dX + dY * dY;
 		
-		if ((seekDistSq < 0 && d < -seekDistSq) || (seekDistSq > 0 && d > seekDistSq)) {
+		// if ((seekDistSq < 0 && d < -seekDistSq) || (seekDistSq > 0 && d > seekDistSq)) {
+		if (seekDistSq > 0 && d < seekDistSq) {
 			return;
 		}
 
 		var t = Math.sqrt(d);
 
 		result.x = dX / t;
-		result.x *= 10;
+		result.x *= 100;
 		result.x -= agent.velocity.x*(16/1000);
 		
 		result.y = dY / t;
-		result.y *= 10;//agent.maxSteeringForcePerStep;
+		result.y *= 100;//agent.maxSteeringForcePerStep;
 		result.y -= agent.velocity.y*(16/1000);
 	}
 	

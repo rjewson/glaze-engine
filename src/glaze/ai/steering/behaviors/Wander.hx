@@ -17,6 +17,9 @@ class Wander extends Behavior
 	public var wanderAngle : Float;
 	public var wanderChange : Float;
 
+	var circleCenter:Vector2 = new Vector2();
+	var displacement:Vector2 = new Vector2();
+
 	public function new(circleRadius:Int = 8,circleDistance:Int = 1,wanderChange:Float = 4) {
 		super(SteeringSettings.wanderWeight, SteeringSettings.wanderPriority);
 		this.circleRadius = circleRadius;
@@ -29,11 +32,14 @@ class Wander extends Behavior
 
 // js.Lib.debug();
 		// var circleCenter = agent.delta.clone();
-		var circleCenter = agent.velocity.clone();
+		
+		// var circleCenter = agent.velocity.clone();
+		circleCenter.copy(agent.velocity);
 		circleCenter.normalize();
 		circleCenter.multEquals(circleDistance);
 
-		var displacement = new Vector2(0,-1);
+		// var displacement = new Vector2(0,-1);
+		displacement.setTo(0,-1);
 		displacement.multEquals(circleRadius);
 		displacement.setAngle(wanderAngle); 
 
