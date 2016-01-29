@@ -16,7 +16,7 @@ class ChickenSystem extends System {
     public var scaredOfPosition:Position;
 
     public function new(particleEngine:IParticleEngine) {
-        super([Chicken,PhysicsBody]);
+        super([Position,Chicken,PhysicsBody]);
         this.particleEngine = particleEngine;
     }
 
@@ -44,6 +44,7 @@ class ChickenSystem extends System {
             } else {
                 if (Random.RandomBoolean(0.02)) {
                     var dir = Random.RandomSign(0.5);
+                    entity.getComponent(Position).direction.x = -dir;
                     body.addForce(new Vector2(dir*10,-10));
                     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-20),-100,  0,5,  800,1,false,true,null,4,255,255,255,255);
                 }

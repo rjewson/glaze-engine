@@ -82,7 +82,8 @@
 			"idle":		{ "frames":[0],					"fps":0,	"looped":false },
 			"scratch":	{ "frames":[2,1,2,1,2],			"fps":4,	"looped":false },
 			"shrug":	{ "frames":[3,3,3,3,3,3,4,3,3],	"fps":4,	"looped":false },
-			"run":		{ "frames":[6,7,8,9,10,11],		"fps":4,	"looped":true }
+			"runright":		{ "frames":[6,7,8,9,10,11],		"fps":4,	"looped":true  },
+			"runleft":		{ "frames":[6,7,8,9,10,11],		"fps":4,	"looped":true , "flipX":true }
 		}
 
 	},

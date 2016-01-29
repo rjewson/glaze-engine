@@ -113,20 +113,20 @@ class GameTestA extends GameEngine {
             bs.set(i);
             trace(bs.toString());
             trace(bs.containsAll(mustHave));     
-        }
+        } 
 
-        setupMap();    
+        setupMap();     
                     
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);  
         var physicsPhase = engine.createPhase();//1000/60);    
          
-        messageBus = new MessageBus();
+        messageBus = new MessageBus();  
          
         renderSystem = new RenderSystem(canvas);
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
-         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
+        renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
 
         var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
@@ -149,10 +149,11 @@ class GameTestA extends GameEngine {
         tileMap.TileScale(2);          
                               
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
-        var map = new Map(collisionData);   
+        var map = new Map(collisionData);  
+        exile.entities.creatures.BeeFactory.map = map; 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
         physicsPhase.addSystem(new SteeringSystem());
-
+ 
         nf = new glaze.physics.collision.Intersect();
         // broadphase = new UniformGrid(map,nf,10,5,640);
         broadphase = new BruteforceBroadphase(map,nf);
@@ -214,7 +215,7 @@ class GameTestA extends GameEngine {
         corephase.addSystem(renderSystem);   
          
         filterSupport = new FilterSupport(engine);  
-  
+   
         playerFilter = new Filter();
         playerFilter.maskBits = 0;
         playerFilter.groupIndex = -1; 
@@ -227,8 +228,8 @@ class GameTestA extends GameEngine {
             new Player(),
             new Position(300,180), 
             new Extents((10*3)/2,(14*3)/2),
-            new Display("player"),
-            new SpriteAnimation("player",["idle","scratch","shrug","run"],"idle"),
+            new Display("player"),        
+            new SpriteAnimation("player",["idle","scratch","shrug","runleft","runright"],"idle"),
             new PhysicsBody(body),
             new PhysicsCollision(false,playerFilter,[]),
             new Moveable(),

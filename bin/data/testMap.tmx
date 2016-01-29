@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="200" height="100" tilewidth="16" tileheight="16" nextobjectid="36">
- <tileset firstgid="1" name="Spelunky" tilewidth="16" tileheight="16" tilecount="64">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="200" height="100" tilewidth="16" tileheight="16" nextobjectid="63">
+ <tileset firstgid="1" name="Spelunky" tilewidth="16" tileheight="16" tilecount="64" columns="8">
   <image source="spelunky-tiles.png" width="128" height="128"/>
   <tile id="0">
    <properties>
@@ -28,7 +28,7 @@
    </properties>
   </tile>
  </tileset>
- <tileset firstgid="65" name="Map Icons" tilewidth="16" tileheight="16" tilecount="2">
+ <tileset firstgid="65" name="Map Icons" tilewidth="16" tileheight="16" tilecount="2" columns="2">
   <image source="Map Icons.png" width="32" height="16"/>
   <tile id="0">
    <properties>
@@ -41,12 +41,29 @@
    eJztnc1S6zgQRh0WQLJLseEu5xHYzDrv/1R3UsSF3KN/t+zP5JyqLufHlhy6D5LsFJymaToRBJGMkPOU5pwJ2w7A0fH0A+C3UfLDjjP4Ac9E6/jR237t3M6rzxH7wvMxqkYtsbVKas3yPo31J+SUeLwXCucAP+zlxxz/mojN41rP7xRs7eeLPZ8mnbpUOQ/4JqwXz2tgNesV60dq/57PlNva15RqUulcYFkfcz1+RLanxLZUyyU/7u2k3Oj5LDVbe4xSTSqdC8T9WBshpTqPjTOt528ft44f9r09UTkP+CY3frTUasqRUhtrrw+n5nXh49hrseMValPhHOCH3PixxzmU9tni+vCe/LbPc3RSfqT2I39j4eerxTz3n6a8G6E77xucU+8Y0bNGqjl2K/BDCzt+xN6365LUnH/tNWEP7m3+83g8Xxd7W9nmlt7ghxa5Ok2tS1TnWeG52fuNM5cgYse39rfHGAPbUeNHyJr72luQ86OmhnvrXWFuBv6k/CjVvqcjrw5tzKz1Y8arvvHm2PT6ccdjrmXrORX3fV4e2+v0vRb6CI4/J9o7m/dbGVXLOHMM1tb32nt78/ElP2r78fZjauh7Lbiih8dauzef4XXlkX6Ujq35Xb5VvfbMBWEcMT96fOnJZ1gLe/hR8174PHac9zwpHFNhf7z8qLm/kXp/r/lVqb2cHyV6a3ztXBB8UbiX8Rv9CPdt2R8/tLB+7PEdwJr5ylH9aD0GP7So9WOkKy1+lCJ1/yO23ravfT72/YzsU/LDa42PH1r01HzOnZfp5z7F1uNQeG41fsT4NM9r/Ki5NpZ6bsEPLTzrdo+xJ3UOvX5YrB8987R5n9Q1sBD80GJkDe/hSMqPO6n5Ug5bx71+xPaNHYcfWnjW8PURPf2tiVj7qe/vtqz1wzWNlx/h/jk/uAeiQa7GWjy5mij157kmz7Wf8qNEaj7m4UfumNbrdTCWlActjlg3ah2ppeVar51Pxfqqua7b4kfuHHvGFvzQoVSroSexv3M4H1vrhm1TEVuXl6nsR6m92ppnfqVFTZ3a+f7sR8jdiT+PKPlh21QjN4fyqNncOIMfWrTUaG5d3Dt+KPtxibw2qmY95mbgj0eN9q4/PNz4cmjD4j2/au0bP3Tw9COcX6X88BwzvoLwZPT8qtQ3fuiwlR/ec6ov056nI7n5lX3sDW5oscX8aqt7816U7nGMrN1wfQ7701pbrXWpvhaPEdbnJXgtto/373v80ML7+x2l9o9Ea/17OBN+lwX254h1uwdrXGmBXGiBH3Xk5lex13qvd5ELLfCjjlyd58YK/Dg2+FFH75oAP44NftSBH88JftTR+/311jU6udACP9aTc6f1Oha50AI/tCAXWuCHFuRCC/zQglxogR9akAst8EMLcqEFfmhBLrTADy3IhRb4oQW50AI/tCAXWuCHFuRCC/wASIMfAGnwAyANfgCkwQ+ANPgBkAY/tCAXWuCHFuRCC/zQglxogR9akAst8EMLcqEFfmhBLrTADy3IhRb4oQW50AI/1uH9vzrIhRb4oQW50AI/tCAXWuCHFuRCC/zQglxogR9akAst8EMLcqEFfmhBLrTADy3IhRb4oQW50AI/tCAXWuCHFuRCC/zQglxogR9akAst8EMLcqEFfiy5ZGILRufiVtjCEvxY8gx+pAL+D34suf4XfyJx3ah//NACP5bgB4TgxxL8gBD8WIIfEIIfS9b48RpEL/ihBX4sqfHj/REzr4noAT+0wI8lJT/eTdxJ+ZFz5JaJkcx9hJ9tfu2jMp6F04Qflpwf1o17WB/eHpHz41aIkcx94EcZ/Pgmd0+wJs6P7ZuJGj9sjd78Pla27yP4cSrElv0/K573xq0jqb+teCvESHL1VuvHiJotueDd55r+nik8mV2b27778RLp82xi758BkY+/0idUPA==
   </data>
  </layer>
- <objectgroup name="Objects">
+ <objectgroup name="Objects" visible="0">
   <object id="17" name="Hall Light 0" type="Light" gid="65" x="64" y="112" width="16" height="16"/>
   <object id="23" name="Hall Light 1" type="Light" gid="65" x="432" y="48" width="16" height="16"/>
   <object id="30" x="500" y="100" visible="0"/>
   <object id="32" name="Water" type="Water" x="496" y="96" width="64" height="48"/>
   <object id="34" name="Water" type="Water" x="528" y="288" width="128" height="96"/>
   <object id="35" name="Water" type="Water" x="160" y="512" width="48" height="32"/>
+ </objectgroup>
+ <objectgroup name="Waypoints">
+  <object id="58" x="96" y="96">
+   <polyline points="0,0 208,0 288,112 144,112 96,80 32,80 -48,192 -48,224 80,256 192,304 304,304 304,208 160,160 144,112"/>
+  </object>
+  <object id="59" x="400" y="304">
+   <polyline points="0,0 128,-48 128,-80 96,-96 -16,-96"/>
+  </object>
+  <object id="60" x="528" y="224">
+   <polyline points="0,0 80,-48 224,-160 32,-176 -192,-176 -224,-128"/>
+  </object>
+  <object id="61" x="528" y="256">
+   <polyline points="0,0 192,0 256,-48"/>
+  </object>
+  <object id="62" x="400" y="400">
+   <polyline points="0,0 64,0 96,48 240,48 384,48"/>
+  </object>
  </objectgroup>
 </map>

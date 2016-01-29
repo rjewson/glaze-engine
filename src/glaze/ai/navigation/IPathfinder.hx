@@ -1,9 +1,4 @@
-package engine.ai.navigation;
-
-/**
- * ...
- * @author rje
- */
+package glaze.ai.navigation;
 
 interface IPathfinder 
 {

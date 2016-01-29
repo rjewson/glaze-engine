@@ -18,6 +18,8 @@ import glaze.physics.components.PhysicsCollision;
 
 class FishFactory {
 
+    public static var fishMaterial:glaze.physics.Material = new glaze.physics.Material(0.1);
+
 	public function new() {
 	} 
 
@@ -29,12 +31,12 @@ class FishFactory {
             new Display("fish2"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
-            new PhysicsBody(Body.Create(null,0.1,0,0.5,100)),
+            new PhysicsBody(Body.Create(fishMaterial,0.01,0,1,100)),
             new Holdable(),
             new Active(),
             new SpriteAnimation("fish2",["swim"],"swim"),
             new glaze.ai.steering.components.Steering([
-                new glaze.ai.steering.behaviors.Wander(18,1,4)
+                // new glaze.ai.steering.behaviors.Wander(18,1,4)
             ])
         ],"fish"); 
 	    

@@ -25,6 +25,9 @@ class CharacterController
 
     public var isWalking:Bool = false;
 
+    public var left:Int;
+    public var right:Int;
+
     public function new(input:DigitalInput,body:Body) {
         this.input = input;
         this.body = body;
@@ -34,8 +37,8 @@ class CharacterController
 
         controlForce.setTo(.0,.0);
 
-        var left = input.PressedDuration(65);   //a
-        var right = input.PressedDuration(68);  //d
+        left = input.PressedDuration(65);   //a
+        right = input.PressedDuration(68);  //d
         var up = input.JustPressed(87);         //w
         var upDuration = input.PressedDuration(87);         //w
         var down = input.PressedDuration(83);   //s

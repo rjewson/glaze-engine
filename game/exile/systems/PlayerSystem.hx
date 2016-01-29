@@ -154,10 +154,16 @@ class PlayerSystem extends System {
         characterController.update();
 
         if (characterController.isWalking) {
-            animation.animationController.play("run");
+            // animation.animationController.play(characterController.left>0 ? "runleft" : "runright");
+            animation.animationController.play("runright");
         } else {
             animation.animationController.play("idle");
         }
+
+        if (characterController.left>0)
+            position.direction.x = -1;
+        if (characterController.right>0)
+            position.direction.x = 1;
 
         var fire = input.JustPressed(32);
         var search = input.JustPressed(71);

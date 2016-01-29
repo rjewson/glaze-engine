@@ -84,6 +84,9 @@ class Map
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
                         if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
+                            //Check for 1 way platform?
+                            //if ( contact.normal.y<0&&contact.distance>=-20 )
+                            {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
                             var nextCell = data.get(nextX,nextY,1);
@@ -91,6 +94,7 @@ class Map
                                 body.respondStaticCollision(contact);
                                 proxy.collide(null,contact);
                             } 
+                            }
                         }
                     }
                 }
@@ -133,6 +137,27 @@ class Map
         //         }
         //     }
         // }
+    }
+
+    public function iterateCells(aabb:glaze.geom.AABB2,cb:glaze.geom.AABB->Void) {
+        var startX = data.Index(aabb.l);
+        var startY = data.Index(aabb.t);
+
+        var endX = data.Index(aabb.r) + 1;
+        var endY = data.Index(aabb.b) + 1;
+
+        var aabbArg = new glaze.geom.AABB();
+        aabbArg.extents.setTo(tileHalfSize,tileHalfSize);
+
+        for (x in startX...endX) {
+            for (y in startY...endY) { 
+                var cell = data.get(x,y,1);
+                if (cell&COLLIDABLE==1) {
+                    aabbArg.position.setTo((x*tileSize)+tileHalfSize,(y*tileSize)+tileHalfSize);
+                    cb(aabbArg);
+                }
+            }
+        }
     }
 
     public function castRay(ray:Ray):Bool {

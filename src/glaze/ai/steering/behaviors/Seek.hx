@@ -45,6 +45,8 @@ class Seek extends Behavior
 		result.y = dY / t;
 		result.y *= 100;//agent.maxSteeringForcePerStep;
 		result.y -= agent.velocity.y*(16/1000);
+
+		
 	}
 	
 }
