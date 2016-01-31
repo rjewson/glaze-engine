@@ -71,14 +71,17 @@ import js.html.CanvasElement;
 
 class GameTestA extends GameEngine {
      
-    public static inline var MAP_DATA:String = "data/testMap.tmx";
+    public static inline var MAP_DATA:String = "data/newMap.tmx";
     public static inline var TEXTURE_CONFIG:String = "data/sprites.json";
     public static inline var FRAMES_CONFIG:String = "data/frames.json";
     public static inline var TEXTURE_DATA:String = "data/sprites.png";
 
-    public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
-    public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
-    public static inline var TILE_MAP_DATA_2:String = "data/spelunky1.png";
+    public static inline var COL_SPRITE_SHEET:String = "data/collisionTiles.png";
+    public static inline var TILE_SPRITE_SHEET:String = "data/set1.png";
+
+    // public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
+    // public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
+    // public static inline var TILE_MAP_DATA_2:String = "data/spelunky1.png";
   
     var tmxMap:TmxMap;
     var player:Entity;
@@ -99,24 +102,27 @@ class GameTestA extends GameEngine {
    
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
-        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,TILE_MAP_DATA_1,TILE_MAP_DATA_2,FRAMES_CONFIG]);
+        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,COL_SPRITE_SHEET,FRAMES_CONFIG]);
     }
 
     override public function initalize() {
-            
-        var bs = new glaze.ds.BitSet(32);                
+              
+        // var bs = new glaze.ds.BitSet(32);                
  
-        var mustHave =  new glaze.ds.BitSet(32);
-        mustHave.set(16); 
+        // var mustHave =  new glaze.ds.BitSet(32);
+        // mustHave.set(16); 
 
-        for (i in 0...32) {
-            bs.set(i);
-            trace(bs.toString());
-            trace(bs.containsAll(mustHave));     
-        } 
-
-        setupMap();     
-                    
+        // for (i in 0...32) {
+        //     bs.set(i);
+        //     trace(bs.toString());
+        //     trace(bs.containsAll(mustHave));     
+        // } 
+  
+        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
+// js.Lib.debug(); 
+        tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
+        tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET));
+                       
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);  
         var physicsPhase = engine.createPhase();//1000/60);    
@@ -127,9 +133,11 @@ class GameTestA extends GameEngine {
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
+ 
+// js.Lib.debug(); 
+        var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
 
-        var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Tile Layer 1"));
-        var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Tile Layer 1"));
+        var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"));
 
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
@@ -137,7 +145,7 @@ class GameTestA extends GameEngine {
  
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
- 
+   
         var tileMap = new TileMap(); 
         renderSystem.renderer.AddRenderer(tileMap);    
         tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
@@ -147,7 +155,7 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);          
-                                                                                                               
+
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 
@@ -267,8 +275,6 @@ class GameTestA extends GameEngine {
     } 
 
     function setupMap() {
-        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
-        tmxMap.tilesets[0].set_image(assets.assets.get(TILE_SPRITE_SHEET));
     } 
   
     function mapPosition(xTiles:Float,yTiles:Float):Position {

@@ -1,29 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" nextobjectid="1">
  <tileset firstgid="1" name="Collision" tilewidth="16" tileheight="16" tilecount="32" columns="8">
-  <image source="../../resources/tiles/collision/collisionTiles.png" width="128" height="64"/>
+  <image source="collisionTiles.png" width="128" height="64"/>
  </tileset>
  <tileset firstgid="33" name="World" tilewidth="16" tileheight="16" tilecount="256" columns="16">
-  <image source="../../resources/tiles/1/export/set1.png" width="256" height="256"/>
+  <image source="set1.png" width="256" height="256"/>
  </tileset>
- <layer name="Collision" width="30" height="30">
+ <layer name="Collision" width="100" height="100" opacity="0.71">
   <data encoding="base64" compression="zlib">
-   eJztyjEKACAQA8Hz/P+fbVMINoIgM7BNSBX8Z2y2jm7rQ/mZEQAAvLQAkZcAJQ==
+   eJzt1jsKwCAABUG9/6XTSkgIgXy2mIFX2LqFzjHGtNRW+zPf0aNFjxY9Wo568J+rHmdvPu9Y7/ruP4zn6dGiR4seLe65RY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aJmW2wayNwG4
   </data>
  </layer>
- <layer name="Background" width="30" height="30" visible="0">
+ <layer name="Background" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztwQEBAAAAgiD/r25IQAEAAPBoDhAAAQ==
+   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
   </data>
  </layer>
- <layer name="Foreground2" width="30" height="30" visible="0">
+ <layer name="Foreground2" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztwQEBAAAAgiD/r25IQAEAAPBoDhAAAQ==
+   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
   </data>
  </layer>
- <layer name="Foreground1" width="30" height="30">
+ <layer name="Foreground1" width="100" height="100" visible="0" opacity="0.84">
   <data encoding="base64" compression="zlib">
-   eJztzbEJACAQBEFbeUHtv0M/MDYQPnIGNr1rDf6wsshmwXZcGlk/RcE3AAC82kQ4AeA=
+   eJzt1kEKgCAUBFCvomF1/xMm1EYIXNU3eg9m4W5gFt+UmFmJLkDHHnNZogvQ2aMLwEdsLblljS7yQ/kmNZ33vVxv3lMGqXHVfskecxnt4d8FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM87AOwEBc8=
   </data>
  </layer>
+ <objectgroup name="Objects" visible="0"/>
 </map>

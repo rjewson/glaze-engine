@@ -59,7 +59,7 @@ class Map
             closestContact.time = Math.POSITIVE_INFINITY;
             for (x in startX...endX) {
                 for (y in startY...endY) { 
-                    var cell = data.get(x,y,1);
+                    var cell = data.get(x,y,0);
                     if (cell&COLLIDABLE==1) {
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
@@ -79,7 +79,7 @@ class Map
         } else {
             for (x in startX...endX) {
                 for (y in startY...endY) { 
-                    var cell = data.get(x,y,1);
+                    var cell = data.get(x,y,0);
                     if (cell&COLLIDABLE==1) {
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
@@ -89,7 +89,7 @@ class Map
                             {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);
-                            var nextCell = data.get(nextX,nextY,1);
+                            var nextCell = data.get(nextX,nextY,0);
                             if (nextCell&COLLIDABLE==0) {
                                 body.respondStaticCollision(contact);
                                 proxy.collide(null,contact);
@@ -151,7 +151,7 @@ class Map
 
         for (x in startX...endX) {
             for (y in startY...endY) { 
-                var cell = data.get(x,y,1);
+                var cell = data.get(x,y,0);
                 if (cell&COLLIDABLE==1) {
                     aabbArg.position.setTo((x*tileSize)+tileHalfSize,(y*tileSize)+tileHalfSize);
                     cb(aabbArg);
