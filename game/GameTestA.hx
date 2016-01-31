@@ -147,7 +147,7 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;  
         tileMap.TileScale(2);          
-                              
+                                                                                                               
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 

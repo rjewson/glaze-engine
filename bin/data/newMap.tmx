@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="30" height="30" tilewidth="16" tileheight="16" nextobjectid="1">
+ <tileset firstgid="1" name="Collision" tilewidth="16" tileheight="16" tilecount="32" columns="8">
+  <image source="../../resources/tiles/collision/collisionTiles.png" width="128" height="64"/>
+ </tileset>
+ <tileset firstgid="33" name="World" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+  <image source="../../resources/tiles/1/export/set1.png" width="256" height="256"/>
+ </tileset>
+ <layer name="Collision" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztyjEKACAQA8Hz/P+fbVMINoIgM7BNSBX8Z2y2jm7rQ/mZEQAAvLQAkZcAJQ==
+  </data>
+ </layer>
+ <layer name="Background" width="30" height="30" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztwQEBAAAAgiD/r25IQAEAAPBoDhAAAQ==
+  </data>
+ </layer>
+ <layer name="Foreground2" width="30" height="30" visible="0">
+  <data encoding="base64" compression="zlib">
+   eJztwQEBAAAAgiD/r25IQAEAAPBoDhAAAQ==
+  </data>
+ </layer>
+ <layer name="Foreground1" width="30" height="30">
+  <data encoding="base64" compression="zlib">
+   eJztzbEJACAQBEFbeUHtv0M/MDYQPnIGNr1rDf6wsshmwXZcGlk/RcE3AAC82kQ4AeA=
+  </data>
+ </layer>
+</map>
