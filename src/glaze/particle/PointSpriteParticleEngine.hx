@@ -1,5 +1,6 @@
 package glaze.particle;
 
+import glaze.ds.Bytes2D;
 import wgr.geom.Point;
 import wgr.particle.PointSpriteParticle;
 import wgr.renderers.webgl.PointSpriteLightMapRenderer;
@@ -16,11 +17,14 @@ class PointSpriteParticleEngine implements IParticleEngine
     public var renderer:PointSpriteRenderer;
     public var ZERO_FORCE:Point;
 
-    public function new(particleCount:Int, deltaTime:Float) 
+    public var map:Bytes2D;
+
+    public function new(particleCount:Int, deltaTime:Float,map:Bytes2D) 
     {
         this.particleCount = particleCount;
         this.deltaTime = deltaTime;
         this.invDeltaTime = deltaTime / 1000;
+        this.map = map;
         ZERO_FORCE = new Point();
         for (i in 0...particleCount) {
             var p = new PointSpriteParticle();

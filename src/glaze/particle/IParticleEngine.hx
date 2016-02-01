@@ -1,4 +1,3 @@
-
 package glaze.particle;
 
 import glaze.geom.Vector2;

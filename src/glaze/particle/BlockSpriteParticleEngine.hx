@@ -1,6 +1,7 @@
 
 package glaze.particle;
 
+import glaze.ds.Bytes2D;
 import glaze.geom.Vector2;
 import glaze.particle.BlockSpriteParticle;
 import glaze.render.renderers.webgl.PointSpriteLightMapRenderer;
@@ -16,11 +17,14 @@ class BlockSpriteParticleEngine implements IParticleEngine
     public var renderer:PointSpriteLightMapRenderer;
     public var ZERO_FORCE:Vector2;
 
-    public function new(particleCount:Int, deltaTime:Float) 
+    public var map:Bytes2D;
+
+    public function new(particleCount:Int, deltaTime:Float, map:Bytes2D) 
     {
         this.particleCount = particleCount;
         this.deltaTime = deltaTime;
         this.invDeltaTime = deltaTime / 1000;
+        this.map = map;
         ZERO_FORCE = new Vector2();
         for (i in 0...particleCount) {
             var p = new BlockSpriteParticle();
@@ -57,7 +61,8 @@ class BlockSpriteParticleEngine implements IParticleEngine
         renderer.ResetBatch();
         var particle = activeParticles;
         while (particle != null) {
-            if (!particle.Update(deltaTime,invDeltaTime)) {
+            var valid = particle.Update(deltaTime,invDeltaTime) && map.getReal(particle.pX,particle.pY,0)==0;
+            if (!valid) {
                 var next = particle.next;
                 if (particle.prev == null) {
                     activeParticles =  particle.next;

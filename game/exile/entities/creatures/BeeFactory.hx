@@ -53,8 +53,8 @@ class BeeFactory {
             new glaze.animation.components.SpriteAnimation("insects",["beefly"],"beefly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                new Wander(),
-                new Seek(position.coords.clone(),(256*246))
+                new Wander()
+                // ,new Seek(position.coords.clone(),(256*246))
                 ,new WallAvoidance(map,40)
                 ]),
             new Age(100000),

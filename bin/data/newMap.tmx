@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" nextobjectid="1">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="16" tileheight="16" nextobjectid="15">
  <tileset firstgid="1" name="Collision" tilewidth="16" tileheight="16" tilecount="32" columns="8">
   <image source="collisionTiles.png" width="128" height="64"/>
  </tileset>
@@ -9,25 +9,42 @@
  <tileset firstgid="289" name="Foreground2" tilewidth="16" tileheight="16" tilecount="32" columns="8">
   <image source="set2.png" width="128" height="64"/>
  </tileset>
- <layer name="Collision" width="100" height="100" visible="0" opacity="0.71">
+ <tileset firstgid="321" name="Background" tilewidth="16" tileheight="16" tilecount="32" columns="8">
+  <image source="setB.png" width="128" height="64"/>
+ </tileset>
+ <layer name="Collision" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt1jsKwCAABUG9/6XTSkgIgXy2mIFX2LqFzjHGtNRW+zPf0aNFjxY9Wo568J+rHmdvPu9Y7/ruP4zn6dGiR4seLe65RY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aJmW2wayNwG4
+   eJzt1jEKwzAQAEHp/592a4LtEIHiLWbgCre3yNIcY0yTmrPPb/5HjxY9WvRouerBe771uLvz2eO861/eYU/vM9at9mAPPVr0aLHnFj1aVnr4l+1jly3OR4tdtujRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokfLNLk5AEDeAcg=
   </data>
  </layer>
  <layer name="Background" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
-   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+   eJzt0UEJAEAIAEGNZv9Sx/1sIMpMgoWNAACuqZwuoPs/PAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAANjjAZXjAMc=
   </data>
  </layer>
- <layer name="Foreground2" width="100" height="100">
+ <layer name="Foreground1" width="100" height="100" visible="0" opacity="0.84">
   <data encoding="base64" compression="zlib">
-   eJztzjERAAAIBKA3iv1LWsHFc4EEJAAAXOv6HgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALA1HIMAIw==
+   eJzt1kEKgCAUBFCvkmF1/xMm1EYo2hTf8D2YheBiYBaaEj3L0QVo2KMvc3QBGlt0AfiJtWaqWaKLDGi6SEnH+57P891d3pcfUuKqDckefXnaw78LAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAL63A7/BBlM=
   </data>
  </layer>
- <layer name="Foreground1" width="100" height="100" opacity="0.84">
+ <layer name="Foreground2" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
-   eJzt1kEKgCAUBFCvomF1/xMm1EYIXNU3eg9m4W5gFt+UmFmJLkDHHnNZogvQ2aMLwEdsLblljS7yQ/kmNZ33vVxv3lMGqXHVfskecxnt4d8FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM87AOwEBc8=
+   eJzt0bENACAMBLHPKGT/IemhRkKKXV57CQAAr61Kuu7GH843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAbBuGwQCL
   </data>
  </layer>
  <objectgroup name="Objects" visible="0"/>
+ <objectgroup name="Waypoints">
+  <object id="9" x="192" y="64">
+   <polyline points="0,0 96,0 96,112 0,112 0,0"/>
+  </object>
+  <object id="10" x="72" y="96">
+   <polyline points="24,-32 120,-32"/>
+  </object>
+  <object id="11" x="288" y="176">
+   <polyline points="0,0 80,56"/>
+  </object>
+  <object id="13" x="368" y="232">
+   <polyline points="0,0 -184,0 -336,-24"/>
+  </object>
+ </objectgroup>
 </map>

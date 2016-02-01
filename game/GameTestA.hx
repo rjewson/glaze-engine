@@ -11,6 +11,7 @@ import exile.systems.GrenadeSystem;
 import exile.systems.MaggotSystem;
 import exile.systems.PlayerSystem;
 import exile.systems.TeleporterSystem;
+import glaze.ai.navigation.AStar;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.animation.components.SpriteAnimation;
 import glaze.animation.systems.AnimationSystem;
@@ -79,6 +80,7 @@ class GameTestA extends GameEngine {
     public static inline var COL_SPRITE_SHEET:String = "data/collisionTiles.png";
     public static inline var TILE_SPRITE_SHEET_1:String = "data/set1.png";
     public static inline var TILE_SPRITE_SHEET_2:String = "data/set2.png";
+    public static inline var TILE_SPRITE_SHEET_B:String = "data/setB.png";
 
     // public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
     // public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
@@ -103,9 +105,9 @@ class GameTestA extends GameEngine {
    
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
-        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET_1,TILE_SPRITE_SHEET_2,COL_SPRITE_SHEET,FRAMES_CONFIG]);
+        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET_1,TILE_SPRITE_SHEET_2,TILE_SPRITE_SHEET_B,COL_SPRITE_SHEET,FRAMES_CONFIG]);
     }
-
+  
     override public function initalize() {
               
         // var bs = new glaze.ds.BitSet(32);                
@@ -113,17 +115,18 @@ class GameTestA extends GameEngine {
         // var mustHave =  new glaze.ds.BitSet(32);
         // mustHave.set(16); 
 
-        // for (i in 0...32) {
+        // for (i in 0...32) { 
         //     bs.set(i);
         //     trace(bs.toString());
         //     trace(bs.containsAll(mustHave));     
         // } 
-  
+   
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
-// js.Lib.debug(); 
+
         tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
         tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
         tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
+        tmxMap.tilesets[3].set_image(assets.assets.get(TILE_SPRITE_SHEET_B));
                        
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);  
@@ -136,10 +139,11 @@ class GameTestA extends GameEngine {
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
         renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_2, assets.assets.get(TILE_SPRITE_SHEET_2) );
+        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_B, assets.assets.get(TILE_SPRITE_SHEET_B) );
 
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
- 
+   
 // js.Lib.debug(); 
         var background = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Background"));
         var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
@@ -149,33 +153,35 @@ class GameTestA extends GameEngine {
    
         var tileMap = new TileMap(); 
         renderSystem.renderer.AddRenderer(tileMap);    
-        // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
+        // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
 
-        tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_1),"base",1,1);
-        tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_2),"base",1,1);
+        tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_2),"f2",1,1); 
+        tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_1),"f1",1,1);
+        tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_B),"bg",1,1);
         // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
         // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
         tileMap.tileSize = 16 ;               
-        tileMap.TileScale(2);          
+        tileMap.TileScale(2);           
 
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
-        blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
+        blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
 
-        // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
         physicsPhase.addSystem(new SteeringSystem());
  
         nf = new glaze.physics.collision.Intersect();
+
         // broadphase = new UniformGrid(map,nf,10,5,640);
-        broadphase = new BruteforceBroadphase(map,nf);
         // broadphase = new glaze.physics.collision.broadphase.SAPBroadphase(map,nf);
+
+        broadphase = new BruteforceBroadphase(map,nf);
 
         exile.util.CombatUtils.setBroadphase(broadphase);
 
@@ -351,15 +357,15 @@ class GameTestA extends GameEngine {
             new Active()
             ],"teleporter");
 
-        engine.createEntity([
-            new Position(18.5*32,2.5*32),  
-            new Extents(16,16),
-            new Display("insects","hive"), 
-            new PhysicsCollision(false,null,[]),
-            new Fixed(),
-            new Active(),
-            new exile.components.BeeHive(5)
-        ],"BeeHive"); 
+        // engine.createEntity([
+        //     new Position(18.5*32,2.5*32),  
+        //     new Extents(16,16),
+        //     new Display("insects","hive"), 
+        //     new PhysicsCollision(false,null,[]),
+        //     new Fixed(),
+        //     new Active(),
+        //     new exile.components.BeeHive(5)
+        // ],"BeeHive"); 
 
 
         // var body = new glaze.physics.Body(new Material());
@@ -400,6 +406,29 @@ class GameTestA extends GameEngine {
             new Active()
         ],"turret");  
 
+        var graph = new glaze.ai.navigation.Graph();
+        graph.pathfinder = new AStar();
+        var nodes = tmxMap.getObjectGroup("Waypoints");
+        for (node in nodes.objects) {
+            var pl:Array<Vector2> = node.polyline;
+            if (pl!=null) {
+                var a:glaze.ai.navigation.Node = graph.GetCreateNode(Std.int(pl[0].x*2),Std.int(pl[0].y*2));
+                var b:glaze.ai.navigation.Node;
+                for (i in 1...pl.length) {
+                    b = graph.GetCreateNode(Std.int(pl[i].x*2),Std.int(pl[i].y*2));
+                    a.connect(b);
+                    a = b;
+                }
+            }
+        }
+
+        var start = graph.GetCreateNode(6*32,4*32);
+        var end = graph.GetCreateNode(2*32,13*32);
+        var route = graph.Search(start,end);
+        js.Lib.debug();     
+
+        var bee = exile.entities.creatures.BeeFactory.create(engine,new Position(6.1*32,4*32));
+        bee.getComponent(glaze.ai.steering.components.Steering).behaviors.push(new glaze.ai.steering.behaviors.FollowPath(route));
     }
 
     public function createTurret() { 

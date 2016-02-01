@@ -9,7 +9,7 @@ import glaze.geom.Vector2;
 class Node 
 {
 
-	public var position:Vector2D;
+	public var position:Vector2;
 	public var parent:Node;
 	public var f:Float;
 	public var g:Float;
@@ -21,7 +21,7 @@ class Node
 	
 	public function new(x:Float,y:Float) 
 	{
-		position = new Vector2D(x,y);
+		position = new Vector2(x,y);
 		f = 0;
 		g = 0;
 		h = 0;
@@ -51,7 +51,7 @@ class Node
 	}
 	
 	public function dist(n:Node):Float {
-		return position.distanceSqrd(n.position);
+		return position.distSqrd(n.position);
 	}
 	
 	public function connect(n:Node){

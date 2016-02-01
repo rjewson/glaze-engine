@@ -1,5 +1,6 @@
 package glaze.ai.navigation;
 import glaze.geom.Vector2;
+import haxe.ds.StringMap;
 
 
 /**
@@ -11,14 +12,14 @@ class Graph
 {
 
 	public var nodes : Array<Node>;
-	public var nodeLookup : Hash<Node>;
+	public var nodeLookup : StringMap<Node>;
 	
 	public var pathfinder:IPathfinder;
 	
 	public function new() 
 	{
 		nodes = new Array<Node>();
-		nodeLookup = new Hash<Node>();
+		nodeLookup = new StringMap<Node>();
 	}
 	
 	public function Reset():Void {
@@ -53,10 +54,10 @@ class Graph
 		return (pathfinder != null) ? pathfinder.FindPath(nodes, start, finish) : null;
 	}
 	
-	public static function ConvertNodeListToWorldCoords(nodes:Array<Node>, tileSize:Int):Array<Vector2D> {
-		var result = new Array<Vector2D>();
+	public static function ConvertNodeListToWorldCoords(nodes:Array<Node>, tileSize:Int):Array<Vector2> {
+		var result = new Array<Vector2>();
 		var count = nodes.length;
-		var tileHalfSize = new Vector2D(tileSize / 2, tileSize / 2);
+		var tileHalfSize = new Vector2(tileSize / 2, tileSize / 2);
 		
 		for (i in 0...count) {
 			var coord = nodes[count - 1 - i].position.clone();
