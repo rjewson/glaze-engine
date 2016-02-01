@@ -42,7 +42,7 @@ var GameTestA = function() {
 	this.shakeIt = 0;
 	this.killChickens = false;
 	glaze_engine_core_GameEngine.call(this,js_Boot.__cast(window.document.getElementById("view") , HTMLCanvasElement));
-	this.loadAssets(["data/newMap.tmx","data/sprites.json","data/sprites.png","data/set1.png","data/collisionTiles.png","data/frames.json"]);
+	this.loadAssets(["data/newMap.tmx","data/sprites.json","data/sprites.png","data/set1.png","data/set2.png","data/collisionTiles.png","data/frames.json"]);
 };
 GameTestA.__name__ = ["GameTestA"];
 GameTestA.main = function() {
@@ -90,39 +90,56 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var _this2 = this.assets.assets;
 		if(__map_reserved["data/set1.png"] != null) tmp2 = _this2.getReserved("data/set1.png"); else tmp2 = _this2.h["data/set1.png"];
 		this.tmxMap.tilesets[1].set_image(tmp2);
+		var tmp3;
+		var _this3 = this.assets.assets;
+		if(__map_reserved["data/set2.png"] != null) tmp3 = _this3.getReserved("data/set2.png"); else tmp3 = _this3.h["data/set2.png"];
+		this.tmxMap.tilesets[2].set_image(tmp3);
 		var corephase = this.engine.createPhase();
 		var aiphase = this.engine.createPhase();
 		var physicsPhase = this.engine.createPhase();
 		this.messageBus = new glaze_util_MessageBus();
 		this.renderSystem = new glaze_engine_systems_RenderSystem(this.canvas);
-		var tmp3;
-		var _this3 = this.assets.assets;
-		if(__map_reserved["data/sprites.png"] != null) tmp3 = _this3.getReserved("data/sprites.png"); else tmp3 = _this3.h["data/sprites.png"];
-		this.renderSystem.textureManager.AddTexture("data/sprites.png",tmp3);
 		var tmp4;
 		var _this4 = this.assets.assets;
-		if(__map_reserved["data/sprites.json"] != null) tmp4 = _this4.getReserved("data/sprites.json"); else tmp4 = _this4.h["data/sprites.json"];
-		this.renderSystem.textureManager.ParseTexturePackerJSON(tmp4,"data/sprites.png");
+		if(__map_reserved["data/sprites.png"] != null) tmp4 = _this4.getReserved("data/sprites.png"); else tmp4 = _this4.h["data/sprites.png"];
+		this.renderSystem.textureManager.AddTexture("data/sprites.png",tmp4);
 		var tmp5;
 		var _this5 = this.assets.assets;
-		if(__map_reserved["data/frames.json"] != null) tmp5 = _this5.getReserved("data/frames.json"); else tmp5 = _this5.h["data/frames.json"];
-		this.renderSystem.frameListManager.ParseFrameListJSON(tmp5);
-		var mapData = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground1"));
+		if(__map_reserved["data/set1.png"] != null) tmp5 = _this5.getReserved("data/set1.png"); else tmp5 = _this5.h["data/set1.png"];
+		this.renderSystem.textureManager.AddTexture("data/set1.png",tmp5);
+		var tmp6;
+		var _this6 = this.assets.assets;
+		if(__map_reserved["data/set2.png"] != null) tmp6 = _this6.getReserved("data/set2.png"); else tmp6 = _this6.h["data/set2.png"];
+		this.renderSystem.textureManager.AddTexture("data/set2.png",tmp6);
+		var tmp7;
+		var _this7 = this.assets.assets;
+		if(__map_reserved["data/sprites.json"] != null) tmp7 = _this7.getReserved("data/sprites.json"); else tmp7 = _this7.h["data/sprites.json"];
+		this.renderSystem.textureManager.ParseTexturePackerJSON(tmp7,"data/sprites.png");
+		var tmp8;
+		var _this8 = this.assets.assets;
+		if(__map_reserved["data/frames.json"] != null) tmp8 = _this8.getReserved("data/frames.json"); else tmp8 = _this8.h["data/frames.json"];
+		this.renderSystem.frameListManager.ParseFrameListJSON(tmp8);
+		var background = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Background"));
+		var foreground1 = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground1"));
+		var foreground2 = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground2"));
 		var collisionData = glaze_tmx_TmxLayer.LayerToCollisionData(this.tmxMap.getLayer("Collision"));
+		var tileMap = new glaze_render_renderers_webgl_TileMap();
+		this.renderSystem.renderer.AddRenderer(tileMap);
+		var tmp9;
+		var _this9 = this.renderSystem.textureManager.baseTextures;
+		if(__map_reserved["data/set1.png"] != null) tmp9 = _this9.getReserved("data/set1.png"); else tmp9 = _this9.h["data/set1.png"];
+		tileMap.SetTileLayerFromData(foreground1,tmp9,"base",1,1);
+		var tmp10;
+		var _this10 = this.renderSystem.textureManager.baseTextures;
+		if(__map_reserved["data/set2.png"] != null) tmp10 = _this10.getReserved("data/set2.png"); else tmp10 = _this10.h["data/set2.png"];
+		tileMap.SetTileLayerFromData(foreground2,tmp10,"base",1,1);
+		tileMap.tileSize = 16;
+		tileMap.TileScale(2);
 		var spriteRender = new glaze_render_renderers_webgl_SpriteRenderer();
 		spriteRender.AddStage(this.renderSystem.stage);
 		this.renderSystem.renderer.AddRenderer(spriteRender);
 		this.blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679);
 		this.renderSystem.renderer.AddRenderer(this.blockParticleEngine.renderer);
-		var tileMap = new glaze_render_renderers_webgl_TileMap();
-		this.renderSystem.renderer.AddRenderer(tileMap);
-		var tmp6;
-		var _this6 = this.assets.assets;
-		if(__map_reserved["data/set1.png"] != null) tmp6 = _this6.getReserved("data/set1.png"); else tmp6 = _this6.h["data/set1.png"];
-		tileMap.SetSpriteSheet(tmp6);
-		tileMap.SetTileLayerFromData(mapData,"base",1,1);
-		tileMap.tileSize = 16;
-		tileMap.TileScale(2);
 		var map = new glaze_physics_collision_Map(collisionData);
 		exile_entities_creatures_BeeFactory.map = map;
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
@@ -169,9 +186,9 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.playerFilter.groupIndex = -1;
 		var body = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0.1));
 		body.maxScalarVelocity = 0;
-		var _this7 = body.maxVelocity;
-		_this7.x = 160;
-		_this7.y = 1000;
+		var _this11 = body.maxVelocity;
+		_this11.x = 160;
+		_this11.y = 1000;
 		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(15.,21.),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","runleft","runright"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
 		chickenSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
@@ -258,7 +275,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 469, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 479, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -7364,24 +7381,30 @@ glaze_render_renderers_webgl_SpriteRenderer.prototype = {
 };
 var glaze_render_renderers_webgl_TileLayer = function() {
 	this.scrollScale = new glaze_geom_Vector2(1,1);
-	this.inverseTextureSize = new Float32Array(2);
+	this.inverseTileDataTextureSize = new Float32Array(2);
+	this.inverseSpriteTextureSize = new Float32Array(2);
 };
 glaze_render_renderers_webgl_TileLayer.__name__ = ["glaze","render","renderers","webgl","TileLayer"];
 glaze_render_renderers_webgl_TileLayer.prototype = {
-	setTextureFromMap: function(gl,data) {
-		if(this.tileTexture == null) this.tileTexture = gl.createTexture();
-		gl.bindTexture(3553,this.tileTexture);
+	setSpriteTexture: function(spriteTexture) {
+		this.spriteTexture = spriteTexture.texture;
+		this.inverseSpriteTextureSize[0] = 1 / spriteTexture.width;
+		this.inverseSpriteTextureSize[1] = 1 / spriteTexture.height;
+	}
+	,setTextureFromMap: function(gl,data) {
+		if(this.tileDataTexture == null) this.tileDataTexture = gl.createTexture();
+		gl.bindTexture(3553,this.tileDataTexture);
 		gl.texImage2D(3553,0,6408,data.w,data.h,0,6408,5121,data.data8);
 		gl.texParameteri(3553,10240,9728);
 		gl.texParameteri(3553,10241,9728);
 		gl.texParameteri(3553,10242,33071);
 		gl.texParameteri(3553,10243,33071);
-		this.inverseTextureSize[0] = 1 / data.w;
-		this.inverseTextureSize[1] = 1 / data.h;
+		this.inverseTileDataTextureSize[0] = 1 / data.w;
+		this.inverseTileDataTextureSize[1] = 1 / data.h;
 	}
 	,setTexture: function(gl,image,repeat) {
-		if(this.tileTexture == null) this.tileTexture = gl.createTexture();
-		gl.bindTexture(3553,this.tileTexture);
+		if(this.tileDataTexture == null) this.tileDataTexture = gl.createTexture();
+		gl.bindTexture(3553,this.tileDataTexture);
 		gl.texImage2D(3553,0,6408,6408,5121,image);
 		gl.texParameteri(3553,10240,9728);
 		gl.texParameteri(3553,10241,9728);
@@ -7392,8 +7415,8 @@ glaze_render_renderers_webgl_TileLayer.prototype = {
 			gl.texParameteri(3553,10242,33071);
 			gl.texParameteri(3553,10243,33071);
 		}
-		this.inverseTextureSize[0] = 1 / image.width;
-		this.inverseTextureSize[1] = 1 / image.height;
+		this.inverseTileDataTextureSize[0] = 1 / image.width;
+		this.inverseTileDataTextureSize[1] = 1 / image.height;
 	}
 	,__class__: glaze_render_renderers_webgl_TileLayer
 };
@@ -7431,17 +7454,6 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.scaledViewportSize[0] = this.viewportSize.x / scale;
 		this.scaledViewportSize[1] = this.viewportSize.y / scale;
 	}
-	,Filtered: function(filtered) {
-		this.filtered = filtered;
-		this.gl.bindTexture(3553,this.spriteSheet);
-		if(filtered) {
-			this.gl.texParameteri(3553,10240,9728);
-			this.gl.texParameteri(3553,10241,9728);
-		} else {
-			this.gl.texParameteri(3553,10240,9729);
-			this.gl.texParameteri(3553,10241,9729);
-		}
-	}
 	,SetSpriteSheet: function(image) {
 		this.gl.bindTexture(3553,this.spriteSheet);
 		this.gl.pixelStorei(37441,0);
@@ -7463,9 +7475,10 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		layer.scrollScale.y = scrollScaleY;
 		this.layers.push(layer);
 	}
-	,SetTileLayerFromData: function(data,layerId,scrollScaleX,scrollScaleY) {
+	,SetTileLayerFromData: function(data,sprite,layerId,scrollScaleX,scrollScaleY) {
 		var layer = new glaze_render_renderers_webgl_TileLayer();
 		layer.setTextureFromMap(this.gl,data);
+		layer.setSpriteTexture(sprite);
 		layer.scrollScale.x = scrollScaleX;
 		layer.scrollScale.y = scrollScaleY;
 		this.layers.push(layer);
@@ -7485,13 +7498,9 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.gl.vertexAttribPointer(this.tilemapShader.attribute.position,2,5126,false,16,0);
 		this.gl.vertexAttribPointer(this.tilemapShader.attribute.texture,2,5126,false,16,8);
 		this.gl.uniform2fv(this.tilemapShader.uniform.viewportSize,this.scaledViewportSize);
-		this.gl.uniform2fv(this.tilemapShader.uniform.inverseSpriteTextureSize,this.inverseSpriteTextureSize);
 		this.gl.uniform1f(this.tilemapShader.uniform.tileSize,this.tileSize);
 		this.gl.uniform1f(this.tilemapShader.uniform.inverseTileSize,1 / this.tileSize);
-		this.gl.activeTexture(33984);
 		this.gl.uniform1i(this.tilemapShader.uniform.sprites,0);
-		this.gl.bindTexture(3553,this.spriteSheet);
-		this.gl.activeTexture(33985);
 		this.gl.uniform1i(this.tilemapShader.uniform.tiles,1);
 		var i = this.layers.length;
 		while(i > 0) {
@@ -7500,8 +7509,12 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 			var pX = this.RoundFunction(x * this.tileScale * layer.scrollScale.x);
 			var pY = this.RoundFunction(y * this.tileScale * layer.scrollScale.y);
 			this.gl.uniform2f(this.tilemapShader.uniform.viewOffset,pX,pY);
-			this.gl.uniform2fv(this.tilemapShader.uniform.inverseTileTextureSize,layer.inverseTextureSize);
-			this.gl.bindTexture(3553,layer.tileTexture);
+			this.gl.uniform2fv(this.tilemapShader.uniform.inverseSpriteTextureSize,layer.inverseSpriteTextureSize);
+			this.gl.uniform2fv(this.tilemapShader.uniform.inverseTileTextureSize,layer.inverseTileDataTextureSize);
+			this.gl.activeTexture(33984);
+			this.gl.bindTexture(3553,layer.spriteTexture);
+			this.gl.activeTexture(33985);
+			this.gl.bindTexture(3553,layer.tileDataTexture);
 			this.gl.drawArrays(4,0,6);
 		}
 	}
@@ -10715,7 +10728,8 @@ GameTestA.TEXTURE_CONFIG = "data/sprites.json";
 GameTestA.FRAMES_CONFIG = "data/frames.json";
 GameTestA.TEXTURE_DATA = "data/sprites.png";
 GameTestA.COL_SPRITE_SHEET = "data/collisionTiles.png";
-GameTestA.TILE_SPRITE_SHEET = "data/set1.png";
+GameTestA.TILE_SPRITE_SHEET_1 = "data/set1.png";
+GameTestA.TILE_SPRITE_SHEET_2 = "data/set2.png";
 Xml.Element = 0;
 Xml.PCData = 1;
 Xml.CData = 2;

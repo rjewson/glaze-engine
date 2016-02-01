@@ -3,10 +3,13 @@
  <tileset firstgid="1" name="Collision" tilewidth="16" tileheight="16" tilecount="32" columns="8">
   <image source="collisionTiles.png" width="128" height="64"/>
  </tileset>
- <tileset firstgid="33" name="World" tilewidth="16" tileheight="16" tilecount="256" columns="16">
+ <tileset firstgid="33" name="Foreground1" tilewidth="16" tileheight="16" tilecount="256" columns="16">
   <image source="set1.png" width="256" height="256"/>
  </tileset>
- <layer name="Collision" width="100" height="100" opacity="0.71">
+ <tileset firstgid="289" name="Foreground2" tilewidth="16" tileheight="16" tilecount="32" columns="8">
+  <image source="set2.png" width="128" height="64"/>
+ </tileset>
+ <layer name="Collision" width="100" height="100" visible="0" opacity="0.71">
   <data encoding="base64" compression="zlib">
    eJzt1jsKwCAABUG9/6XTSkgIgXy2mIFX2LqFzjHGtNRW+zPf0aNFjxY9Wo568J+rHmdvPu9Y7/ruP4zn6dGiR4seLe65RY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aJmW2wayNwG4
   </data>
@@ -16,12 +19,12 @@
    eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
   </data>
  </layer>
- <layer name="Foreground2" width="100" height="100" visible="0">
+ <layer name="Foreground2" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+   eJztzjERAAAIBKA3iv1LWsHFc4EEJAAAXOv6HgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALA1HIMAIw==
   </data>
  </layer>
- <layer name="Foreground1" width="100" height="100" visible="0" opacity="0.84">
+ <layer name="Foreground1" width="100" height="100" opacity="0.84">
   <data encoding="base64" compression="zlib">
    eJzt1kEKgCAUBFCvomF1/xMm1EYIXNU3eg9m4W5gFt+UmFmJLkDHHnNZogvQ2aMLwEdsLblljS7yQ/kmNZ33vVxv3lMGqXHVfskecxnt4d8FAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM87AOwEBc8=
   </data>

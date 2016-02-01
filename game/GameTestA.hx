@@ -77,7 +77,8 @@ class GameTestA extends GameEngine {
     public static inline var TEXTURE_DATA:String = "data/sprites.png";
 
     public static inline var COL_SPRITE_SHEET:String = "data/collisionTiles.png";
-    public static inline var TILE_SPRITE_SHEET:String = "data/set1.png";
+    public static inline var TILE_SPRITE_SHEET_1:String = "data/set1.png";
+    public static inline var TILE_SPRITE_SHEET_2:String = "data/set2.png";
 
     // public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
     // public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
@@ -102,7 +103,7 @@ class GameTestA extends GameEngine {
    
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
-        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET,COL_SPRITE_SHEET,FRAMES_CONFIG]);
+        loadAssets([MAP_DATA,TEXTURE_CONFIG,TEXTURE_DATA,TILE_SPRITE_SHEET_1,TILE_SPRITE_SHEET_2,COL_SPRITE_SHEET,FRAMES_CONFIG]);
     }
 
     override public function initalize() {
@@ -121,7 +122,8 @@ class GameTestA extends GameEngine {
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
 // js.Lib.debug(); 
         tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
-        tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET));
+        tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
+        tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
                        
         var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);  
@@ -130,14 +132,32 @@ class GameTestA extends GameEngine {
         messageBus = new MessageBus();  
          
         renderSystem = new RenderSystem(canvas);
+        
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
+        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
+        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_2, assets.assets.get(TILE_SPRITE_SHEET_2) );
+
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
  
 // js.Lib.debug(); 
-        var mapData = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
+        var background = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Background"));
+        var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
+        var foreground2 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground2"));
 
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"));
+   
+        var tileMap = new TileMap(); 
+        renderSystem.renderer.AddRenderer(tileMap);    
+        // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
+
+        tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_1),"base",1,1);
+        tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_2),"base",1,1);
+        // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
+        // tileMap.SetTileLayerFromData(mapData,"base",1,1);
+        // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
+        tileMap.tileSize = 16 ;               
+        tileMap.TileScale(2);          
 
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
@@ -145,16 +165,6 @@ class GameTestA extends GameEngine {
  
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
-   
-        var tileMap = new TileMap(); 
-        renderSystem.renderer.AddRenderer(tileMap);    
-        tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));
-        tileMap.SetTileLayerFromData(mapData,"base",1,1);
-        // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
-        // tileMap.SetTileLayerFromData(mapData,"base",1,1);
-        // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
-        tileMap.tileSize = 16 ;  
-        tileMap.TileScale(2);          
 
         // var map = new Map(tmxMap.getLayer("Tile Layer 1").tileGIDs); 
         var map = new Map(collisionData);  
