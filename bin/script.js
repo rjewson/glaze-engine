@@ -227,39 +227,11 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	}
 	,createDoor: function() {
 		this.door = this.engine.createEntity([new glaze_engine_components_Position(144.,196),new glaze_engine_components_Extents(3,34),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
-		var doorSwitch = this.engine.createEntity([new glaze_engine_components_Position(168,42),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
+		this.engine.createEntity([new glaze_engine_components_Position(168,42),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
 		this.engine.createEntity([new glaze_engine_components_Position(784,192),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(784.,80.)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
 		this.engine.createEntity([new glaze_engine_components_Position(320,128),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body()),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 		this.engine.createEntity([new glaze_engine_components_Position(288,192),new glaze_engine_components_Extents(8,5),new glaze_engine_components_Display("blob"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(glaze_physics_Body.Create(null,0.1,0,1,100)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active(),new glaze_animation_components_SpriteAnimation("blob",["blob"],"blob"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(4,1,4)])],"blob");
 		this.engine.createEntity([new glaze_engine_components_Position(112.,48.),new glaze_engine_components_Display("insects","hive"),new glaze_engine_components_Extents(5,7),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active()],"turret");
-		var graph = new glaze_ai_navigation_Graph();
-		graph.pathfinder = new glaze_ai_navigation_AStar();
-		var nodes = this.tmxMap.getObjectGroup("Waypoints");
-		var _g = 0;
-		var _g1 = nodes.objects;
-		while(_g < _g1.length) {
-			var node = _g1[_g];
-			++_g;
-			var pl = node.polyline;
-			if(pl != null) {
-				var a = graph.GetCreateNode(pl[0].x * 2 | 0,pl[0].y * 2 | 0);
-				var b;
-				var _g3 = 1;
-				var _g2 = pl.length;
-				while(_g3 < _g2) {
-					var i = _g3++;
-					b = graph.GetCreateNode(pl[i].x * 2 | 0,pl[i].y * 2 | 0);
-					a.connect(b);
-					a = b;
-				}
-			}
-		}
-		var start = graph.GetCreateNode(192,128);
-		var end = graph.GetCreateNode(64,416);
-		var route = graph.Search(start,end);
-		debugger;
-		var bee = exile_entities_creatures_BeeFactory.create(this.engine,new glaze_engine_components_Position(195.2,128));
-		bee.map.Steering.behaviors.push(new glaze_ai_steering_behaviors_FollowPath(route));
 	}
 	,createTurret: function() {
 		var behavior = new glaze_ai_behaviortree_Sequence();
@@ -1556,68 +1528,6 @@ glaze_ai_navigation_Edge.__name__ = ["glaze","ai","navigation","Edge"];
 glaze_ai_navigation_Edge.prototype = {
 	__class__: glaze_ai_navigation_Edge
 };
-var glaze_ai_navigation_Graph = function() {
-	this.nodes = [];
-	this.nodeLookup = new haxe_ds_StringMap();
-};
-glaze_ai_navigation_Graph.__name__ = ["glaze","ai","navigation","Graph"];
-glaze_ai_navigation_Graph.ConvertNodeListToWorldCoords = function(nodes,tileSize) {
-	var result = [];
-	var count = nodes.length;
-	var tileHalfSize_x = tileSize / 2;
-	var tileHalfSize_y = tileSize / 2;
-	var _g = 0;
-	while(_g < count) {
-		var i = _g++;
-		var coord = nodes[count - 1 - i].position.clone();
-		coord.x *= tileSize;
-		coord.y *= tileSize;
-		coord.x += tileHalfSize_x;
-		coord.y += tileHalfSize_y;
-		result.push(coord);
-	}
-	return result;
-};
-glaze_ai_navigation_Graph.prototype = {
-	Reset: function() {
-		var _g = 0;
-		var _g1 = this.nodes;
-		while(_g < _g1.length) {
-			var node = _g1[_g];
-			++_g;
-			node.reset();
-		}
-	}
-	,GetCreateNode: function(x,y) {
-		var hash = this.HashCoords(x,y);
-		var tmp;
-		var _this = this.nodeLookup;
-		if(__map_reserved[hash] != null) tmp = _this.getReserved(hash); else tmp = _this.h[hash];
-		var node = tmp;
-		if(node == null) {
-			node = new glaze_ai_navigation_Node(x,y);
-			this.nodes.push(node);
-			var _this1 = this.nodeLookup;
-			if(__map_reserved[hash] != null) _this1.setReserved(hash,node); else _this1.h[hash] = node;
-		}
-		return node;
-	}
-	,GetNode: function(x,y) {
-		var tmp;
-		var _this = this.nodeLookup;
-		var key = this.HashCoords(x,y);
-		if(__map_reserved[key] != null) tmp = _this.getReserved(key); else tmp = _this.h[key];
-		return tmp;
-	}
-	,HashCoords: function(x,y) {
-		return x + ":" + y;
-	}
-	,Search: function(start,finish) {
-		this.Reset();
-		return this.pathfinder != null?this.pathfinder.FindPath(this.nodes,start,finish):null;
-	}
-	,__class__: glaze_ai_navigation_Graph
-};
 var glaze_ai_navigation_Node = function(x,y) {
 	this.position = new glaze_geom_Vector2(x,y);
 	this.f = 0;
@@ -1807,40 +1717,6 @@ glaze_ai_steering_behaviors_Feeler.prototype = {
 	}
 	,__class__: glaze_ai_steering_behaviors_Feeler
 };
-var glaze_ai_steering_behaviors_FollowPath = function(path,seekDistSq) {
-	if(seekDistSq == null) seekDistSq = 256;
-	glaze_ai_steering_behaviors_Behavior.call(this,0.5,130);
-	this.path = path;
-	this.seekDistSq = seekDistSq;
-	this.currentIndex = 0;
-};
-glaze_ai_steering_behaviors_FollowPath.__name__ = ["glaze","ai","steering","behaviors","FollowPath"];
-glaze_ai_steering_behaviors_FollowPath.__super__ = glaze_ai_steering_behaviors_Behavior;
-glaze_ai_steering_behaviors_FollowPath.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
-	calculate: function(agent,result) {
-		if(this.currentIndex == this.path.length) return;
-		haxe_Log.trace(this.currentIndex,{ fileName : "FollowPath.hx", lineNumber : 28, className : "glaze.ai.steering.behaviors.FollowPath", methodName : "calculate"});
-		var tmp;
-		var target = this.path[this.currentIndex].position;
-		var seekDistSq = this.seekDistSq;
-		var dX = target.x - agent.position.x + 0.000001;
-		var dY = target.y - agent.position.y + 0.000001;
-		var d = dX * dX + dY * dY;
-		haxe_Log.trace(seekDistSq,{ fileName : "Seek.hx", lineNumber : 33, className : "glaze.ai.steering.behaviors.Seek", methodName : "calc"});
-		if(seekDistSq > 0 && d < seekDistSq) tmp = false; else {
-			var t = Math.sqrt(d);
-			result.x = dX / t;
-			result.x *= 100;
-			result.x -= agent.velocity.x * 0.016;
-			result.y = dY / t;
-			result.y *= 100;
-			result.y -= agent.velocity.y * 0.016;
-			tmp = true;
-		}
-		if(!tmp) this.currentIndex++;
-	}
-	,__class__: glaze_ai_steering_behaviors_FollowPath
-});
 var glaze_ai_steering_behaviors_Seek = function(target,seekDistSq) {
 	if(seekDistSq == null) seekDistSq = 0;
 	glaze_ai_steering_behaviors_Behavior.call(this,1,70);
@@ -8148,9 +8024,9 @@ glaze_render_texture_BaseTexture.prototype = {
 			this.renderbuffer.height = this.height;
 			this.gl.renderbufferStorage(36161,33189,this.width,this.height);
 			haxe_Log.trace("resize",{ fileName : "BaseTexture.hx", lineNumber : 84, className : "glaze.render.texture.BaseTexture", methodName : "drawTo"});
+			this.gl.framebufferTexture2D(36160,36064,3553,this.texture,0);
+			this.gl.framebufferRenderbuffer(36160,36096,36161,this.renderbuffer);
 		}
-		this.gl.framebufferTexture2D(36160,36064,3553,this.texture,0);
-		this.gl.framebufferRenderbuffer(36160,36096,36161,this.renderbuffer);
 		this.gl.viewport(0,0,this.width,this.height);
 		callback();
 		this.gl.bindFramebuffer(36160,null);

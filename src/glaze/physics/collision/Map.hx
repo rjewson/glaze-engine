@@ -85,7 +85,7 @@ class Map
                         tilePosition.y = (y*tileSize)+tileHalfSize;
                         if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
                             //Check for 1 way platform?
-                            //if ( contact.normal.y<0&&contact.distance>=-20 )
+                            // if ( contact.normal.y<0&&contact.distance>=-20 )
                             {
                             var nextX:Int = x + Std.int(contact.normal.x);
                             var nextY:Int = y + Std.int(contact.normal.y);

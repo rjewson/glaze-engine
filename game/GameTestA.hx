@@ -151,7 +151,7 @@ class GameTestA extends GameEngine {
 
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"));
    
-        var tileMap = new TileMap(); 
+        var tileMap = new TileMap();  
         renderSystem.renderer.AddRenderer(tileMap);    
         // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
 
@@ -406,29 +406,29 @@ class GameTestA extends GameEngine {
             new Active()
         ],"turret");  
 
-        var graph = new glaze.ai.navigation.Graph();
-        graph.pathfinder = new AStar();
-        var nodes = tmxMap.getObjectGroup("Waypoints");
-        for (node in nodes.objects) {
-            var pl:Array<Vector2> = node.polyline;
-            if (pl!=null) {
-                var a:glaze.ai.navigation.Node = graph.GetCreateNode(Std.int(pl[0].x*2),Std.int(pl[0].y*2));
-                var b:glaze.ai.navigation.Node;
-                for (i in 1...pl.length) {
-                    b = graph.GetCreateNode(Std.int(pl[i].x*2),Std.int(pl[i].y*2));
-                    a.connect(b);
-                    a = b;
-                }
-            }
-        }
+        // var graph = new glaze.ai.navigation.Graph();
+        // graph.pathfinder = new AStar();
+        // var nodes = tmxMap.getObjectGroup("Waypoints");
+        // for (node in nodes.objects) {
+        //     var pl:Array<Vector2> = node.polyline;
+        //     if (pl!=null) {
+        //         var a:glaze.ai.navigation.Node = graph.GetCreateNode(Std.int(pl[0].x*2),Std.int(pl[0].y*2));
+        //         var b:glaze.ai.navigation.Node;
+        //         for (i in 1...pl.length) {
+        //             b = graph.GetCreateNode(Std.int(pl[i].x*2),Std.int(pl[i].y*2));
+        //             a.connect(b);
+        //             a = b;
+        //         }
+        //     }
+        // }
 
-        var start = graph.GetCreateNode(6*32,4*32);
-        var end = graph.GetCreateNode(2*32,13*32);
-        var route = graph.Search(start,end);
-        js.Lib.debug();     
+        // var start = graph.GetCreateNode(6*32,4*32);
+        // var end = graph.GetCreateNode(2*32,13*32);
+        // var route = graph.Search(start,end);
+        // js.Lib.debug();     
 
-        var bee = exile.entities.creatures.BeeFactory.create(engine,new Position(6.1*32,4*32));
-        bee.getComponent(glaze.ai.steering.components.Steering).behaviors.push(new glaze.ai.steering.behaviors.FollowPath(route));
+        // var bee = exile.entities.creatures.BeeFactory.create(engine,new Position(6.1*32,4*32));
+        // bee.getComponent(glaze.ai.steering.components.Steering).behaviors.push(new glaze.ai.steering.behaviors.FollowPath(route));
     }
 
     public function createTurret() { 
