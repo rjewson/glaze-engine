@@ -61,7 +61,7 @@ class BlockSpriteParticleEngine implements IParticleEngine
         renderer.ResetBatch();
         var particle = activeParticles;
         while (particle != null) {
-            var valid = particle.Update(deltaTime,invDeltaTime) && map.getReal(particle.pX,particle.pY,0)==0;
+            var valid = particle.Update(deltaTime,invDeltaTime) && map.getReal(particle.pX,particle.pY,0)&1!=1;
             if (!valid) {
                 var next = particle.next;
                 if (particle.prev == null) {

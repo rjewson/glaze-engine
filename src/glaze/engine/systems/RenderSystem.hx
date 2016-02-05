@@ -36,8 +36,8 @@ class RenderSystem extends System {
         super([Position,Display,Active]);
         this.canvas = canvas;
         initalizeWebGlRenderer();
-    }
-
+    } 
+ 
     function initalizeWebGlRenderer() {
         stage = new Stage();
         camera = new Camera();

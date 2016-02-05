@@ -25,7 +25,7 @@ class Graph
 	public function Reset():Void {
 		for (node in nodes) {
 			node.reset();
-		}
+		} 
 	}
 	
 	public function GetCreateNode(x:Int, y:Int):Node {

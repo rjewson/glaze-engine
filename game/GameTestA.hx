@@ -143,34 +143,34 @@ class GameTestA extends GameEngine {
 
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
-   
+    
 // js.Lib.debug(); 
         var background = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Background"));
         var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
         var foreground2 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground2"));
-
+     
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"));
-   
-        var tileMap = new TileMap();  
+        
+        var tileMap = new TileMap();     
         renderSystem.renderer.AddRenderer(tileMap);    
         // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
-
+  
         tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_2),"f2",1,1); 
         tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_1),"f1",1,1);
         tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_B),"bg",1,1);
         // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
         // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
-        tileMap.tileSize = 16 ;               
-        tileMap.TileScale(2);           
-
+        tileMap.tileSize = 16 ;                 
+        tileMap.TileScale(2);             
+   
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
-
+ 
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -180,11 +180,11 @@ class GameTestA extends GameEngine {
 
         // broadphase = new UniformGrid(map,nf,10,5,640);
         // broadphase = new glaze.physics.collision.broadphase.SAPBroadphase(map,nf);
-
+  
         broadphase = new BruteforceBroadphase(map,nf);
 
         exile.util.CombatUtils.setBroadphase(broadphase);
-
+ 
         physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
         physicsPhase.addSystem(new PhysicsMoveableSystem(broadphase));
         physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
@@ -337,7 +337,7 @@ class GameTestA extends GameEngine {
         ],"door");        
 
         var doorSwitch = engine.createEntity([
-            new Position((5*32)+8,(1*32)+10),  
+            new Position((5*32)+8,(2*32)+10),  
             new Display("switch"), 
             new Extents(8,8),
             new PhysicsCollision(false,null,[]),
@@ -345,7 +345,7 @@ class GameTestA extends GameEngine {
             new CollidableSwitch(1000,["doorA"]),
             new Active()
         ],"turret");        
-    
+         
         engine.createEntity([
             new Position((32*24)+16,(32*6)),  
             new Extents(16,32),
@@ -355,9 +355,9 @@ class GameTestA extends GameEngine {
             new ParticleEmitters([new glaze.particle.emitter.ScanLineEmitter(200,100,600,10)]),
             new State(["on","off"],0,[]),
             new Active()
-            ],"teleporter");
-
-        // engine.createEntity([
+            ],"teleporter") ;
+ 
+        // engine.createEntity([ 
         //     new Position(18.5*32,2.5*32),  
         //     new Extents(16,16),
         //     new Display("insects","hive"), 
