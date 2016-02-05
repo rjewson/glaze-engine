@@ -1,7 +1,7 @@
 
 package glaze.particle;
 
-import wgr.geom.Point;
+import glaze.geom.Vector2;
 
 class PointSpriteParticle
 {
@@ -20,7 +20,7 @@ class PointSpriteParticle
     public var type:Float;
     public var size:Float;
 
-    public var externalForce:Point;
+    public var externalForce:Vector2;
     
     public var age:Float;
     public var ttl:Float;
@@ -37,7 +37,7 @@ class PointSpriteParticle
     {
     }
     
-    inline public function Initalize(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decay:Float, top:Bool, externalForce:Point, data1:Int, data2:Int, data3:Int,data4:Int) {
+    inline public function Initalize(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decay:Float, top:Bool, externalForce:Vector2, data1:Int, data2:Int, data3:Int,data4:Int) {
         this.pX = x;
         this.pY = y;
         this.vX = vX;

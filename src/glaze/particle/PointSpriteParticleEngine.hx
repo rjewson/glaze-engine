@@ -1,10 +1,9 @@
 package glaze.particle;
 
 import glaze.ds.Bytes2D;
-import wgr.geom.Point;
-import wgr.particle.PointSpriteParticle;
-import wgr.renderers.webgl.PointSpriteLightMapRenderer;
-import wgr.renderers.webgl.PointSpriteRenderer;
+import glaze.geom.Vector2;
+import glaze.particle.PointSpriteParticle;
+import glaze.render.renderers.webgl.PointSpriteRenderer;
 
 class PointSpriteParticleEngine implements IParticleEngine
 {
@@ -15,7 +14,7 @@ class PointSpriteParticleEngine implements IParticleEngine
     public var cachedParticles:PointSpriteParticle;
         
     public var renderer:PointSpriteRenderer;
-    public var ZERO_FORCE:Point;
+    public var ZERO_FORCE:Vector2;
 
     public var map:Bytes2D;
 
@@ -25,7 +24,7 @@ class PointSpriteParticleEngine implements IParticleEngine
         this.deltaTime = deltaTime;
         this.invDeltaTime = deltaTime / 1000;
         this.map = map;
-        ZERO_FORCE = new Point();
+        ZERO_FORCE = new Vector2();
         for (i in 0...particleCount) {
             var p = new PointSpriteParticle();
             p.next = cachedParticles;
@@ -35,7 +34,7 @@ class PointSpriteParticleEngine implements IParticleEngine
         this.renderer.ResizeBatch(particleCount);
     }
     
-    public function EmitParticle(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decayable:Bool, top:Bool, externalForce:Point, data1:Int, data2:Int, data3:Int,data4:Int,data5:Int):Bool {
+    public function EmitParticle(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decayable:Bool, top:Bool, externalForce:Vector2, data1:Int, data2:Int, data3:Int,data4:Int,data5:Int):Bool {
         if (cachedParticles == null)
             return false;
             

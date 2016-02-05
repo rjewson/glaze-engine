@@ -67,6 +67,7 @@ GameTestA.main = function() {
 		game.shakeIt = 15;
 	});
 	window.document.getElementById("debug5button").addEventListener("click",function(event6) {
+		game.throwWabbits();
 	});
 	window.document.getElementById("entities").addEventListener("click",function(event7) {
 		window.writeResult(glaze_debug_DebugEngine.GetAllEntities());
@@ -152,6 +153,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.renderSystem.renderer.AddRenderer(spriteRender);
 		this.blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679,collisionData);
 		this.renderSystem.renderer.AddRenderer(this.blockParticleEngine.renderer);
+		this.spriteParticleEngine = new glaze_particle_PointSpriteParticleEngine(4000,16.6666666666666679,collisionData);
+		this.renderSystem.renderer.AddRenderer(this.spriteParticleEngine.renderer);
+		var tmp14;
+		var _this14 = this.renderSystem.textureManager.baseTextures;
+		if(__map_reserved["data/sprites.png"] != null) tmp14 = _this14.getReserved("data/sprites.png"); else tmp14 = _this14.h["data/sprites.png"];
+		this.spriteParticleEngine.renderer.SetSpriteSheet(tmp14.texture,16,16,16);
 		var map = new glaze_physics_collision_Map(collisionData);
 		exile_entities_creatures_BeeFactory.map = map;
 		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
@@ -183,6 +190,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		aiphase.addSystem(new exile_systems_BeeSystem(this.broadphase));
 		var chickenSystem = new exile_systems_ChickenSystem(this.blockParticleEngine);
 		aiphase.addSystem(chickenSystem);
+		var rabbitSystem = new exile_systems_RabbitSystem();
+		aiphase.addSystem(rabbitSystem);
 		aiphase.addSystem(new exile_systems_MaggotSystem(this.broadphase,this.blockParticleEngine));
 		aiphase.addSystem(new exile_systems_GrenadeSystem(this.broadphase));
 		aiphase.addSystem(new glaze_engine_systems_InventorySystem());
@@ -198,11 +207,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.playerFilter.groupIndex = -1;
 		var body = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0.1));
 		body.maxScalarVelocity = 0;
-		var _this14 = body.maxVelocity;
-		_this14.x = 160;
-		_this14.y = 1000;
+		var _this15 = body.maxVelocity;
+		_this15.x = 160;
+		_this15.y = 1000;
 		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(15.,21.),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","runleft","runright"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
 		chickenSystem.scaredOfPosition = this.player.map.Position;
+		rabbitSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
 		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
@@ -213,6 +223,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.createDoor();
 		exile_entities_creatures_ChickenFactory.create(this.engine,this.mapPosition(9,2));
 		exile_entities_creatures_MaggotFactory.create(this.engine,this.mapPosition(8,2));
+		exile_entities_creatures_RabbitFactory.create(this.engine,this.mapPosition(9,2));
 		exile_entities_creatures_FishFactory.create(this.engine,this.mapPosition(37,21));
 		this.loop.start();
 	}
@@ -273,6 +284,15 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			chickie.map.PhysicsBody.body.addForce(new glaze_geom_Vector2(Math.floor(Math.random() * 2000 + -1000),Math.floor(Math.random() * 1100 + -1000)));
 		}
 	}
+	,throwWabbits: function() {
+		var _g = 0;
+		while(_g < 10) {
+			_g++;
+			var pos = this.player.map.Position.clone();
+			var wabbit = exile_entities_creatures_RabbitFactory.create(this.engine,pos);
+			wabbit.map.PhysicsBody.body.addForce(new glaze_geom_Vector2(Math.floor(Math.random() * 2000 + -1000),Math.floor(Math.random() * 1100 + -1000)));
+		}
+	}
 	,destroyChickens: function() {
 		var cs = this.engine.getSystem(exile_systems_ChickenSystem);
 		var explosion = new glaze_particle_emitter_Explosion(10,50);
@@ -283,10 +303,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		} else this.killChickens = false;
 	}
 	,preUpdate: function() {
+		this.spriteParticleEngine.EmitParticle(100,100,Math.random() * 200 + -100,Math.random() * 200 + -100,0,0,2000,1,true,true,null,1,32,255,0,0);
+		this.spriteParticleEngine.Update();
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 508, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 531, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -703,6 +725,14 @@ exile_components_Projectile.__interfaces__ = [glaze_eco_core_IComponent];
 exile_components_Projectile.prototype = {
 	__class__: exile_components_Projectile
 };
+var exile_components_Rabbit = function() {
+	this.sleep = .0;
+};
+exile_components_Rabbit.__name__ = ["exile","components","Rabbit"];
+exile_components_Rabbit.__interfaces__ = [glaze_eco_core_IComponent];
+exile_components_Rabbit.prototype = {
+	__class__: exile_components_Rabbit
+};
 var exile_components_Teleporter = function(teleportPosition) {
 	this.teleportPosition = teleportPosition;
 };
@@ -777,6 +807,21 @@ exile_entities_creatures_MaggotFactory.create = function(engine,position) {
 };
 exile_entities_creatures_MaggotFactory.prototype = {
 	__class__: exile_entities_creatures_MaggotFactory
+};
+var exile_entities_creatures_RabbitFactory = function() {
+};
+exile_entities_creatures_RabbitFactory.__name__ = ["exile","entities","creatures","RabbitFactory"];
+exile_entities_creatures_RabbitFactory.create = function(engine,position) {
+	var rabbitBody = new glaze_physics_Body(new glaze_physics_Material(1,0.5,0.7));
+	rabbitBody.setMass(0.1);
+	rabbitBody.setBounces(3);
+	rabbitBody.maxScalarVelocity = 1000;
+	rabbitBody.globalForceFactor = 1;
+	var rabbit = engine.createEntity([position,new exile_components_Rabbit(),new glaze_engine_components_Extents(12,16),new glaze_engine_components_Display("rabbit"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(rabbitBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("rabbit",["idle","blink","jump","eat","listen"],"jump"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"rabbit");
+	return rabbit;
+};
+exile_entities_creatures_RabbitFactory.prototype = {
+	__class__: exile_entities_creatures_RabbitFactory
 };
 var exile_entities_projectile_PlasmaProjectileFactory = function() {
 };
@@ -1230,6 +1275,56 @@ exile_systems_ProjectileSystem.prototype = $extend(glaze_eco_core_System.prototy
 		a.entity.map.Projectile.bounce--;
 	}
 	,__class__: exile_systems_ProjectileSystem
+});
+var exile_systems_RabbitSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,exile_components_Rabbit,glaze_physics_components_PhysicsBody,glaze_animation_components_SpriteAnimation]);
+};
+exile_systems_RabbitSystem.__name__ = ["exile","systems","RabbitSystem"];
+exile_systems_RabbitSystem.__super__ = glaze_eco_core_System;
+exile_systems_RabbitSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var dist = 1000000;
+			var body = entity.map.PhysicsBody.body;
+			var dir = 0;
+			var rabbit = entity.map.Rabbit;
+			rabbit.sleep -= delta;
+			if(this.scaredOfPosition != null) {
+				dist = body.position.distSqrd(this.scaredOfPosition.coords);
+				dir = body.position.x - this.scaredOfPosition.coords.x < 0?-1:1;
+			}
+			if(dist < 4096) {
+				if(Math.random() < 0.1) {
+					body.addForce(new glaze_geom_Vector2(dir * 10,-10));
+					entity.map.Position.direction.x = dir;
+					entity.map.SpriteAnimation.animationController.play("jump");
+				}
+			} else if(rabbit.sleep < 0) {
+				if(Math.random() < 0.01) {
+					rabbit.sleep += 2000;
+					var dir1 = Math.random() < 0.5?1:-1;
+					entity.map.Position.direction.x = dir1;
+					body.addForce(new glaze_geom_Vector2(dir1 * 10,-10));
+					entity.map.SpriteAnimation.animationController.play("jump");
+				} else if(Math.random() < 0.005) {
+					rabbit.sleep += 1500;
+					entity.map.SpriteAnimation.animationController.play("listen");
+				} else if(Math.random() < 0.005) {
+					rabbit.sleep += 2000;
+					entity.map.SpriteAnimation.animationController.play("eat");
+				}
+			}
+		}
+	}
+	,__class__: exile_systems_RabbitSystem
 });
 var exile_systems_TeleporterSystem = function() {
 	glaze_eco_core_System.call(this,[glaze_physics_components_PhysicsCollision,exile_components_Teleporter,glaze_engine_components_State]);
@@ -4813,6 +4908,119 @@ glaze_particle_BlockSpriteParticleEngine.prototype = {
 	}
 	,__class__: glaze_particle_BlockSpriteParticleEngine
 };
+var glaze_particle_PointSpriteParticle = function() {
+};
+glaze_particle_PointSpriteParticle.__name__ = ["glaze","particle","PointSpriteParticle"];
+glaze_particle_PointSpriteParticle.prototype = {
+	Initalize: function(x,y,vX,vY,fX,fY,ttl,damping,decay,top,externalForce,data1,data2,data3,data4) {
+		this.pX = x;
+		this.pY = y;
+		this.vX = vX;
+		this.vY = vY;
+		this.fX = fX;
+		this.fY = fY;
+		this.ttl = ttl;
+		this.age = ttl;
+		this.damping = damping;
+		this.decay = decay;
+		this.externalForce = externalForce;
+		this.type = data1;
+		this.size = data2;
+		this.colour = data3;
+		this.alpha = (this.colour & 255) * 0.00392156862745098;
+	}
+	,Update: function(deltaTime,invDeltaTime) {
+		this.vX += this.fX + this.externalForce.x;
+		this.vY += this.fY + this.externalForce.y;
+		this.vX *= this.damping;
+		this.vY *= this.damping;
+		this.pX += this.vX * invDeltaTime;
+		this.pY += this.vY * invDeltaTime;
+		this.age -= deltaTime;
+		this.alpha -= this.decay;
+		return this.age > 0;
+	}
+	,__class__: glaze_particle_PointSpriteParticle
+};
+var glaze_particle_PointSpriteParticleEngine = function(particleCount,deltaTime,map) {
+	this.particleCount = particleCount;
+	this.deltaTime = deltaTime;
+	this.invDeltaTime = deltaTime / 1000;
+	this.map = map;
+	this.ZERO_FORCE = new glaze_geom_Vector2();
+	var _g = 0;
+	while(_g < particleCount) {
+		_g++;
+		var p = new glaze_particle_PointSpriteParticle();
+		p.next = this.cachedParticles;
+		this.cachedParticles = p;
+	}
+	this.renderer = new glaze_render_renderers_webgl_PointSpriteRenderer();
+	this.renderer.ResizeBatch(particleCount);
+};
+glaze_particle_PointSpriteParticleEngine.__name__ = ["glaze","particle","PointSpriteParticleEngine"];
+glaze_particle_PointSpriteParticleEngine.__interfaces__ = [glaze_particle_IParticleEngine];
+glaze_particle_PointSpriteParticleEngine.prototype = {
+	EmitParticle: function(x,y,vX,vY,fX,fY,ttl,damping,decayable,top,externalForce,data1,data2,data3,data4,data5) {
+		if(this.cachedParticles == null) return false;
+		var particle = this.cachedParticles;
+		this.cachedParticles = this.cachedParticles.next;
+		if(this.activeParticles == null) {
+			this.activeParticles = particle;
+			particle.next = particle.prev = null;
+		} else {
+			particle.next = this.activeParticles;
+			particle.prev = null;
+			this.activeParticles.prev = particle;
+			this.activeParticles = particle;
+		}
+		particle.pX = x;
+		particle.pY = y;
+		particle.vX = vX;
+		particle.vY = vY;
+		particle.fX = fX;
+		particle.fY = fY;
+		particle.ttl = ttl;
+		particle.age = ttl;
+		particle.damping = damping;
+		particle.decay = decayable?this.deltaTime / ttl:0;
+		particle.externalForce = externalForce != null?externalForce:this.ZERO_FORCE;
+		particle.type = data1;
+		particle.size = data2;
+		particle.colour = data3;
+		particle.alpha = (particle.colour & 255) * 0.00392156862745098;
+		return true;
+	}
+	,Update: function() {
+		this.renderer.ResetBatch();
+		var particle = this.activeParticles;
+		while(particle != null) {
+			var tmp;
+			var invDeltaTime = this.invDeltaTime;
+			particle.vX += particle.fX + particle.externalForce.x;
+			particle.vY += particle.fY + particle.externalForce.y;
+			particle.vX *= particle.damping;
+			particle.vY *= particle.damping;
+			particle.pX += particle.vX * invDeltaTime;
+			particle.pY += particle.vY * invDeltaTime;
+			particle.age -= this.deltaTime;
+			particle.alpha -= particle.decay;
+			tmp = particle.age > 0;
+			if(!tmp) {
+				var next = particle.next;
+				if(particle.prev == null) this.activeParticles = particle.next; else particle.prev.next = particle.next;
+				if(particle.next != null) particle.next.prev = particle.prev;
+				particle.next = this.cachedParticles;
+				this.cachedParticles = particle;
+				particle = next;
+			} else {
+				this.renderer.AddSpriteToBatch(particle.type | 0,particle.pX,particle.pY,particle.size,particle.alpha * 255 | 0,255,255,255);
+				particle = particle.next;
+			}
+		}
+	}
+	,__class__: glaze_particle_PointSpriteParticleEngine
+};
 var glaze_particle_emitter_IParticleEmitter = function() { };
 glaze_particle_emitter_IParticleEmitter.__name__ = ["glaze","particle","emitter","IParticleEmitter"];
 glaze_particle_emitter_IParticleEmitter.prototype = {
@@ -7458,6 +7666,81 @@ glaze_render_renderers_webgl_PointSpriteLightMapRenderer.prototype = {
 		this.gl.drawArrays(0,0,this.indexRun);
 	}
 	,__class__: glaze_render_renderers_webgl_PointSpriteLightMapRenderer
+};
+var glaze_render_renderers_webgl_PointSpriteRenderer = function() {
+};
+glaze_render_renderers_webgl_PointSpriteRenderer.__name__ = ["glaze","render","renderers","webgl","PointSpriteRenderer"];
+glaze_render_renderers_webgl_PointSpriteRenderer.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
+glaze_render_renderers_webgl_PointSpriteRenderer.prototype = {
+	Init: function(gl,camera) {
+		this.gl = gl;
+		this.camera = camera;
+		this.projection = new glaze_geom_Vector2();
+		this.pointSpriteShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_VERTEX_SHADER,glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_FRAGMENT_SHADER));
+		this.dataBuffer = gl.createBuffer();
+	}
+	,ResizeBatch: function(size) {
+		this.arrayBuffer = new ArrayBuffer(80 * size);
+		this.data = new Float32Array(this.arrayBuffer);
+		this.data8 = new Uint8ClampedArray(this.arrayBuffer);
+		this.ResetBatch();
+	}
+	,SetSpriteSheet: function(texture,spriteSize,spritesWide,spritesHigh) {
+		this.texture = texture;
+		this.tileSize = spriteSize;
+		this.texTilesWide = spritesWide;
+		this.texTilesHigh = spritesHigh;
+		this.invTexTilesWide = 1 / this.texTilesWide;
+		this.invTexTilesHigh = 1 / this.texTilesHigh;
+	}
+	,Resize: function(width,height) {
+		this.projection.x = width / 2;
+		this.projection.y = height / 2;
+	}
+	,AddStage: function(stage) {
+		this.stage = stage;
+	}
+	,ResetBatch: function() {
+		this.indexRun = 0;
+	}
+	,AddSpriteToBatch: function(spriteID,x,y,size,alpha,red,green,blue) {
+		var index = this.indexRun * 5;
+		this.data[index] = x + this.camera.position.x | 0;
+		this.data[index + 1] = y + this.camera.position.y | 0;
+		this.data[index + 2] = size;
+		this.data[index + 3] = spriteID;
+		index *= 4;
+		this.data8[index + 16] = red;
+		this.data8[index + 17] = blue;
+		this.data8[index + 18] = green;
+		this.data8[index + 19] = alpha;
+		this.indexRun++;
+	}
+	,Render: function(clip) {
+		this.gl.enable(3042);
+		this.gl.blendFunc(770,771);
+		this.gl.useProgram(this.pointSpriteShader.program);
+		this.gl.bindBuffer(34962,this.dataBuffer);
+		this.gl.bufferData(34962,this.data,35048);
+		this.gl.enableVertexAttribArray(this.pointSpriteShader.attribute.position);
+		this.gl.enableVertexAttribArray(this.pointSpriteShader.attribute.size);
+		this.gl.enableVertexAttribArray(this.pointSpriteShader.attribute.tileType);
+		this.gl.enableVertexAttribArray(this.pointSpriteShader.attribute.colour);
+		this.gl.vertexAttribPointer(this.pointSpriteShader.attribute.position,2,5126,false,20,0);
+		this.gl.vertexAttribPointer(this.pointSpriteShader.attribute.size,1,5126,false,20,8);
+		this.gl.vertexAttribPointer(this.pointSpriteShader.attribute.tileType,1,5126,false,20,12);
+		this.gl.vertexAttribPointer(this.pointSpriteShader.attribute.colour,4,5121,true,20,16);
+		this.gl.uniform1f(this.pointSpriteShader.uniform.texTilesWide,this.texTilesWide);
+		this.gl.uniform1f(this.pointSpriteShader.uniform.texTilesHigh,this.texTilesHigh);
+		this.gl.uniform1f(this.pointSpriteShader.uniform.invTexTilesWide,this.invTexTilesWide);
+		this.gl.uniform1f(this.pointSpriteShader.uniform.invTexTilesHigh,this.invTexTilesHigh);
+		this.gl.uniform2f(this.pointSpriteShader.uniform.projectionVector,this.projection.x,this.projection.y);
+		this.gl.uniform2f(this.pointSpriteShader.uniform.flip,0,0);
+		this.gl.activeTexture(33984);
+		this.gl.bindTexture(3553,this.texture);
+		this.gl.drawArrays(0,0,this.indexRun);
+	}
+	,__class__: glaze_render_renderers_webgl_PointSpriteRenderer
 };
 var glaze_render_renderers_webgl_ShaderWrapper = function(gl,program) {
 	this.program = program;
@@ -10952,6 +11235,8 @@ exile_components_Player.NAME = "Player";
 exile_components_Player.ID = 33;
 exile_components_Projectile.NAME = "Projectile";
 exile_components_Projectile.ID = 36;
+exile_components_Rabbit.NAME = "Rabbit";
+exile_components_Rabbit.ID = 0;
 exile_components_Teleporter.NAME = "Teleporter";
 exile_components_Teleporter.ID = 32;
 exile_entities_creatures_FishFactory.fishMaterial = new glaze_physics_Material(0.1);
@@ -11024,7 +11309,7 @@ glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
 glaze_ai_steering_components_Steering.ID = 27;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 0;
+glaze_animation_components_SpriteAnimation.ID = 10;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -11043,7 +11328,7 @@ glaze_engine_components_CollidableSwitch.ID = 7;
 glaze_engine_components_Destroy.NAME = "Destroy";
 glaze_engine_components_Destroy.ID = 14;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 1;
+glaze_engine_components_Display.ID = 24;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
 glaze_engine_components_EnvironmentForce.ID = 6;
 glaze_engine_components_Extents.NAME = "Extents";
@@ -11082,6 +11367,7 @@ glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
 glaze_lighting_components_Light.ID = 19;
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
+glaze_particle_PointSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_physics_Body.SLEEP_BIAS = 0.99332805041467;
 glaze_physics_Body.SLEEP_EPSILON = 0.0009;
 glaze_physics_Body.WAKE_MOTION = 10;
@@ -11106,6 +11392,8 @@ glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
 glaze_physics_components_PhysicsConstraints.ID = 0;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
+glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform float texTilesWide;","uniform float texTilesHigh;","uniform float invTexTilesWide;","uniform float invTexTilesHigh;","uniform vec2 projectionVector;","uniform vec2 flip;","attribute vec2 position;","attribute float size;","attribute float tileType;","attribute vec4 colour;","varying vec2 vTilePos;","varying vec4 vColor;","void main() {","float t = floor(tileType/texTilesWide);","vTilePos = vec2(tileType-(t*texTilesWide), t);","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( position.x / projectionVector.x -1.0, position.y / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
+glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","uniform sampler2D texture;","uniform float invTexTilesWide;","uniform float invTexTilesHigh;","uniform vec2 flip;","varying vec2 vTilePos;","varying vec4 vColor;","void main() {","vec2 uv = vec2( ((-1.0+(2.0*flip.x))*(flip.x-gl_PointCoord.x))*invTexTilesWide + invTexTilesWide*vTilePos.x, ((-1.0+(2.0*flip.y))*(flip.y-gl_PointCoord.y))*invTexTilesHigh + invTexTilesHigh*vTilePos.y);","gl_FragColor = texture2D( texture, uv ) * vColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 vTextureCoord;","varying float vColor;","uniform sampler2D uSampler;","void main(void) {","gl_FragColor = texture2D(uSampler,vTextureCoord) * vColor;","}"];
 glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","attribute vec2 texture;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform vec2 viewOffset;","uniform vec2 viewportSize;","uniform vec2 inverseTileTextureSize;","uniform float inverseTileSize;","void main(void) {","   pixelCoord = (texture * viewportSize) + viewOffset;","   texCoord = pixelCoord * inverseTileTextureSize * inverseTileSize;","   gl_Position = vec4(position, 0.0, 1.0);","}"];

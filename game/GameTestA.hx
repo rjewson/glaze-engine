@@ -7,10 +7,11 @@ import exile.systems.BeeHiveSystem;
 import exile.systems.BeeSystem;
 import exile.systems.ChickenSystem;
 import exile.systems.DoorSystem;
-import exile.systems.GrenadeSystem;
-import exile.systems.MaggotSystem;
+import exile.systems.GrenadeSystem;  
+import exile.systems.MaggotSystem;  
 import exile.systems.PlayerSystem;
-import exile.systems.TeleporterSystem;
+import exile.systems.RabbitSystem;
+import exile.systems.TeleporterSystem;        
 import glaze.ai.navigation.AStar;
 import glaze.ai.steering.systems.SteeringSystem;
 import glaze.animation.components.SpriteAnimation;
@@ -46,6 +47,7 @@ import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.particle.BlockSpriteParticleEngine;
 import glaze.particle.emitter.Explosion;
+import glaze.particle.PointSpriteParticleEngine;
 import glaze.physics.Body;
 import glaze.physics.collision.broadphase.uniformgrid.UniformGrid;
 import glaze.physics.collision.Intersect;
@@ -94,6 +96,7 @@ class GameTestA extends GameEngine {
     var filterSupport:FilterSupport;
     var messageBus:MessageBus;
     var blockParticleEngine:BlockSpriteParticleEngine;
+    var spriteParticleEngine:PointSpriteParticleEngine;
 
     public var nf:Intersect;
     public var broadphase:glaze.physics.collision.broadphase.IBroadphase;
@@ -171,6 +174,10 @@ class GameTestA extends GameEngine {
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
  
+        spriteParticleEngine = new PointSpriteParticleEngine(4000,1000/60,collisionData);
+        renderSystem.renderer.AddRenderer(spriteParticleEngine.renderer);
+        spriteParticleEngine.renderer.SetSpriteSheet(renderSystem.textureManager.baseTextures.get(TEXTURE_DATA).texture,16,16,16);
+
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
@@ -224,6 +231,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new BeeSystem(broadphase));  
         var chickenSystem:ChickenSystem = new ChickenSystem(blockParticleEngine);
         aiphase.addSystem(chickenSystem); 
+        var rabbitSystem = new RabbitSystem();
+        aiphase.addSystem(rabbitSystem); 
         aiphase.addSystem(new MaggotSystem(broadphase,blockParticleEngine));                                              
         aiphase.addSystem(new GrenadeSystem(broadphase)); 
         aiphase.addSystem(new InventorySystem());                                                
@@ -261,6 +270,7 @@ class GameTestA extends GameEngine {
         ],"player"); 
 
         chickenSystem.scaredOfPosition = player.getComponent(Position);
+        rabbitSystem.scaredOfPosition = player.getComponent(Position);
 
         // var serializer = new haxe.Serializer();
         // serializer.serialize(new Position(0,0));
@@ -281,10 +291,11 @@ class GameTestA extends GameEngine {
 
         createTurret();    
         createWind();
-        createDoor();
-
+        createDoor(); 
+ 
         exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
         exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
+        exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
         exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
 
         loop.start();
@@ -484,6 +495,15 @@ class GameTestA extends GameEngine {
   
         }
     }
+    public function throwWabbits() {
+        for (i in 0 ... 10) {
+            var pos = player.getComponent(Position).clone();
+            var wabbit = exile.entities.creatures.RabbitFactory.create(engine,pos);
+            // var wabbit = exile.entities.creatures.MaggotFactory.create(engine,pos);
+            wabbit.getComponent(PhysicsBody).body.addForce(new Vector2(RandomInteger(-1000,1000),RandomInteger(-1000,100)));
+  
+        }
+    }
 
     public function destroyChickens() {
         var cs:ChickenSystem = cast engine.getSystem(ChickenSystem);
@@ -498,6 +518,9 @@ class GameTestA extends GameEngine {
     }
 
     override public function preUpdate() {
+
+        spriteParticleEngine.EmitParticle(100,100,glaze.util.Random.RandomFloat(-100,100),glaze.util.Random.RandomFloat(-100,100),0,0,2000,1,true,true,null,1,32,255,0,0);
+        spriteParticleEngine.Update(); 
         // trace(nf.collideCount);
         // nf.collideCount=0;
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
@@ -520,7 +543,7 @@ class GameTestA extends GameEngine {
         });
         Browser.document.getElementById("startbutton").addEventListener("click",function(event){
             game.loop.start();
-        });       
+        });        
         Browser.document.getElementById("debug1button").addEventListener("click",function(event){
             game.flyChickens();
         });        
@@ -536,6 +559,7 @@ class GameTestA extends GameEngine {
         });        
         Browser.document.getElementById("debug5button").addEventListener("click",function(event){
             // game.shakeIt = false;
+            game.throwWabbits();
         });        
         Browser.document.getElementById("entities").addEventListener("click",function(event){
             untyped Browser.window.writeResult(glaze.debug.DebugEngine.GetAllEntities());
