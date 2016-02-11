@@ -8,7 +8,7 @@ import glaze.particle.IParticleEngine;
 class ParticleEmitters implements IComponent {
 
     public var emitters:Array<IParticleEmitter>;
-    public var particleEngine:IParticleEngine;
+    //public var particleEngine:IParticleEngine;
 
     public function new(emitters) {
         this.emitters = emitters;

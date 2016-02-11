@@ -19,7 +19,7 @@ class FireballEmitter implements IParticleEmitter
         this.speed = 400;
     }
 
-    public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
+    public function update(time:Float, entity:Entity, engine:IParticleEngine,spriteEngine:IParticleEngine):Void {
         var position = entity.getComponent(Position).coords;
         var body = entity.getComponent(glaze.physics.components.PhysicsBody).body;
         for (i in 0 ... 5) {

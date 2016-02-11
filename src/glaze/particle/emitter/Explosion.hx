@@ -18,7 +18,7 @@ class Explosion implements IParticleEmitter
         this.power = power;
     }
 
-    public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
+    public function update(time:Float, entity:Entity, engine:IParticleEngine,spriteEngine:IParticleEngine):Void {
         var position = entity.getComponent(Position).coords;
         for (i in 0...mass) {
             var angle = Random.RandomFloat(0,Math.PI*2);

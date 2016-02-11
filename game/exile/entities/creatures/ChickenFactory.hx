@@ -33,6 +33,10 @@ class ChickenFactory {
 
 	public static function create(engine:Engine,position:Position):Entity {
 
+        var filter = new Filter();
+        filter.categoryBits |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
+        filter.maskBits |= exile.ExileFilters.PROJECTILE_CAT;
+
         var chickenBody = new Body(new Material());
         chickenBody.setMass(0.1);
         chickenBody.setBounces(3);     
@@ -44,7 +48,7 @@ class ChickenFactory {
             new Chicken(),
             new Extents((12/2)*2,(15/2)*2),
             new Display("chicken"), 
-            new PhysicsCollision(false,new Filter(),[]),
+            new PhysicsCollision(false,filter,[]),
             new PhysicsBody(chickenBody), 
             new Moveable(),
             new Holdable(),

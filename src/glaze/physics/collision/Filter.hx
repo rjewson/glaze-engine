@@ -12,7 +12,7 @@ class Filter
     //What category this filter is in
     public var categoryBits:Int = 0x0001;
     //What other categories it can collide with
-    public var maskBits:Int = 0xFFFF;
+    public var maskBits:Int = 0xFFFFFFFF;
 
     //e.g.
     //player.filter.categoryBits = 0x0002
@@ -25,7 +25,10 @@ class Filter
     //overever players wont collide with player or monsters with mosters
 
 
-    public function new() {   
+    public function new(categoryBits:Int = 0x1,maskBits:Int=0xFFFFFFFF,groupIndex:Int = 0x0) {   
+        this.categoryBits=categoryBits;
+        this.maskBits=maskBits;
+        this.groupIndex=groupIndex;
     }
 
     public static function CHECK(filterA:Filter,filterB:Filter):Bool {
@@ -48,5 +51,8 @@ class Filter
         // return true;
     }
 
+    public function clone():Filter {
+        return new Filter(this.categoryBits,this.maskBits,this.groupIndex);
+    }
 
 }

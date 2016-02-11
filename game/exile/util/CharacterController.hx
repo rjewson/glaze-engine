@@ -15,9 +15,9 @@ class CharacterController
 
     private var jumpUnit:Vector2 = new Vector2();
 
-    private static inline var WALK_FORCE:Float = 20;
+    private static inline var WALK_FORCE:Float = 2000;
     private static inline var AIR_CONTROL_FORCE:Float = 10;
-    private static inline var JUMP_FORCE:Float = 1000;
+    private static inline var JUMP_FORCE:Float = 70000;
 
     private static inline var MAX_AIR_HORIZONTAL_VELOCITY:Float = 500;
 
@@ -66,7 +66,7 @@ class CharacterController
         } else if (body.onGround) {
             if (left>0)     controlForce.x -= WALK_FORCE;
             if (right>0)    controlForce.x += WALK_FORCE;
-            if (up)         controlForce.y -= JUMP_FORCE/5;
+            if (up)         controlForce.y -= JUMP_FORCE;
         } else {
             if (left>0)     controlForce.x -= AIR_CONTROL_FORCE;
             if (right>0)    controlForce.x += AIR_CONTROL_FORCE;

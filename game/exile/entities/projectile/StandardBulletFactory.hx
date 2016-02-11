@@ -33,6 +33,9 @@ class StandardBulletFactory {
         bulletBody.globalForceFactor = 0.5;
         bulletBody.isBullet = true;
 
+        filter.categoryBits |= exile.ExileFilters.PROJECTILE_CAT;
+        filter.maskBits     |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
+
 /*
         var data = '
         {

@@ -31,8 +31,7 @@ class BlockSpriteParticleEngine implements IParticleEngine
             p.next = cachedParticles;
             cachedParticles = p;
         }
-        this.renderer = new PointSpriteLightMapRenderer();
-        this.renderer.ResizeBatch(particleCount);
+        this.renderer = new PointSpriteLightMapRenderer(particleCount);
     }
     
     public function EmitParticle(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decayable:Bool, top:Bool, externalForce:Vector2, data1:Int, data2:Int, data3:Int,data4:Int,data5:Int):Bool {

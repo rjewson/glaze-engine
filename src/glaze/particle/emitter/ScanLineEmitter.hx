@@ -24,7 +24,7 @@ class ScanLineEmitter implements IParticleEmitter
         this.lastTime = 0;
     }
 
-    public function update(time:Float, entity:Entity, engine:IParticleEngine):Void {
+    public function update(time:Float, entity:Entity, engine:IParticleEngine,spriteEngine:IParticleEngine):Void {
         if (time-lastTime<interval) 
             return;
         lastTime = time;

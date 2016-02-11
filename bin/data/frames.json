@@ -61,22 +61,22 @@
 
 	"player":{
 		"frames":[
-			{ "id":"w1",		"name":"player/player_00.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w2",		"name":"player/player_01.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w3",		"name":"player/player_02.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w4",		"name":"player/player_03.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w5",		"name":"player/player_04.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w6",		"name":"player/player_05.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w7",		"name":"player/player_06.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w8",		"name":"player/player_07.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w9",		"name":"player/player_08.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w10",		"name":"player/player_09.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w11",		"name":"player/player_10.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w12",		"name":"player/player_11.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w13",		"name":"player/player_12.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w14",		"name":"player/player_13.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w15",		"name":"player/player_14.png",		"scale":{"x":3,"y":3} },
-			{ "id":"w16",		"name":"player/player_15.png",		"scale":{"x":3,"y":3} }
+			{ "id":"w1",		"name":"player2/player_00.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w2",		"name":"player2/player_01.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w3",		"name":"player2/player_02.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w4",		"name":"player2/player_03.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w5",		"name":"player2/player_04.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w6",		"name":"player2/player_05.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w7",		"name":"player2/player_06.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w8",		"name":"player2/player_07.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w9",		"name":"player2/player_08.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w10",		"name":"player2/player_09.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w11",		"name":"player2/player_10.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w12",		"name":"player2/player_11.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w13",		"name":"player2/player_12.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w14",		"name":"player2/player_13.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w15",		"name":"player2/player_14.png",		"scale":{"x":3,"y":3} },
+			{ "id":"w16",		"name":"player2/player_15.png",		"scale":{"x":3,"y":3} }
 		],
 		"animations":{
 			"idle":		{ "frames":[0],					"fps":0,	"looped":false },
@@ -125,7 +125,7 @@
 		"animations":{
 			"idle":		{ "frames":[0],					"fps":0,	"looped":false },
 			"blink":	{ "frames":[0,7,0],				"fps":4,	"looped":false },
-			"jump":		{ "frames":[2,3,4,5,6,0],			"fps":4,	"looped":false },
+			"jump":		{ "frames":[1,2,3,4,5,0],			"fps":4,	"looped":false },
 			"eat":		{ "frames":[7,8,9,8,9,8,9,8,9],			"fps":4,	"looped":false },
 			"listen":	{ "frames":[10,11,12,13,14,13,14,13,14,13,14,13],	"fps":4,	"looped":false }
 		}

@@ -19,13 +19,16 @@ import glaze.util.Random.RandomFloat;
 
 class HoldableSystem extends System {
 
-    public function new() {
+    var holderFilterCategory:Int;
+
+    public function new(holderFilterCategory:Int) {
         super([PhysicsCollision,Extents,Holdable]);
+        this.holderFilterCategory = holderFilterCategory;
     }
 
     override public function entityAdded(entity:Entity) {
         var physicsCollision = entity.getComponent(PhysicsCollision);
-        physicsCollision.proxy.filter.categoryBits = 0x2;    
+        physicsCollision.proxy.filter.categoryBits |= holderFilterCategory;    
     }
 
     override public function entityRemoved(entity:Entity) {

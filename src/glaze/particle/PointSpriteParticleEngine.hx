@@ -3,7 +3,12 @@ package glaze.particle;
 import glaze.ds.Bytes2D;
 import glaze.geom.Vector2;
 import glaze.particle.PointSpriteParticle;
+import glaze.particle.SpriteParticleManager;
 import glaze.render.renderers.webgl.PointSpriteRenderer;
+
+/*
+ * Renders point sprites with textures
+ */
 
 class PointSpriteParticleEngine implements IParticleEngine
 {
@@ -18,11 +23,14 @@ class PointSpriteParticleEngine implements IParticleEngine
 
     public var map:Bytes2D;
 
-    public function new(particleCount:Int, deltaTime:Float,map:Bytes2D) 
+    public var spriteParticleManager:SpriteParticleManager;
+
+    public function new(particleCount:Int, deltaTime:Float,spriteParticleManager:SpriteParticleManager,map:Bytes2D) 
     {
         this.particleCount = particleCount;
         this.deltaTime = deltaTime;
         this.invDeltaTime = deltaTime / 1000;
+        this.spriteParticleManager = spriteParticleManager;
         this.map = map;
         ZERO_FORCE = new Vector2();
         for (i in 0...particleCount) {
@@ -30,14 +38,13 @@ class PointSpriteParticleEngine implements IParticleEngine
             p.next = cachedParticles;
             cachedParticles = p;
         }
-        this.renderer = new PointSpriteRenderer();
-        this.renderer.ResizeBatch(particleCount);
+        this.renderer = new PointSpriteRenderer(particleCount);
     }
     
     public function EmitParticle(x:Float, y:Float, vX:Float, vY:Float, fX:Float, fY:Float, ttl:Int, damping:Float, decayable:Bool, top:Bool, externalForce:Vector2, data1:Int, data2:Int, data3:Int,data4:Int,data5:Int):Bool {
         if (cachedParticles == null)
             return false;
-            
+        // js.Lib.debug();
         var particle = cachedParticles;
         cachedParticles = cachedParticles.next;
         
@@ -51,7 +58,7 @@ class PointSpriteParticleEngine implements IParticleEngine
             activeParticles = particle;
         }
         
-        particle.Initalize(x, y, vX, vY, fX, fY, ttl, damping, decayable ? deltaTime/ttl : 0, top, externalForce!=null?externalForce:ZERO_FORCE, data1, data2, data3, data4);
+        particle.Initalize(x, y, vX, vY, fX, fY, ttl, damping, 0, top, externalForce!=null?externalForce:ZERO_FORCE, spriteParticleManager.sequencesList[data1], data2, data3, data4,data5);
 
         return true;
     }
@@ -75,7 +82,10 @@ class PointSpriteParticleEngine implements IParticleEngine
                                 
                 particle = next;
             } else {
-                renderer.AddSpriteToBatch(Std.int(particle.type),particle.pX,particle.pY,particle.size,Std.int(particle.alpha*255),0xFF,0xFF,0xFF);
+                //spriteX:Float,spriteY:Float,dim:Float
+                var frame = particle.sequence.sequence[Std.int(Math.min(particle.currentFrame,particle.sequence.len-1))];
+                renderer.AddSpriteToBatch(frame.x,frame.y,frame.w,frame.h,particle.pX,particle.pY,particle.size,1,particle.flipX,particle.flipY,0);
+                // renderer.AddSpriteToBatch(Std.int(particle.type),particle.pX,particle.pY,particle.size,Std.int(particle.alpha*255),0xFF,0xFF,0xFF);
                 particle = particle.next;
             }
         }

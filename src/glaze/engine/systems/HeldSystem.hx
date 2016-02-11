@@ -69,7 +69,7 @@ class HeldSystem extends System {
 
             entity.getComponent(Position).coords.copy(holderPos);
             // entity.getComponent(PhysicsBody).body.position.copy(holderPos);
-            entity.getComponent(PhysicsBody).body.setPosition(holderPos.x,holderPos.y); //position.copy(holderPos);
+            entity.getComponent(PhysicsBody).body.setPosition(holderPos.x,holderPos.y-15); //position.copy(holderPos);
         }
 
     }

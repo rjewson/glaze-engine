@@ -14,17 +14,17 @@
  </tileset>
  <layer name="Collision" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt1kEKhDAQAEHd/z/aa1hYoiEufaiCOQU8TKPxPI7jNKkZzc6/zc6571ePp89gDz1aVnt8htFjnzv3A/8z63H3TmePcde7/s9Y97QH79KjRY8We27Ro2Wlh2/Ze+yyxfvRYpcterTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0aJHix4terTo0XKa3FyxEQHY
+   eJzt1jEKhEAQAEH3/v/oC0zkQFZFzw6qYKIVg2lcHMuyDJOardn5r9k5x+31OPsO7qFHy9Uen83sPX/mjmT1r93occxsN3ftT49jtrt585+O1dkePEuPFj1a7LlFj5YrPdxlz7HLFt9Hi1226NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR8swufkCe6sB9w==
   </data>
  </layer>
- <layer name="Background" width="100" height="100">
+ <layer name="Background" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
    eJzt1MEJACAMBMGkNO2/qGAFklcUZio4WLgIoGPn9AKAu+WrnnJ6aAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPCPAqZeAQo=
   </data>
  </layer>
  <layer name="Foreground1" width="100" height="100" opacity="0.84">
   <data encoding="base64" compression="zlib">
-   eJzt1kEKgzAQBdBcxYht0fvfT0EKJVRjocGBvAd/lSwGJpMkJSLLW8YiZ+bmFfUt/7hfP9qqzUNJP9p6XdizfGRoWw6E9Uz7+X/cXUiHhi+Z0v6+54P1d/i/XMl0X2ld0o9Yav248u8CiOToPgPMBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAARLYCpIsJ2Q==
+   eJzt1lEKwyAQBUCvEkvakt7/fi1IIUisSpEImYH3lSUIm10TAjOLn9yy/LINP9G1xc56/RirNg85/Rjr2VDz2mUp1CyVcJ78PuqdQZJHSN/y/c/36Ee/o52yhnS/x8Lzb7ZdanvKvmoTK1nPO9ol6cdcav1o+e8CmElpnwHmAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZvYGkBkOBw==
   </data>
  </layer>
  <layer name="Foreground2" width="100" height="100" visible="0">
@@ -33,7 +33,7 @@
   </data>
  </layer>
  <objectgroup name="Objects" visible="0"/>
- <objectgroup name="Waypoints">
+ <objectgroup name="Waypoints" visible="0">
   <object id="9" x="192" y="64">
    <polyline points="0,0 96,0 96,112 0,112 0,0"/>
   </object>

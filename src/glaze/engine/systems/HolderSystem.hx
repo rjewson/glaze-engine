@@ -20,14 +20,17 @@ import glaze.util.Random.RandomFloat;
 
 class HolderSystem extends System {
 
-    public function new() {
+    var holderFilterCategory:Int;
+
+    public function new(holderFilterCategory:Int) {
         super([PhysicsCollision,Extents,Holder,Active]);
+        this.holderFilterCategory = holderFilterCategory;
     }
 
     override public function entityAdded(entity:Entity) {
         var physicsCollision = entity.getComponent(PhysicsCollision);
         physicsCollision.proxy.contactCallbacks.push(callback);//setCallback(callback);
-        physicsCollision.proxy.filter.maskBits = physicsCollision.proxy.filter.maskBits | 0x2;
+        physicsCollision.proxy.filter.maskBits = physicsCollision.proxy.filter.maskBits | holderFilterCategory;
     }
 
     override public function entityRemoved(entity:Entity) {

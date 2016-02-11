@@ -115,6 +115,8 @@ class PlayerSystem extends System {
         position = entity.getComponent(Position);
         physicsBody = entity.getComponent(PhysicsBody);
 
+        physicsBody.body.setMass(100);
+
         characterController = new CharacterController(input,physicsBody.body);
 
         playerLight = engine.createEntity( 
@@ -154,7 +156,6 @@ class PlayerSystem extends System {
         characterController.update();
 
         if (characterController.isWalking) {
-            // animation.animationController.play(characterController.left>0 ? "runleft" : "runright");
             animation.animationController.play("runright");
         } else {
             animation.animationController.play("idle");
@@ -212,10 +213,9 @@ class PlayerSystem extends System {
 
         if (fire) {
             if (currentWeapon==0)
-                exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter,input.ViewCorrectedMousePosition());
+                exile.entities.projectile.StandardBulletFactory.create(engine,position.clone(),playerFilter.clone(),input.ViewCorrectedMousePosition());
             if (currentWeapon==1)
-                exile.entities.projectile.PlasmaProjectileFactory.create(engine,position.clone(),playerFilter,input.ViewCorrectedMousePosition());
-            // glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),2500);        
+                exile.entities.projectile.PlasmaProjectileFactory.create(engine,position.clone(),playerFilter.clone(),input.ViewCorrectedMousePosition());
 
         } 
         //'e' aim
@@ -223,7 +223,7 @@ class PlayerSystem extends System {
             var vel = input.ViewCorrectedMousePosition().clone();
             vel.minusEquals(position.coords);
             vel.normalize();
-            vel.multEquals(3000); 
+            vel.multEquals(2000); 
             particleEngine.EmitParticle(position.coords.x,position.coords.y,vel.x,vel.y,0,0,200,1,false,true,null,4,255,255,255,255);
         }
 
