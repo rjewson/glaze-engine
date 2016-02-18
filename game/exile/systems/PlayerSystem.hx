@@ -1,7 +1,7 @@
 package exile.systems;
 
 import exile.components.Player;
-import exile.util.CharacterController;
+import exile.util.CharacterController2;
 import glaze.animation.components.SpriteAnimation;
 import glaze.core.DigitalInput;
 import glaze.eco.core.Entity;
@@ -97,13 +97,13 @@ class PlayerSystem extends System {
 
     var animation:SpriteAnimation;
 
-    var characterController:CharacterController; 
+    var characterController:CharacterController2; 
 
     var playerFilter:Filter;
 
     var currentWeapon:Int = 0;
 
-    public function new(input:DigitalInput,particleEngine:IParticleEngine) {
+    public function new(input:DigitalInput,particleEngine:IParticleEngine,spriteParticleEngine:IParticleEngine) {
         super([Player,PhysicsCollision,PhysicsBody,SpriteAnimation,Extents]);
         this.input = input;
         this.particleEngine = particleEngine;
@@ -117,7 +117,7 @@ class PlayerSystem extends System {
 
         physicsBody.body.setMass(100);
 
-        characterController = new CharacterController(input,physicsBody.body);
+        characterController = new CharacterController2(input,physicsBody.body);
 
         playerLight = engine.createEntity( 
             [  
@@ -129,13 +129,13 @@ class PlayerSystem extends System {
             ],"player light");  
 
         holder = new Holder();
-        inventory = new Inventory(4);
+        inventory = new Inventory(4);         
 
         playerHolder = engine.createEntity([
             position,
             entity.getComponent(Extents),
             holder,
-            new PhysicsCollision(true,new Filter(),[]),
+            new PhysicsCollision(true,new Filter(1,0,exile.ExileFilters.PLAYER_GROUP),[]),
             new Moveable(),
             new Active(),
             inventory
@@ -155,8 +155,11 @@ class PlayerSystem extends System {
 
         characterController.update();
 
-        if (characterController.isWalking) {
+        // if (characterController.isWalking) {
+        if (physicsBody.body.onGround&&Math.abs(physicsBody.body.velocity.x)>10) {
             animation.animationController.play("runright");
+        } else if (!physicsBody.body.onGround) {
+            animation.animationController.play("fly");            
         } else {
             animation.animationController.play("idle");
         }
@@ -225,6 +228,18 @@ class PlayerSystem extends System {
             vel.normalize();
             vel.multEquals(2000); 
             particleEngine.EmitParticle(position.coords.x,position.coords.y,vel.x,vel.y,0,0,200,1,false,true,null,4,255,255,255,255);
+        }
+
+        if (characterController.burn>0) {
+            var ttl = 280;
+            var offsetx = position.coords.x-(6*position.direction.x);
+            var velocity =  200 + glaze.util.Random.RandomInteger(-150,150);// + physicsBody.body.velocity.y;
+            var count = Math.floor( (characterController.burn+500)/1000 );
+            if (count>0)
+                particleEngine.EmitParticle(offsetx,position.coords.y+6,glaze.util.Random.RandomFloat(-10,10),velocity,0,0,40,0.9,false,false,null,4,255,255,0,0);
+            for (i in 0 ... count) {
+                particleEngine.EmitParticle(offsetx,position.coords.y+6,glaze.util.Random.RandomFloat(-50,50),velocity,0,0,ttl,0.9,true,true,null,4,255,255,255,255);                
+            }
         }
 
         if (input.JustPressed(49))

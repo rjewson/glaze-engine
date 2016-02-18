@@ -35,7 +35,7 @@ class MaggotFactory {
 	public static function create(engine:Engine,position:Position):Entity {
 
         var maggotBody = new Body(new Material(1,0.5,0.7));
-        maggotBody.setMass(0.1);
+        maggotBody.setMass(0.5);
         maggotBody.setBounces(3);     
         maggotBody.maxScalarVelocity = 1000; 
         maggotBody.globalForceFactor = 1;

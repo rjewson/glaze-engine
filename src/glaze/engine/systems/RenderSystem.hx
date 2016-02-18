@@ -42,7 +42,7 @@ class RenderSystem extends System {
         stage = new Stage();
         camera = new Camera();
         
-        camera.worldExtentsAABB = new glaze.geom.AABB2( 0 , 4096 , 4096 , 0 );
+        camera.worldExtentsAABB = new glaze.geom.AABB2( 0 , 32*100 , 32*100 , 0 );
         camera.worldExtentsAABB.expand(64);
         // camera.worldExtentsAABB.expand(-16);
 

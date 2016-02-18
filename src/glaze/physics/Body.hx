@@ -63,9 +63,9 @@ class Body
 
     // public var sweep:AABB2 = new glaze.geom.AABB2();
 
-    public function new(material:Material = null) {
+    public function new(material:Material = null,mass:Float = 1) {
         this.material = material==null ? new Material() : material;
-        setMass(1);
+        setMass(mass);
     }
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {

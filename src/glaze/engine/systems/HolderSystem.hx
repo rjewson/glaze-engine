@@ -30,7 +30,7 @@ class HolderSystem extends System {
     override public function entityAdded(entity:Entity) {
         var physicsCollision = entity.getComponent(PhysicsCollision);
         physicsCollision.proxy.contactCallbacks.push(callback);//setCallback(callback);
-        physicsCollision.proxy.filter.maskBits = physicsCollision.proxy.filter.maskBits | holderFilterCategory;
+        physicsCollision.proxy.filter.maskBits |= holderFilterCategory;
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -42,6 +42,7 @@ class HolderSystem extends System {
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {   
         var holder = a.entity.getComponent(Holder);
         if (holder.activate==true) {
+            trace("hhhold");
             holder.hold(b.entity,a.entity);
             // trace("hollld");
             // var holdable = b.entity.getComponent(Holdable);

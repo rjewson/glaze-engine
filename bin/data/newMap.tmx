@@ -14,7 +14,7 @@
  </tileset>
  <layer name="Collision" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt1jEKhEAQAEH3/v/oC0zkQFZFzw6qYKIVg2lcHMuyDJOardn5r9k5x+31OPsO7qFHy9Uen83sPX/mjmT1r93occxsN3ftT49jtrt585+O1dkePEuPFj1a7LlFj5YrPdxlz7HLFt9Hi1226NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR4seLXq06NGiR8swufkCe6sB9w==
+   eJzt2MGKwjAAANHW///oPXgRMdSUoOP2PcjFNpZ0SED3bdt2IzUeHV1/dnSd9416zH4Ha+jRcrbH7WGM7p85I0dzruZT657pMZpzBUdrXfU+zvQ4mv+fxzfWPHrvq/zivprtsfK5M59fhR4terR864x99cxfPO9Xq/W4ujM9Vpxlerxmf7TYHy32R4seLXq06NFS6eG34F2pB3rU6NGiR4seLXq06NGiR4seLZUe3OnRokeL//Fa9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjZjdz4AxrKAm8=
   </data>
  </layer>
  <layer name="Background" width="100" height="100" visible="0">
@@ -24,7 +24,7 @@
  </layer>
  <layer name="Foreground1" width="100" height="100" opacity="0.84">
   <data encoding="base64" compression="zlib">
-   eJzt1lEKwyAQBUCvEkvakt7/fi1IIUisSpEImYH3lSUIm10TAjOLn9yy/LINP9G1xc56/RirNg85/Rjr2VDz2mUp1CyVcJ78PuqdQZJHSN/y/c/36Ee/o52yhnS/x8Lzb7ZdanvKvmoTK1nPO9ol6cdcav1o+e8CmElpnwHmAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZvYGkBkOBw==
+   eJzt2OGKgkAYhlFvJZe2Xbv/+yuIwB3UMWu2FzsHvh+Bac3DaNR1JOuv81XMkqH5J/ps/YPH69FWbT+U9GjrZ8Ux59EcZo45VGbNe2ijfB7N7cHf4rU2f52621p8P3merT3GavttD1P7vsfu9nzvK+cZRrPl2ndLPVpI3nd9ZY4vvNbcuv93j2R6ZKn1WPO7ay09skyte/K9fO+metgb28zdzx6hRxY9Xsf+2B89suiRRY8semSZ+l+d9yl72BvvpUcWPbLokUWPLHpk0SOLHln0yGL9s+iRRQ8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4JNdAKKJHlo=
   </data>
  </layer>
  <layer name="Foreground2" width="100" height="100" visible="0">

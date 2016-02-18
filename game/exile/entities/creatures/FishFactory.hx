@@ -31,7 +31,7 @@ class FishFactory {
             new Display("fish2"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
-            new PhysicsBody(Body.Create(fishMaterial,0.01,0,1,100)),
+            new PhysicsBody(Body.Create(fishMaterial,0.5,0,1,100)),
             new Holdable(),
             new Active(),
             new SpriteAnimation("fish2",["swim"],"swim"),

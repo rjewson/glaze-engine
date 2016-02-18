@@ -10,6 +10,8 @@ import glaze.physics.collision.Ray;
 
 class BroadphaseAreaQuery {
 
+	public static inline var RAYCAST_THRESHOLD:Float = 10;
+
 	var broadphase:IBroadphase;
 	var ray:Ray;
 	public var entityCollection:EntityCollection;
@@ -41,7 +43,9 @@ class BroadphaseAreaQuery {
         if (filterEntity!=null&&bfproxy.entity==filterEntity)
             return;
 		
-		if (visibleCheck) {
+        var distance = bfproxy.aabb.position.distSqrd(aabb.position);
+
+		if (distance>RAYCAST_THRESHOLD && visibleCheck) {
 			ray.initalize(aabb.position,bfproxy.entity.getComponent(Position).coords,0,null);
 			//js.Lib.debug();
 			broadphase.CastRay(ray,null,false,false); //Dont check ray against static and dynamic items
@@ -50,7 +54,7 @@ class BroadphaseAreaQuery {
        }
 
         var item = entityCollection.addItem(bfproxy.entity);
-        item.distance = bfproxy.aabb.position.distSqrd(aabb.position);
+        item.distance = distance;
         item.perspective = aabb.position;
     }
 

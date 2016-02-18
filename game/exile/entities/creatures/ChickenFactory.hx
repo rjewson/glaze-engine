@@ -29,16 +29,16 @@ import glaze.render.frame.FrameList;
 class ChickenFactory {
 
 	public function new() {
-	} 
+	}   
 
 	public static function create(engine:Engine,position:Position):Entity {
-
+ 
         var filter = new Filter();
-        filter.categoryBits |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
-        filter.maskBits |= exile.ExileFilters.PROJECTILE_CAT;
+        // filter.categoryBits |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
+        // filter.maskBits |= exile.ExileFilters.PROJECTILE_CAT;
 
         var chickenBody = new Body(new Material());
-        chickenBody.setMass(0.1);
+        chickenBody.setMass(3);
         chickenBody.setBounces(3);     
         chickenBody.maxScalarVelocity = 1000; 
         chickenBody.globalForceFactor = 0.5;

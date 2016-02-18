@@ -1,5 +1,5 @@
 package;
-
+ 
 import exile.components.Door;
 import exile.components.Player;
 import exile.components.Teleporter;
@@ -153,10 +153,10 @@ class GameTestA extends GameEngine {
         tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
         tmxMap.tilesets[3].set_image(assets.assets.get(TILE_SPRITE_SHEET_B));
                        
-        var corephase = engine.createPhase(); 
         var aiphase = engine.createPhase();//1000/30);  
         var physicsPhase = engine.createPhase();//1000/60);    
-         
+        var corephase = engine.createPhase(); 
+          
         messageBus = new MessageBus();  
          
         renderSystem = new RenderSystem(canvas);
@@ -265,7 +265,7 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new InventorySystem());                                                
 
         corephase.addSystem(new DestroySystem());
-        corephase.addSystem(new PlayerSystem(input,blockParticleEngine));
+        corephase.addSystem(new PlayerSystem(input,blockParticleEngine,spriteParticleEngine));
         corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine,spriteParticleEngine));
@@ -284,14 +284,14 @@ class GameTestA extends GameEngine {
 
         var body = new glaze.physics.Body(new Material(1,0.3,0.1));
         body.maxScalarVelocity = 0;
-        body.maxVelocity.setTo(160,1000);
-    
+        body.maxVelocity.setTo(1600,1000);
+
         player = engine.createEntity([
             new Player(),
             new Position(300,180), 
-            new Extents((10*2)/2,(14*3)/2),
+            new Extents(12,24),
             new Display("player"),        
-            new SpriteAnimation("player",["idle","scratch","shrug","runleft","runright"],"idle"),
+            new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
             new PhysicsBody(body),
             new PhysicsCollision(false,playerFilter,[]),
             new Moveable(),
@@ -406,7 +406,7 @@ class GameTestA extends GameEngine {
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
-            new PhysicsBody(new Body()),
+            new PhysicsBody(new Body(null,30)),
             new Holdable(),
             new Active()
         ],"rock"); 

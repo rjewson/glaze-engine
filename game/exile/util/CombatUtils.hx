@@ -22,21 +22,28 @@ class CombatUtils {
 	}
 
 	public static function explode(position:Vector2,radius:Float,power:Float,ignoreEntity:Entity) {
-	    CombatUtils.bfAreaQuery.query(position,64,ignoreEntity,true);
+	    CombatUtils.bfAreaQuery.query(position,radius,ignoreEntity,true);
 	    var item = bfAreaQuery.entityCollection.entities.head;
         while (item!=null) {
+            
             var health = item.entity.getComponent(Health);
-            if (health!=null) {
-                health.applyDamage(power);
-            }
             var body = item.entity.getComponent(PhysicsBody);
-            if (body!=null) {
-                var delta = body.body.position.clone();
-                delta.minusEquals(position);
-                delta.normalize();
-                delta.multEquals(100);
-                body.body.addForce(delta);
+
+            if (health!=null || body!=null) {
+                var effect = (radius/Math.sqrt(item.distance))*power;
+                if (health!=null) {
+                    health.applyDamage(effect);
+                }
+                
+                if (body!=null) {
+                    var delta = body.body.position.clone();
+                    delta.minusEquals(position);
+                    delta.normalize();
+                    delta.multEquals(effect);
+                    body.body.addForce(delta);
+                }               
             }
+
             item = item.next;
         }
 	}
