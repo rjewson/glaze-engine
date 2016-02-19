@@ -211,12 +211,12 @@ class Body
 
     }
 
-    public function addForce(f:Vector2) {
+    inline public function addForce(f:Vector2) {
         forces.plusMultEquals(f,invMass);
         wake();
     }
 
-    public function addMasslessForce(f:Vector2) {
+    inline public function addMasslessForce(f:Vector2) {
         forces.plusEquals(f);
         wake();
     }
@@ -228,7 +228,6 @@ class Body
 
     public function setPosition(x:Float,y:Float) {
         position.setTo(x,y);
-        // js.Lib.debug();
         wake();
     }
 

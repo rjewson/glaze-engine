@@ -11,6 +11,7 @@ import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.Position;
 import glaze.engine.components.State;
+import glaze.engine.components.Storeable;
 import glaze.physics.Body;
 import glaze.physics.Material;
 import glaze.physics.collision.Filter;
@@ -34,6 +35,7 @@ class HandGrenadeFactory {
             new Moveable(),
             new PhysicsBody(body),
             new Holdable(),
+            new Storeable(),
             new Grenade(),
             new Health(100,100,0),
             new State(['off','on'],0,[]),

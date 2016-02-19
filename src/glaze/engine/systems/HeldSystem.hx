@@ -42,7 +42,7 @@ class HeldSystem extends System {
         if (entity.getComponent(Storeable)==null) {
             var holderBody = holder.parent.getComponent(PhysicsBody).body;
             if (holderBody!=null) {
-                holderBody.setMass(holderBody.mass+2);
+                holderBody.setMass(holderBody.mass+body.mass);
             }
         }
     }
@@ -56,7 +56,7 @@ class HeldSystem extends System {
         if (entity.getComponent(Storeable)==null) {
             var holderBody = holder.parent.getComponent(PhysicsBody).body;
             if (holderBody!=null) {
-                holderBody.setMass(holderBody.mass-2);
+                holderBody.setMass(holderBody.mass-body.mass);
             }
         }
 

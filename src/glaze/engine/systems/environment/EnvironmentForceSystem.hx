@@ -20,6 +20,8 @@ class EnvironmentForceSystem extends System {
 
     public var particleEngine:IParticleEngine;
 
+    public var temp:Vector2 = new Vector2();
+
     public function new() {
         super([PhysicsCollision,Extents,EnvironmentForce,Active]);
     }

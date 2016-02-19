@@ -50,7 +50,7 @@ class BeeFactory {
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(100,10)]),
-            new glaze.animation.components.SpriteAnimation("insects",["beefly"],"beefly"),
+            new glaze.animation.components.SpriteAnimation("insects",["firefly"],"firefly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
                 new Wander()

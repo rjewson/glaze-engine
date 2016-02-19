@@ -22,7 +22,7 @@ class WindRenderSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         var extents = entity.getComponent(Extents);
-        var units = ((extents.halfWidths.x*extents.halfWidths.y) * 4) / (32*32);
+        var units = ((extents.halfWidths.x*extents.halfWidths.y) * 4) / (glaze.EngineConstants.TILE_SIZE*glaze.EngineConstants.TILE_SIZE);
         var wind = entity.getComponent(Wind);
         wind.incPerFrame = wind.particlePerUnitPerFrame*units;
     }
@@ -39,7 +39,7 @@ class WindRenderSystem extends System {
             while (wind.particleCount>1) {
                 particleEngine.EmitParticle(
                     RandomFloat(proxy.aabb.l,proxy.aabb.r),RandomFloat(proxy.aabb.t,proxy.aabb.b),
-                    envForce.x*10,envForce.y*10,
+                    envForce.x/10,envForce.y/10,
                     0,1,300,1,true,true,null,4,255,255,255,255);
 
                 //particleEngine.EmitParticle(RandomFloat(proxy.aabb.l,proxy.aabb.r),RandomFloat(proxy.aabb.t,proxy.aabb.b),RandomFloat(-20,20),RandomFloat(-20,20),0,1,1000,1,true,true,null,4,255,255,255,255);

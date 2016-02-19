@@ -14,5 +14,14 @@ class Ballistics {
         body.maxScalarVelocity = velocity;
         body.velocity.setTo(vel.x,vel.y);
 	}
+	
+	public static function calcProjectileForce(body:Body,target:Vector2,force:Float) {
+ 		var newforce = target.clone();
+        newforce.minusEquals(body.position);
+        newforce.normalize();
+        newforce.multEquals(force); 
+        // body.maxScalarVelocity = velocity;
+        body.addForce(newforce);
+	}
 
 }

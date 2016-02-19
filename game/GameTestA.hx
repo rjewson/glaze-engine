@@ -32,6 +32,7 @@ import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
 import glaze.engine.components.State;
+import glaze.engine.components.Storeable;
 import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
 import glaze.engine.factories.TMXFactory;
@@ -113,6 +114,8 @@ class GameTestA extends GameEngine {
     public var shakeIt:Float = 0;
  
     public var door:Entity;    
+
+    public var TS:Int = glaze.EngineConstants.TILE_SIZE;
    
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
@@ -146,20 +149,23 @@ class GameTestA extends GameEngine {
    
         engine.config.tileSize = 16;
 
-        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA));
+        tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
 
         tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
         tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
         tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
         tmxMap.tilesets[3].set_image(assets.assets.get(TILE_SPRITE_SHEET_B));
-                       
+                        
         var aiphase = engine.createPhase();//1000/30);  
         var physicsPhase = engine.createPhase();//1000/60);    
         var corephase = engine.createPhase(); 
           
         messageBus = new MessageBus();  
-         
-        renderSystem = new RenderSystem(canvas);
+        
+        var cameraRange = new glaze.geom.AABB2( 0 , TS*tmxMap.width , TS*tmxMap.height , 0 );
+        cameraRange.expand(-glaze.EngineConstants.TILE_SIZE*2);
+
+        renderSystem = new RenderSystem(canvas,cameraRange);
         
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.AddTexture(PARTICLE_TEXTURE_DATA, assets.assets.get(PARTICLE_TEXTURE_DATA) );
@@ -175,7 +181,7 @@ class GameTestA extends GameEngine {
         var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
         var foreground2 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground2"));
       
-        var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"));
+        var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"),glaze.EngineConstants.TILE_SIZE);
         
         var tileMap = new TileMap();     
         renderSystem.renderer.AddRenderer(tileMap);    
@@ -187,7 +193,7 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
         // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
-        tileMap.tileSize = 16 ;                 
+        tileMap.tileSize = Std.int(glaze.EngineConstants.TILE_SIZE/2);                 
         tileMap.TileScale(2);             
       
         var spriteRender = new SpriteRenderer(); 
@@ -312,10 +318,10 @@ class GameTestA extends GameEngine {
         createWind();
         createDoor(); 
  
-        exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
-        exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
-        exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
-        exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
+        // exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
+        // exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
+        // exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
+        // exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
 
         loop.start();
     } 
@@ -324,25 +330,24 @@ class GameTestA extends GameEngine {
     } 
   
     function mapPosition(xTiles:Float,yTiles:Float):Position {
-        return new Position(xTiles*32,yTiles*32);
+        return new Position(xTiles*TS,yTiles*TS);
     }
 
     public function createWind() { 
 
 
         engine.createEntity([
-            // new Position(32+16,512+16),  
             mapPosition(1.5,14.5),
             new Extents(16,256), 
             new PhysicsCollision(true,null,[]),
             new Fixed(),
-            new EnvironmentForce(new Vector2(0,-40)),
+            new EnvironmentForce(new Vector2(0,-1600)), 
             new Wind(1/100),
             new Active()
         ],"wind");         
 
         engine.createEntity([
-                new Position((32*39)+16,(32*27)+16),  
+                mapPosition(39.5,27.5),
                 new Extents(6*32,1.5*32), 
                 new PhysicsCollision(true,null,[]),
                 new Fixed(),
@@ -356,7 +361,7 @@ class GameTestA extends GameEngine {
     public function createDoor() {
 
         door = engine.createEntity([
-            new Position(32*4.5,(32*6)+4),  
+            mapPosition(4.5,6.125),
             new Extents(3,34),
             new Display("door"),
             new PhysicsCollision(false,null,[]),
@@ -365,9 +370,10 @@ class GameTestA extends GameEngine {
             new State(['closed','open'],0,["doorA"]),
             new Active()
         ],"door");        
-
+ 
         var doorSwitch = engine.createEntity([
-            new Position((5*32)+8,(2*32)+10),  
+            mapPosition(5.25,2.5),
+            // new Position((5*32)+8,(2*32)+10),  
             new Display("switch"), 
             new Extents(8,8),
             new PhysicsCollision(false,null,[]),
@@ -405,27 +411,39 @@ class GameTestA extends GameEngine {
             new Extents(4,4),
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
-            new Moveable(),
-            new PhysicsBody(new Body(null,30)),
+            new Moveable(), 
+            new PhysicsBody(new Body(null,20)),
             new Holdable(),
             new Active()
-        ],"rock"); 
-
+        ],"rock");         
 
         engine.createEntity([
-            new Position(9*32,6*32),  
-            new Extents(8,5),
-            new Display("blob"), 
+            mapPosition(40,4),
+            new Extents(5,2.5),
+            new Display("items","blaster"), 
             new PhysicsCollision(false,new Filter(),[]),
-            new Moveable(),
-            new PhysicsBody(Body.Create(null,0.1,0,1,100)),
+            new Moveable(), 
+            new PhysicsBody(new Body(null,1)),
             new Holdable(),
-            new Active(),
-            new SpriteAnimation("blob",["blob"],"blob"),
-            new glaze.ai.steering.components.Steering([
-                new glaze.ai.steering.behaviors.Wander(4,1,4)
-            ])
-        ],"blob"); 
+            new Storeable("blaster",1),
+            new Active()
+        ],"blaster"); 
+
+
+        // engine.createEntity([
+        //     new Position(9*32,6*32),  
+        //     new Extents(8,5),
+        //     new Display("blob"), 
+        //     new PhysicsCollision(false,new Filter(),[]),
+        //     new Moveable(),
+        //     new PhysicsBody(Body.Create(null,0.1,0,1,100)),
+        //     new Holdable(),
+        //     new Active(),
+        //     new SpriteAnimation("blob",["blob"],"blob"),
+        //     new glaze.ai.steering.components.Steering([
+        //         new glaze.ai.steering.behaviors.Wander(4,1,4)
+        //     ])
+        // ],"blob"); 
 
         engine.createEntity([
             new Position(3.5*32,1.5*32),  
@@ -482,7 +500,7 @@ class GameTestA extends GameEngine {
             new PhysicsCollision(false,filter,[]),
             new Fixed(),
             new Script(behavior), 
-            new Active()
+            new Active()  
         ],"turret");        
         turret.getComponent(Display).displayObject.rotation=Math.PI;
     }

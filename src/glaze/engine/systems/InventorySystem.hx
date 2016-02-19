@@ -5,6 +5,7 @@ import glaze.eco.core.System;
 import glaze.engine.components.Active;
 import glaze.engine.components.Holder;
 import glaze.engine.components.Inventory;
+import glaze.engine.components.Storeable;
 
 class InventorySystem extends System {
 
@@ -48,12 +49,24 @@ class InventorySystem extends System {
         var entity = findEntity(inventory);
         if (entity!=null) {
             var holder = entity.getComponent(Holder);
-            if (holder.heldItem!=null && !inventory.slots.isFull()) {
-                var item = holder.drop();
-                item.removeComponent(item.getComponent(Active));
-                inventory.slots.enqueue(item);
-                trace(inventory.toString());
-            }            
+
+            if (holder.heldItem!=null) {
+                var storeable = holder.heldItem.getComponent(Storeable);
+                if (storeable!=null) {
+                    if (storeable.permanentType!=null) {
+                        var item = holder.drop();
+                        inventory.storePerm(storeable.permanentType,storeable.permanentValue);
+                        item.destroy();
+                        // engine.destroyEntity(item);
+                    } else if (!inventory.slots.isFull()) {
+                        var item = holder.drop();
+                        item.removeComponent(item.getComponent(Active));
+                        inventory.slots.enqueue(item);
+                        trace(inventory.toString());
+                    }  
+                }          
+            }
+            // if (holder.heldItem!=null && !
         } 
     }
 

@@ -115,7 +115,7 @@ class PlayerSystem extends System {
         position = entity.getComponent(Position);
         physicsBody = entity.getComponent(PhysicsBody);
 
-        physicsBody.body.setMass(100);
+        physicsBody.body.setMass(50);
 
         characterController = new CharacterController2(input,physicsBody.body);
 
@@ -207,6 +207,8 @@ class PlayerSystem extends System {
         }
 
         if (input.JustPressed(90)) {
+            js.Lib.debug();
+            
             inventory.store();
         }        
 

@@ -22,14 +22,14 @@
    eJzt1MEJACAMBMGkNO2/qGAFklcUZio4WLgIoGPn9AKAu+WrnnJ6aAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPCPAqZeAQo=
   </data>
  </layer>
- <layer name="Foreground1" width="100" height="100" opacity="0.84">
+ <layer name="Foreground1" width="100" height="100" visible="0" opacity="0.84">
   <data encoding="base64" compression="zlib">
    eJzt2OGKgkAYhlFvJZe2Xbv/+yuIwB3UMWu2FzsHvh+Bac3DaNR1JOuv81XMkqH5J/ps/YPH69FWbT+U9GjrZ8Ux59EcZo45VGbNe2ijfB7N7cHf4rU2f52621p8P3merT3GavttD1P7vsfu9nzvK+cZRrPl2ndLPVpI3nd9ZY4vvNbcuv93j2R6ZKn1WPO7ay09skyte/K9fO+metgb28zdzx6hRxY9Xsf+2B89suiRRY8semSZ+l+d9yl72BvvpUcWPbLokUWPLHpk0SOLHln0yGL9s+iRRQ8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4JNdAKKJHlo=
   </data>
  </layer>
- <layer name="Foreground2" width="100" height="100" visible="0">
+ <layer name="Foreground2" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt0bENACAMBLHPKGT/IemhRkKKXV57CQAAr61Kuu7GH843AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAbBuGwQCL
+   eJzt07ENACAMA0FnFGD/HemhjpTirvzWcgIAQLdVya6/McO7DdDr+BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMNwFdcwArw==
   </data>
  </layer>
  <objectgroup name="Objects" visible="0"/>

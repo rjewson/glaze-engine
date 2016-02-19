@@ -32,18 +32,19 @@ class RenderSystem extends System {
 
     var cameraTarget:Vector2;
 
-    public function new(canvas:CanvasElement) {
+    public function new(canvas:CanvasElement,cameraRange:glaze.geom.AABB2) {
         super([Position,Display,Active]);
         this.canvas = canvas;
+        stage = new Stage();
+        camera = new Camera();
+        camera.worldExtentsAABB = cameraRange;
         initalizeWebGlRenderer();
     } 
  
     function initalizeWebGlRenderer() {
-        stage = new Stage();
-        camera = new Camera();
+
         
-        camera.worldExtentsAABB = new glaze.geom.AABB2( 0 , 32*100 , 32*100 , 0 );
-        camera.worldExtentsAABB.expand(64);
+
         // camera.worldExtentsAABB.expand(-16);
 
         stage.addChild(camera);
