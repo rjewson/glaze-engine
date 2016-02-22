@@ -77,7 +77,7 @@ import js.html.CanvasElement;
 
 class GameTestA extends GameEngine {
      
-    public static inline var MAP_DATA:String = "data/newMap.tmx";
+    public static inline var MAP_DATA:String = "data/16map.tmx";
 
     public static inline var TEXTURE_CONFIG:String = "data/sprites.json";
     public static inline var TEXTURE_DATA:String = "data/sprites.png";
@@ -88,10 +88,12 @@ class GameTestA extends GameEngine {
     public static inline var PARTICLE_FRAMES_CONFIG:String = "data/particleFrames.json";
 
 
-    public static inline var COL_SPRITE_SHEET:String = "data/collisionTiles.png";
-    public static inline var TILE_SPRITE_SHEET_1:String = "data/set1.png";
-    public static inline var TILE_SPRITE_SHEET_2:String = "data/set2.png";
-    public static inline var TILE_SPRITE_SHEET_B:String = "data/setB.png";
+    // public static inline var COL_SPRITE_SHEET:String = "data/superSet.png";
+    // public static inline var TILE_SPRITE_SHEET_1:String = "data/superSet.png";
+    // public static inline var TILE_SPRITE_SHEET_2:String = "data/superSet.png";
+    // public static inline var TILE_SPRITE_SHEET_B:String = "data/superSet.png";  
+
+    public static inline var TILE_SPRITE_SHEET:String = "data/superSet.png";  
 
     // public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
     // public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
@@ -126,10 +128,11 @@ class GameTestA extends GameEngine {
             PARTICLE_TEXTURE_CONFIG,
             PARTICLE_TEXTURE_DATA,
             PARTICLE_FRAMES_CONFIG,
-            TILE_SPRITE_SHEET_1,
-            TILE_SPRITE_SHEET_2,
-            TILE_SPRITE_SHEET_B,
-            COL_SPRITE_SHEET,
+            TILE_SPRITE_SHEET,
+            // TILE_SPRITE_SHEET_1,
+            // TILE_SPRITE_SHEET_2,
+            // TILE_SPRITE_SHEET_B,
+            // COL_SPRITE_SHEET,
             FRAMES_CONFIG
         ]);
     }
@@ -144,22 +147,23 @@ class GameTestA extends GameEngine {
         // for (i in 0...32) { 
         //     bs.set(i);
         //     trace(bs.toString());
-        //     trace(bs.containsAll(mustHave));     
+        //     trace(bs.containsAll(mustHave));        
         // } 
    
         engine.config.tileSize = 16;
 
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
+   
 
-        tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
-        tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
-        tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
-        tmxMap.tilesets[3].set_image(assets.assets.get(TILE_SPRITE_SHEET_B));
+        // tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
+        // tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
+        // tmxMap.tilesets[2].set_image(assets.assets.get(TILE_SPRITE_SHEET_2));
+        // tmxMap.tilesets[3].set_image(assets.assets.get(TILE_SPRITE_SHEET_B));
                         
         var aiphase = engine.createPhase();//1000/30);  
-        var physicsPhase = engine.createPhase();//1000/60);    
         var corephase = engine.createPhase(); 
-          
+        var physicsPhase = engine.createPhase();//1000/60);    
+              
         messageBus = new MessageBus();  
         
         var cameraRange = new glaze.geom.AABB2( 0 , TS*tmxMap.width , TS*tmxMap.height , 0 );
@@ -169,10 +173,11 @@ class GameTestA extends GameEngine {
         
         renderSystem.textureManager.AddTexture(TEXTURE_DATA, assets.assets.get(TEXTURE_DATA) );
         renderSystem.textureManager.AddTexture(PARTICLE_TEXTURE_DATA, assets.assets.get(PARTICLE_TEXTURE_DATA) );
-        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
-        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_2, assets.assets.get(TILE_SPRITE_SHEET_2) );
-        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_B, assets.assets.get(TILE_SPRITE_SHEET_B) );
-
+        // renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
+        // renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
+        // renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_2, assets.assets.get(TILE_SPRITE_SHEET_2) );
+        renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET, assets.assets.get(TILE_SPRITE_SHEET) );
+    
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
     
@@ -187,9 +192,9 @@ class GameTestA extends GameEngine {
         renderSystem.renderer.AddRenderer(tileMap);    
         // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
   
-        tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_2),"f2",1,1); 
-        tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_1),"f1",1,1);
-        tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET_B),"bg",1,1);
+        tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f2",1,1); 
+        tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f1",1,1);
+        tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"bg",1,1);
         // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
         // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
@@ -232,18 +237,18 @@ class GameTestA extends GameEngine {
         physicsPhase.addSystem(new PhysicsPositionSystem());
         physicsPhase.addSystem(new ContactRouterSystem());
 
-        physicsPhase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
+        corephase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
 
-        physicsPhase.addSystem(new glaze.engine.systems.environment.EnvironmentForceSystem());
-        physicsPhase.addSystem(new glaze.engine.systems.environment.WindRenderSystem(blockParticleEngine));
+        corephase.addSystem(new glaze.engine.systems.environment.EnvironmentForceSystem());
+        corephase.addSystem(new glaze.engine.systems.environment.WindRenderSystem(blockParticleEngine));
 
-        physicsPhase.addSystem(new glaze.engine.systems.HolderSystem(exile.ExileFilters.HOLDABLE_CAT));
-        physicsPhase.addSystem(new glaze.engine.systems.HeldSystem());
-        physicsPhase.addSystem(new glaze.engine.systems.HoldableSystem(exile.ExileFilters.HOLDABLE_CAT));
-        physicsPhase.addSystem(new glaze.engine.systems.HealthSystem());
-        physicsPhase.addSystem(new glaze.engine.systems.AgeSystem());
+        corephase.addSystem(new glaze.engine.systems.HolderSystem(exile.ExileFilters.HOLDABLE_CAT));
+        corephase.addSystem(new glaze.engine.systems.HeldSystem());
+        corephase.addSystem(new glaze.engine.systems.HoldableSystem(exile.ExileFilters.HOLDABLE_CAT));
+        corephase.addSystem(new glaze.engine.systems.HealthSystem());
+        corephase.addSystem(new glaze.engine.systems.AgeSystem());
                 
-        physicsPhase.addSystem(new exile.systems.ProjectileSystem());
+        corephase.addSystem(new exile.systems.ProjectileSystem());
                     
         /*       
          * Lighting RnD 
@@ -295,7 +300,7 @@ class GameTestA extends GameEngine {
         player = engine.createEntity([
             new Player(),
             new Position(300,180), 
-            new Extents(12,24),
+            new Extents(7,23),
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
             new PhysicsBody(body),
@@ -383,7 +388,8 @@ class GameTestA extends GameEngine {
         ],"turret");        
          
         engine.createEntity([
-            new Position((32*24)+16,(32*6)),  
+            mapPosition(24.5,6),
+            // new Position((32*24)+16,(32*6)),  
             new Extents(16,32),
             new PhysicsCollision(true,null,[]),
             new Fixed(),
@@ -394,7 +400,8 @@ class GameTestA extends GameEngine {
             ],"teleporter") ;
  
         engine.createEntity([ 
-            new Position(18.5*32,2.5*32),  
+            mapPosition(18.5,2.5),
+            // new Position(18.5*32,2.5*32),  
             new Extents(16,16),
             new Display("insects","hive"), 
             new PhysicsCollision(false,null,[]),
@@ -407,7 +414,8 @@ class GameTestA extends GameEngine {
         // var body = new glaze.physics.Body(new Material());
 
         engine.createEntity([
-            new Position(10*32,4*32),  
+            mapPosition(10,4),
+            // new Position(10*32,4*32),  
             new Extents(4,4),
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
@@ -446,7 +454,8 @@ class GameTestA extends GameEngine {
         // ],"blob"); 
 
         engine.createEntity([
-            new Position(3.5*32,1.5*32),  
+            mapPosition(3.5,1.5),
+            // new Position(3.5*32,1.5*32),  
             new Display("insects","hive"), 
             new Extents(5,7),
             new PhysicsCollision(false,playerFilter,[]),

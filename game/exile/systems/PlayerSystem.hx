@@ -207,7 +207,7 @@ class PlayerSystem extends System {
         }
 
         if (input.JustPressed(90)) {
-            js.Lib.debug();
+            // js.Lib.debug();
             
             inventory.store();
         }        

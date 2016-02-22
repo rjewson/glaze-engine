@@ -43,6 +43,7 @@ class Map
         tileSize = data.cellSize;
         tileHalfSize = tileSize/2;
         tileExtents.setTo(tileHalfSize,tileHalfSize);
+        js.Lib.debug();
         contact = new Contact();
         closestContact = new Contact();
     }
@@ -59,7 +60,7 @@ class Map
         var endX = data.Index(Math.max(body.position.x,body.predictedPosition.x) + proxy.aabb.extents.x + CORRECTION - ROUNDDOWN) + 1;
         var endY = data.Index(Math.max(body.position.y,body.predictedPosition.y) + proxy.aabb.extents.y + CORRECTION ) + 1;
 
-
+var c = 0;
         if (body.isBullet) {
             plane.setFromSegment(body.predictedPosition,body.position);
             closestContact.time = Math.POSITIVE_INFINITY;
@@ -71,6 +72,7 @@ class Map
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
                         //yuk fix this,  
+                        c++;
                         if (Math.abs(plane.distancePoint(tilePosition))<40) {
                             if (Intersect.StaticAABBvsSweeptAABB(tilePosition,tileExtents,body.position,proxy.aabb.extents,body.delta,contact)==true) {
                                 if (body.respondBulletCollision(contact)) {
@@ -95,10 +97,12 @@ class Map
                             
                             //Check for 1 way platform?
                             if (cell&ONE_WAY==ONE_WAY ) {
-                                if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
-                                    body.respondStaticCollision(contact);
-                                    proxy.collide(null,contact);
-                                }
+                                // if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
+                                //     body.respondStaticCollision(contact);
+                                //     proxy.collide(null,contact);
+                                // }
+                                contact.normal.setTo(0,-1);
+                                body.respondStaticCollision(contact);
                             } else {
                                 var nextX:Int = x + Std.int(contact.normal.x);
                                 var nextY:Int = y + Std.int(contact.normal.y);
@@ -124,7 +128,11 @@ class Map
                 }
             }
         }
-
+// trace(c);
+// if (c>100) {
+//     trace(startX,endX,startX,endY);
+//     js.Lib.debug();
+// }
         // plane.setFromSegment(body.predictedPosition,body.position);
 
         // for (x in startX...endX) {

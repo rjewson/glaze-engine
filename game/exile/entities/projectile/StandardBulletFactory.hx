@@ -32,6 +32,7 @@ class StandardBulletFactory {
         bulletBody.setBounces(3);     
         bulletBody.globalForceFactor = 0.5;
         bulletBody.isBullet = true;
+        bulletBody.maxScalarVelocity = 1000;
 
         filter.categoryBits |= exile.ExileFilters.PROJECTILE_CAT;
         filter.maskBits     |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;

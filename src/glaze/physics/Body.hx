@@ -82,13 +82,13 @@ class Body
         velocity.multEquals(globalDamping*damping);
 
         //Which velocity limiting type?
-        if (!isBullet) {
+        // if (!isBullet) {
             if (maxScalarVelocity>0) {
                 velocity.clampScalar(maxScalarVelocity);
             } else {
                 velocity.clampVector(maxVelocity);
             }            
-        }
+        // }
 
         originalVelocity.copy(velocity);
 

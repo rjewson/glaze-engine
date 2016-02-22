@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="8" tileheight="8" nextobjectid="1">
+ <tileset firstgid="1" name="Collision" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set1.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="1025" name="SetA" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set2.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="2049" name="SetB" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set3.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="3073" name="SetC" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set4.png" width="256" height="256"/>
+ </tileset>
+ <layer name="Background" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+  </data>
+ </layer>
+ <layer name="Foreground1" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt0cEJgDAQRcGoi6QO+y9SryoqCS6CzMA/Jnt4pQAAAAAAAADwtYj8G0PNv/EX2T1mLZpk9tCiXVYPLfpk9NCi39s9tOgz1vtN2+KwpzeXf8V57C01bwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQaQVskAWA
+  </data>
+ </layer>
+ <layer name="Foreground2" width="100" height="100">
+  <data encoding="base64" compression="zlib">
+   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+  </data>
+ </layer>
+ <layer name="Collision" width="100" height="100" visible="0" opacity="0.47">
+  <data encoding="base64" compression="zlib">
+   eJzt3UEKAyEQAEHN/x+dF4R1Dw4dqALBmzB9HXCvtfbQ4Zk5tejRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRsn/cb/kMvPHPJnto8WyqhxZnJnpoce52Dy3eudlDi/emduHsyZ0xjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxb/bLZ8AZ3yAMM=
+  </data>
+ </layer>
+ <objectgroup name="Objects" visible="0"/>
+ <objectgroup name="Waypoints" visible="0"/>
+</map>

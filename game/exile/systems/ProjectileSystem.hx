@@ -33,6 +33,8 @@ class ProjectileSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
+            if (entity.getComponent(Destroy)!=null)
+                continue;
             var projectile = entity.getComponent(Projectile);
             projectile.age-=delta;
             var health = entity.getComponent(Health);

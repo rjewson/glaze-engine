@@ -14,7 +14,7 @@
  </tileset>
  <layer name="Collision" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt3EtuwjAAQEHo/Q9doW6iiJTmU3hOZiRvCAY7T47EhvvtdrsbqTH16vrcq+us86zHnvnso0fLlh5fk7H0/jXPyKU5V/SOfa/psTTnKn7b61H3Y0uPV/PPPD6x56X7fpQRz9XaHkd+75rXr0KPFj1aPvWMffadIz7vj1brcXVbehzxLNPjOeejxflocT5a9GjRo0WPlkoPvwV/lHqgR40eLXq06NGiR4seLXq06NFS6bH1M/46RjFqjzUtRmqiR8tIa53a0mOEfY6yzjk9WvRo2dqjvtcR1ji3p0V9ryOscU6PFj1a9GjRo+WsLR5GWeeUHi1nbfEw0lqnztjiYbT1TunBf9OjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVr0aNGjRY8WPVrW/Cek8Z7xDYqnA1s=
+   eJzt2MGKwjAAANHW///oPXgRMdSUoOP2PcjFNpZ0SED3bdt2IzUeHV1/dnSd9416zH4Ha+jRcrbH7WGM7p85I0dzruZT657pMZpzBUdrXfU+zvQ4mv+fxzfWPHrvq/zivprtsfK5M59fhR4terR864x99cxfPO9Xq/W4ujM9Vpxlerxmf7TYHy32R4seLXq06NFS6eG34F2pB3rU6NGiR4seLXq06NGiR4seLZUe3OnRokeL//Fa9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjZjdz4AxrKAm8=
   </data>
  </layer>
  <layer name="Background" width="100" height="100" visible="0">
@@ -22,14 +22,14 @@
    eJzt1MEJACAMBMGkNO2/qGAFklcUZio4WLgIoGPn9AKAu+WrnnJ6aAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPCPAqZeAQo=
   </data>
  </layer>
- <layer name="Foreground1" width="100" height="100" opacity="0.84">
+ <layer name="Foreground1" width="100" height="100" visible="0" opacity="0.84">
   <data encoding="base64" compression="zlib">
-   eJzt2e1ugjAAhlFuRYz70Pu/vy0xSxgBC4XOd3hO0h8mFbRPCka6jmT99ziPxiPX5p/otfUr5+vRVmk/jOnR1seCObfBOM3MORXGkvfQxvh+NLcHP0evtfntvbuvxdvG49T2GCrttyOM0ve9dPf7e184znUwas7941GPFpL3XV8Ylx3PNbfuf90jmR5ZSj2W/O5aSo8sU+uefC0/uqke9kaduevZGnpk0WM/9sfx6JFFjyx6ZNEjy9T/6jzPuIe98Vx6ZNEjix5Z9MiiRxY9suiRRY8se6x/6Xl/7bOAV7S1x5oWmpTpcSw1PTRpR48semSp7aHJ/ra00GN/emTRI4seWfTIokcWLbJokUeLLHr8D1oAAAAAAAAAAAAAAAAAAAAAAAAAALT3BZ/jP0o=
+   eJzt2OGKgkAYhlFvJZe2Xbv/+yuIwB3UMWu2FzsHvh+Bac3DaNR1JOuv81XMkqH5J/ps/YPH69FWbT+U9GjrZ8Ux59EcZo45VGbNe2ijfB7N7cHf4rU2f52621p8P3merT3GavttD1P7vsfu9nzvK+cZRrPl2ndLPVpI3nd9ZY4vvNbcuv93j2R6ZKn1WPO7ay09skyte/K9fO+metgb28zdzx6hRxY9Xsf+2B89suiRRY8semSZ+l+d9yl72BvvpUcWPbLokUWPLHpk0SOLHln0yGL9s+iRRQ8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA4JNdAKKJHlo=
   </data>
  </layer>
- <layer name="Foreground2" width="100" height="100" visible="0">
+ <layer name="Foreground2" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt0zEOgDAMBEHnKYT//5EeqgQsndCMdI3blasAAOh2jKo5njcy3NsAvU4/BwAAAAAAAAD8zFwYvVZaaNJPjyw7PTTpo0cWPbLs9tDke29a6PE9PbLokUWPLHpk0SKLHlm0yKNFHj0AAAAAAAAAAAAAAAAAAAAAAAAAAKDqAvZ8ILE=
+   eJzt07ENACAMA0FnFGD/HemhjpTirvzWcgIAQLdVya6/McO7DdDr+BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMNwFdcwArw==
   </data>
  </layer>
  <objectgroup name="Objects" visible="0"/>
