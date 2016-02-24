@@ -12,24 +12,27 @@
  <tileset firstgid="3073" name="SetC" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
   <image source="../../resources/tiles2/set4.png" width="256" height="256"/>
  </tileset>
- <layer name="Background" width="100" height="100">
+ <tileset firstgid="4097" name="SetD" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set5.png" width="256" height="256"/>
+ </tileset>
+ <layer name="Background" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
    eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
   </data>
  </layer>
  <layer name="Foreground1" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt0cEJgDAQRcGoi6QO+y9SryoqCS6CzMA/Jnt4pQAAAAAAAADwtYj8G0PNv/EX2T1mLZpk9tCiXVYPLfpk9NCi39s9tOgz1vtN2+KwpzeXf8V57C01bwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACQaQVskAWA
+   eJzt2W9KwzAYB+D5h1mvMYd+8hR6Eb+IBxHUg3iRdjcR72ELKabvkg3mivvwPPDSmNkM8muSwhYLAAAAmM+yWSwusrrs6zy1z1ONfcxryGLV1zpdb1J7nbWH650sZlfK4ia1V1mfLOYXs6i1ZTG/ZXj+11kG+fqQxfyW4YxYNdPzYvxbFvMbsnhI9ViosV8WwCHe+r3jvfm9foT2s73lpCyPmMdZP9a9fP/kWHkM47zK4s9ejjCHsjgdT7I4GbI4HbI4zPj7Q63G3yvy2ndPreK9V/Ka6Pr5aFNtUg3tLrW77LPYn183hXHi/5XG/ZTHRFeZwzynLqt87mvteE8bsshz+5bHRFvJoQvzutlRbVNeM21TzicveUyVnu8uzGVpjdTmt7RP5Z/F77JfTbVNeR+K62RfXrE/nhel7+nksaX2LJf2+n1n9K7cSu8H9qtttXej+F5VusYcY6ZtGLu0p1kfU7vO4tq8xn0sznVtvbTNdqbWx9RX8791e/3fMwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAHH4A37EGRg==
   </data>
  </layer>
  <layer name="Foreground2" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
+   eJzt1DEKgDAQRcFEC1NYeAW9iXfz4Ao2aUOErDAD2394sCkBAAAAAAAAAECfvI1eQG3XI5Szo8dVvtvBK6+jF1DTI5by9Jga7tAvlLlqw3j+Wyx6xLLoAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAT9ycZwJu
   </data>
  </layer>
  <layer name="Collision" width="100" height="100" visible="0" opacity="0.47">
   <data encoding="base64" compression="zlib">
-   eJzt3UEKAyEQAEHN/x+dF4R1Dw4dqALBmzB9HXCvtfbQ4Zk5tejRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRokeLHi16tOjRsn/cb/kMvPHPJnto8WyqhxZnJnpoce52Dy3eudlDi/emduHsyZ0xjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxY9WvRo0aNFjxb/bLZ8AZ3yAMM=
+   eJzt10sOgkAQQEHwpN7/FC50rQNxhhetSnrLJP0In33btt2khgY9WvRo0aNFjxY9WvRo0aNlZY/XWfeB+Vurevg3HbNiB1qMm70HLY6ZuQstjpu1Dy3OmbET31HnuUdb9GjxnG8Z3fU3e9y+fL1fsrqHFu+t7KHFZ6veDVqMWdFDi3Gze2hxzJHv3ZnDU2EfV59fokeLHi16tOjRokeLHi16tFz9H1i4H0rso0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjRo0WPFj1a9GjZTW4egxcJAA==
   </data>
  </layer>
  <objectgroup name="Objects" visible="0"/>

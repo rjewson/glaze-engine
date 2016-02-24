@@ -43,7 +43,6 @@ class Map
         tileSize = data.cellSize;
         tileHalfSize = tileSize/2;
         tileExtents.setTo(tileHalfSize,tileHalfSize);
-        js.Lib.debug();
         contact = new Contact();
         closestContact = new Contact();
     }
@@ -101,8 +100,12 @@ var c = 0;
                                 //     body.respondStaticCollision(contact);
                                 //     proxy.collide(null,contact);
                                 // }
-                                contact.normal.setTo(0,-1);
+                                if ( contact.normal.x!=0 && contact.distance<16) {
+
+                                    contact.normal.setTo(0,-1);
+                                }
                                 body.respondStaticCollision(contact);
+
                             } else {
                                 var nextX:Int = x + Std.int(contact.normal.x);
                                 var nextY:Int = y + Std.int(contact.normal.y);

@@ -33,6 +33,7 @@ import glaze.engine.components.Position;
 import glaze.engine.components.Script;
 import glaze.engine.components.State;
 import glaze.engine.components.Storeable;
+import glaze.engine.components.TileDisplay;
 import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
 import glaze.engine.factories.TMXFactory;
@@ -45,6 +46,7 @@ import glaze.engine.systems.InventorySystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.StateSystem;
+import glaze.engine.systems.TileRenderSystem;
 import glaze.engine.systems.ViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.particle.BlockSpriteParticleEngine;
@@ -86,6 +88,7 @@ class GameTestA extends GameEngine {
     public static inline var PARTICLE_TEXTURE_CONFIG:String = "data/particles.json";
     public static inline var PARTICLE_TEXTURE_DATA:String = "data/particles.png";
     public static inline var PARTICLE_FRAMES_CONFIG:String = "data/particleFrames.json";
+    public static inline var TILE_FRAMES_CONFIG:String = "data/tileFrames.json";
 
 
     // public static inline var COL_SPRITE_SHEET:String = "data/superSet.png";
@@ -133,7 +136,8 @@ class GameTestA extends GameEngine {
             // TILE_SPRITE_SHEET_2,
             // TILE_SPRITE_SHEET_B,
             // COL_SPRITE_SHEET,
-            FRAMES_CONFIG
+            FRAMES_CONFIG,
+            TILE_FRAMES_CONFIG
         ]);
     }
   
@@ -270,7 +274,7 @@ class GameTestA extends GameEngine {
         var chickenSystem:ChickenSystem = new ChickenSystem(blockParticleEngine);
         aiphase.addSystem(chickenSystem); 
         var rabbitSystem = new RabbitSystem();
-        aiphase.addSystem(rabbitSystem); 
+        aiphase.addSystem(rabbitSystem);     
         aiphase.addSystem(new MaggotSystem(broadphase,blockParticleEngine));                                              
         aiphase.addSystem(new GrenadeSystem(broadphase)); 
         aiphase.addSystem(new InventorySystem());                                                
@@ -285,6 +289,8 @@ class GameTestA extends GameEngine {
         // and this one
         // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);    
+        var tileRenderSystem = new TileRenderSystem(assets.assets.get(TILE_FRAMES_CONFIG),tileMap,map);
+        corephase.addSystem(tileRenderSystem);    
          
         filterSupport = new FilterSupport(engine);  
    
@@ -296,11 +302,11 @@ class GameTestA extends GameEngine {
         var body = new glaze.physics.Body(new Material(1,0.3,0.1));
         body.maxScalarVelocity = 0;
         body.maxVelocity.setTo(1600,1000);
-
+                         
         player = engine.createEntity([
             new Player(),
             new Position(300,180), 
-            new Extents(7,23),
+            new Extents(7,22), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
             new PhysicsBody(body),
@@ -348,7 +354,7 @@ class GameTestA extends GameEngine {
             new Fixed(),
             new EnvironmentForce(new Vector2(0,-1600)), 
             new Wind(1/100),
-            new Active()
+            new Active()      
         ],"wind");         
 
         engine.createEntity([
@@ -377,14 +383,15 @@ class GameTestA extends GameEngine {
         ],"door");        
  
         var doorSwitch = engine.createEntity([
-            mapPosition(5.25,2.5),
+            mapPosition(10.5,18.5),
             // new Position((5*32)+8,(2*32)+10),  
-            new Display("switch"), 
+            // new Display("switch"), 
             new Extents(8,8),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
             new CollidableSwitch(1000,["doorA"]),
-            new Active()
+            new Active(),    
+            new TileDisplay("switchOff")
         ],"turret");        
          
         engine.createEntity([
@@ -414,7 +421,7 @@ class GameTestA extends GameEngine {
         // var body = new glaze.physics.Body(new Material());
 
         engine.createEntity([
-            mapPosition(10,4),
+            mapPosition(9,4),
             // new Position(10*32,4*32),  
             new Extents(4,4),
             new Display("items","rock"), 

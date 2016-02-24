@@ -43,7 +43,7 @@ var GameTestA = function() {
 	this.shakeIt = 0;
 	this.killChickens = false;
 	glaze_engine_core_GameEngine.call(this,js_Boot.__cast(window.document.getElementById("view") , HTMLCanvasElement));
-	this.loadAssets(["data/16map.tmx","data/sprites.json","data/sprites.png","data/particles.json","data/particles.png","data/particleFrames.json","data/superSet.png","data/frames.json"]);
+	this.loadAssets(["data/16map.tmx","data/sprites.json","data/sprites.png","data/particles.json","data/particles.png","data/particleFrames.json","data/superSet.png","data/frames.json","data/tileFrames.json"]);
 };
 GameTestA.__name__ = ["GameTestA"];
 GameTestA.main = function() {
@@ -194,6 +194,11 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(this.blockParticleEngine,this.spriteParticleEngine));
 		corephase.addSystem(new glaze_animation_systems_AnimationSystem(this.renderSystem.frameListManager));
 		corephase.addSystem(this.renderSystem);
+		var tmp12;
+		var _this12 = this.assets.assets;
+		if(__map_reserved["data/tileFrames.json"] != null) tmp12 = _this12.getReserved("data/tileFrames.json"); else tmp12 = _this12.h["data/tileFrames.json"];
+		var tileRenderSystem = new glaze_engine_systems_TileRenderSystem(tmp12,tileMap,map);
+		corephase.addSystem(tileRenderSystem);
 		this.filterSupport = new glaze_engine_actions_FilterSupport(this.engine);
 		this.playerFilter = new glaze_physics_collision_Filter();
 		this.playerFilter.categoryBits = 4;
@@ -201,10 +206,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.playerFilter.groupIndex = -1;
 		var body = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0.1));
 		body.maxScalarVelocity = 0;
-		var _this12 = body.maxVelocity;
-		_this12.x = 1600;
-		_this12.y = 1000;
-		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(7,23),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
+		var _this13 = body.maxVelocity;
+		_this13.x = 1600;
+		_this13.y = 1000;
+		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(7,22),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
 		chickenSystem.scaredOfPosition = this.player.map.Position;
 		rabbitSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
@@ -228,10 +233,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	}
 	,createDoor: function() {
 		this.door = this.engine.createEntity([this.mapPosition(4.5,6.125),new glaze_engine_components_Extents(3,34),new glaze_engine_components_Display("door"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
-		this.engine.createEntity([this.mapPosition(5.25,2.5),new glaze_engine_components_Display("switch"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active()],"turret");
+		this.engine.createEntity([this.mapPosition(10.5,18.5),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(1000,["doorA"]),new glaze_engine_components_Active(),new glaze_engine_components_TileDisplay("switchOff")],"turret");
 		this.engine.createEntity([this.mapPosition(24.5,6),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(784.,80.)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
 		this.engine.createEntity([this.mapPosition(18.5,2.5),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("insects","hive"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(5)],"BeeHive");
-		this.engine.createEntity([this.mapPosition(10,4),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(null,20)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.engine.createEntity([this.mapPosition(9,4),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(null,20)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 		this.engine.createEntity([this.mapPosition(40,4),new glaze_engine_components_Extents(5,2.5),new glaze_engine_components_Display("items","blaster"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(null,1)),new glaze_engine_components_Holdable(),new glaze_engine_components_Storeable("blaster",1),new glaze_engine_components_Active()],"blaster");
 		this.engine.createEntity([this.mapPosition(3.5,1.5),new glaze_engine_components_Display("insects","hive"),new glaze_engine_components_Extents(5,7),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active()],"turret");
 	}
@@ -325,7 +330,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 597, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 604, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -3541,6 +3546,19 @@ glaze_engine_components_Storeable.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Storeable.prototype = {
 	__class__: glaze_engine_components_Storeable
 };
+var glaze_engine_components_TileDisplay = function(tileFrameId) {
+	this.set_tileFrameId(tileFrameId);
+};
+glaze_engine_components_TileDisplay.__name__ = ["glaze","engine","components","TileDisplay"];
+glaze_engine_components_TileDisplay.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_TileDisplay.prototype = {
+	set_tileFrameId: function(value) {
+		this.tileFrameId = value;
+		if(this.onChange != null) this.onChange();
+		return value;
+	}
+	,__class__: glaze_engine_components_TileDisplay
+};
 var glaze_engine_components_Viewable = function() {
 };
 glaze_engine_components_Viewable.__name__ = ["glaze","engine","components","Viewable"];
@@ -3952,7 +3970,7 @@ glaze_engine_systems_BehaviourSystem.prototype = $extend(glaze_eco_core_System.p
 	,__class__: glaze_engine_systems_BehaviourSystem
 });
 var glaze_engine_systems_CollidableSwitchSystem = function(bus) {
-	glaze_eco_core_System.call(this,[glaze_engine_components_CollidableSwitch,glaze_physics_components_PhysicsCollision,glaze_engine_components_Display]);
+	glaze_eco_core_System.call(this,[glaze_engine_components_CollidableSwitch,glaze_physics_components_PhysicsCollision,glaze_engine_components_TileDisplay]);
 	this.bus = bus;
 };
 glaze_engine_systems_CollidableSwitchSystem.__name__ = ["glaze","engine","systems","CollidableSwitchSystem"];
@@ -3972,8 +3990,8 @@ glaze_engine_systems_CollidableSwitchSystem.prototype = $extend(glaze_eco_core_S
 		var collidableSwitch = a.entity.map.CollidableSwitch;
 		if(collidableSwitch.trigger(this.engine.timestamp)) {
 			this.bus.triggerAll(collidableSwitch.triggerChannels,null);
-			var display = a.entity.map.Display;
-			if(display.frame.name == "on") display.setFrameId("off"); else display.setFrameId("on");
+			var display = a.entity.map.TileDisplay;
+			display.set_tileFrameId("switchOn");
 		}
 	}
 	,__class__: glaze_engine_systems_CollidableSwitchSystem
@@ -4299,6 +4317,72 @@ glaze_engine_systems_StateSystem.prototype = $extend(glaze_eco_core_System.proto
 	,update: function(timestamp,delta) {
 	}
 	,__class__: glaze_engine_systems_StateSystem
+});
+var glaze_engine_systems_TileRenderSystem = function(tileFramesConfig,tileMap,map) {
+	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_engine_components_TileDisplay]);
+	this.updates = [];
+	this.frames = new haxe_ds_StringMap();
+	this.tileMap = tileMap;
+	this.map = map;
+	this.parseFramesConfig(tileFramesConfig);
+};
+glaze_engine_systems_TileRenderSystem.__name__ = ["glaze","engine","systems","TileRenderSystem"];
+glaze_engine_systems_TileRenderSystem.__super__ = glaze_eco_core_System;
+glaze_engine_systems_TileRenderSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	parseFramesConfig: function(config) {
+		if(!(typeof(config) == "string")) return;
+		var data = JSON.parse(config);
+		var sheetNumber = 0;
+		var config1 = Reflect.field(data,"sheets");
+		var _g = 0;
+		var _g1 = Reflect.fields(config1);
+		while(_g < _g1.length) {
+			var sheetId = _g1[_g];
+			++_g;
+			var sheet = Reflect.field(config1,sheetId);
+			var _g2 = 0;
+			var _g3 = Reflect.fields(sheet);
+			while(_g2 < _g3.length) {
+				var frameId = _g3[_g2];
+				++_g2;
+				var frameData = Reflect.field(sheet,frameId);
+				frameData.push(sheetNumber);
+				var _this = this.frames;
+				if(__map_reserved[frameId] != null) _this.setReserved(frameId,frameData); else _this.h[frameId] = frameData;
+			}
+			sheetNumber++;
+		}
+	}
+	,entityAdded: function(entity) {
+		var tileDisplay = entity.map.TileDisplay;
+		var tmp;
+		var f = $bind(this,this.onChange);
+		var a1 = entity;
+		tmp = function() {
+			f(a1);
+		};
+		tileDisplay.onChange = tmp;
+		if(tileDisplay.tileFrameId != null) this.onChange(entity);
+	}
+	,entityRemoved: function(entity) {
+	}
+	,onChange: function(entity) {
+		this.updates.push(entity);
+	}
+	,update: function(timestamp,delta) {
+		while(this.updates.length > 0) {
+			var entity = this.updates.pop();
+			var position = entity.map.Position;
+			var tileDisplay = entity.map.TileDisplay;
+			var tmp;
+			var _this = this.frames;
+			var key = tileDisplay.tileFrameId;
+			if(__map_reserved[key] != null) tmp = _this.getReserved(key); else tmp = _this.h[key];
+			this.tileMap.updateMap(position.coords.x * this.map.data.invCellSize | 0,position.coords.y * this.map.data.invCellSize | 0,tmp);
+			haxe_Log.trace(tileDisplay,{ fileName : "TileRenderSystem.hx", lineNumber : 92, className : "glaze.engine.systems.TileRenderSystem", methodName : "update"});
+		}
+	}
+	,__class__: glaze_engine_systems_TileRenderSystem
 });
 var glaze_engine_systems_ViewManagementSystem = function(camera) {
 	this.camera = camera;
@@ -6110,7 +6194,6 @@ var glaze_physics_collision_Map = function(data) {
 	var _this = this.tileExtents;
 	_this.x = this.tileHalfSize;
 	_this.y = this.tileHalfSize;
-	debugger;
 	this.contact = new glaze_physics_collision_Contact();
 	this.closestContact = new glaze_physics_collision_Contact();
 };
@@ -6177,9 +6260,11 @@ glaze_physics_collision_Map.prototype = {
 						this.tilePosition.y = y1 * this.tileSize + this.tileHalfSize;
 						if(glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,this.tilePosition,this.tileExtents,this.bias,this.contact) == true) {
 							if((cell1 & 2) == 2) {
-								var _this2 = this.contact.normal;
-								_this2.x = 0;
-								_this2.y = -1;
+								if(this.contact.normal.x != 0 && this.contact.distance < 16) {
+									var _this2 = this.contact.normal;
+									_this2.x = 0;
+									_this2.y = -1;
+								}
 								body.respondStaticCollision(this.contact);
 							} else {
 								var nextX = x1 + (this.contact.normal.x | 0);
@@ -8305,6 +8390,9 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		var quadVerts = new Float32Array([-1,-1,0,1,1,-1,1,1,1,1,1,0,-1,-1,0,1,1,1,1,0,-1,1,0,0]);
 		gl.bufferData(34962,quadVerts,35044);
 		this.tilemapShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER,glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER));
+		this.writebuffer = new Uint8Array(16);
+		this.flip = false;
+		this.writebuffer2 = new glaze_ds_TypedArray2D(1,1);
 	}
 	,Resize: function(width,height) {
 		this.viewportSize.x = width;
@@ -8348,6 +8436,20 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 	}
 	,RoundFunction: function(v) {
 		return v;
+	}
+	,updateMap: function(x,y,data) {
+		var superY = Math.floor(data[4] / 8);
+		var superX = data[4] % 8;
+		var startX = data[0];
+		var startY = data[1];
+		var width = data[2];
+		var height = data[3];
+		var value = superY << 24 | superX << 16 | startY << 8 | startX;
+		var _this = this.writebuffer2;
+		_this.data32[0 * _this.w] = value;
+		var writeLayer = this.layers[2].tileDataTexture;
+		this.gl.bindTexture(3553,writeLayer);
+		this.gl.texSubImage2D(3553,0,x,y,width,height,6408,5121,this.writebuffer2.data8);
 	}
 	,Render: function(clip) {
 		var x = -this.camera.position.x / (this.tileScale * 2);
@@ -11698,6 +11800,7 @@ GameTestA.FRAMES_CONFIG = "data/frames.json";
 GameTestA.PARTICLE_TEXTURE_CONFIG = "data/particles.json";
 GameTestA.PARTICLE_TEXTURE_DATA = "data/particles.png";
 GameTestA.PARTICLE_FRAMES_CONFIG = "data/particleFrames.json";
+GameTestA.TILE_FRAMES_CONFIG = "data/tileFrames.json";
 GameTestA.TILE_SPRITE_SHEET = "data/superSet.png";
 Xml.Element = 0;
 Xml.PCData = 1;
@@ -11860,6 +11963,8 @@ glaze_engine_components_State.NAME = "State";
 glaze_engine_components_State.ID = 4;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 2;
+glaze_engine_components_TileDisplay.NAME = "TileDisplay";
+glaze_engine_components_TileDisplay.ID = 0;
 glaze_engine_components_Viewable.NAME = "Viewable";
 glaze_engine_components_Viewable.ID = 46;
 glaze_engine_components_Water.NAME = "Water";

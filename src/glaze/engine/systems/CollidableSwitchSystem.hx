@@ -7,6 +7,7 @@ import glaze.engine.components.CollidableSwitch;
 import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
 import glaze.engine.components.Script;
+import glaze.engine.components.TileDisplay;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
@@ -17,7 +18,7 @@ class CollidableSwitchSystem extends System {
     var bus:MessageBus;
 
     public function new(bus:MessageBus) {
-        super([CollidableSwitch,PhysicsCollision,Display]);
+        super([CollidableSwitch,PhysicsCollision,TileDisplay]);
         this.bus = bus;
         // hasUpdate = false;
     }
@@ -40,11 +41,14 @@ class CollidableSwitchSystem extends System {
         var collidableSwitch = a.entity.getComponent(CollidableSwitch);
         if (collidableSwitch.trigger(engine.timestamp)) {
             bus.triggerAll(collidableSwitch.triggerChannels,null);
-            var display = a.entity.getComponent(Display);
-            if (display.frame.name=="on")
-                display.setFrameId("off");
-            else
-                display.setFrameId("on");
+            // var display = a.entity.getComponent(Display);
+            // if (display.frame.name=="on")
+            //     display.setFrameId("off");
+            // else
+            //     display.setFrameId("on");
+
+            var display = a.entity.getComponent(TileDisplay);
+            display.tileFrameId = "switchOn";
 
         }
     }
