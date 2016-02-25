@@ -41,7 +41,7 @@ class TileRenderSystem extends System {
     } 
  
     //Format
-    // "switchOn":[sheet,x,y,w,h] 64 32 32 32 32  
+    // "switchOn":[x,y,w,h,cx,cy] 64 32 32 32 32  
     //                               5  4 4 4 4
     //                              16 12 8 4 0
 
@@ -84,6 +84,7 @@ class TileRenderSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         while (updates.length>0) {
+            // js.Lib.debug();
             var entity = updates.pop();
             var position = entity.getComponent(Position);
             var tileDisplay = entity.getComponent(TileDisplay);

@@ -26,6 +26,8 @@ class CollidableSwitchSystem extends System {
     override public function entityAdded(entity:Entity) {
         var collidableSwitch =  entity.getComponent(CollidableSwitch);
         var collision = entity.getComponent(PhysicsCollision);
+        var display = entity.getComponent(TileDisplay);
+        display.tileFrameId = collidableSwitch.isOn ? "switchOn" : "switchOff";
         collision.proxy.contactCallbacks.push(onCollision);
     }
 
@@ -48,7 +50,7 @@ class CollidableSwitchSystem extends System {
             //     display.setFrameId("on");
 
             var display = a.entity.getComponent(TileDisplay);
-            display.tileFrameId = "switchOn";
+            display.tileFrameId = collidableSwitch.isOn ? "switchOn" : "switchOff";
 
         }
     }

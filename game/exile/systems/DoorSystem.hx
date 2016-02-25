@@ -3,7 +3,7 @@ package exile.systems;
 import exile.components.Door;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
-import glaze.engine.components.Display;
+import glaze.engine.components.TileDisplay;
 import glaze.engine.components.State;
 import glaze.physics.components.PhysicsCollision;
 import glaze.render.frame.FrameList;
@@ -14,7 +14,7 @@ class DoorSystem extends System {
 	var scp:StateChangeProxy;
 
     public function new() {
-        super([Door,PhysicsCollision,State,Display]);
+        super([Door,PhysicsCollision,State,TileDisplay]);
         this.hasUpdate = false;
         this.scp = new StateChangeProxy();
         this.scp.registerStateHandler("open",openDoor2);
@@ -38,16 +38,16 @@ class DoorSystem extends System {
     	var pc = state.owner.getComponent(PhysicsCollision);
 	    pc.proxy.responseBias.x=0;
 	    pc.proxy.isActive = false;
-	    var display = state.owner.getComponent(Display);
-	    display.setFrameId("open");
+	    var display = state.owner.getComponent(TileDisplay);
+	    display.tileFrameId = "doorOpen";
 	}
 
 	public function closeDoor2(state:State) {
     	var pc = state.owner.getComponent(PhysicsCollision);
 	    pc.proxy.responseBias.x=1;
 	   	pc.proxy.isActive = true;
-	   	var display = state.owner.getComponent(Display);
-	    display.setFrameId("closed");
+	   	var display = state.owner.getComponent(TileDisplay);
+	    display.tileFrameId = "doorClosed";
 	}
 
 }

@@ -300,12 +300,12 @@ class GameTestA extends GameEngine {
         playerFilter.groupIndex = ExileFilters.PLAYER_GROUP; 
 
         var body = new glaze.physics.Body(new Material(1,0.3,0.1));
-        body.maxScalarVelocity = 0;
+        body.maxScalarVelocity = 0; 
         body.maxVelocity.setTo(1600,1000);
                          
         player = engine.createEntity([
             new Player(),
-            new Position(300,180), 
+            new Position(300,180),  
             new Extents(7,22), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
@@ -372,11 +372,12 @@ class GameTestA extends GameEngine {
     public function createDoor() {
 
         door = engine.createEntity([
-            mapPosition(4.5,6.125),
-            new Extents(3,34),
-            new Display("door"),
+            mapPosition(9.5,23.5),
+            new Extents(3,34),  
+            // new Display("door"), 
+            new TileDisplay("doorClosed"),
             new PhysicsCollision(false,null,[]),
-            new Fixed(),
+            new Fixed(),      
             new Door(false,""),
             new State(['closed','open'],0,["doorA"]),
             new Active()
@@ -384,19 +385,16 @@ class GameTestA extends GameEngine {
  
         var doorSwitch = engine.createEntity([
             mapPosition(10.5,18.5),
-            // new Position((5*32)+8,(2*32)+10),  
-            // new Display("switch"), 
             new Extents(8,8),
             new PhysicsCollision(false,null,[]),
             new Fixed(),
-            new CollidableSwitch(1000,["doorA"]),
+            new CollidableSwitch(false,1000,["doorA"]),
             new Active(),    
             new TileDisplay("switchOff")
         ],"turret");        
-         
-        engine.createEntity([
-            mapPosition(24.5,6),
-            // new Position((32*24)+16,(32*6)),  
+          
+        engine.createEntity([ 
+            mapPosition(3.5,22),
             new Extents(16,32),
             new PhysicsCollision(true,null,[]),
             new Fixed(),
@@ -407,8 +405,7 @@ class GameTestA extends GameEngine {
             ],"teleporter") ;
  
         engine.createEntity([ 
-            mapPosition(18.5,2.5),
-            // new Position(18.5*32,2.5*32),  
+            mapPosition(20.5,17),
             new Extents(16,16),
             new Display("insects","hive"), 
             new PhysicsCollision(false,null,[]),
@@ -417,12 +414,8 @@ class GameTestA extends GameEngine {
             new exile.components.BeeHive(5)
         ],"BeeHive"); 
 
-
-        // var body = new glaze.physics.Body(new Material());
-
         engine.createEntity([
             mapPosition(9,4),
-            // new Position(10*32,4*32),  
             new Extents(4,4),
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
@@ -459,16 +452,6 @@ class GameTestA extends GameEngine {
         //         new glaze.ai.steering.behaviors.Wander(4,1,4)
         //     ])
         // ],"blob"); 
-
-        engine.createEntity([
-            mapPosition(3.5,1.5),
-            // new Position(3.5*32,1.5*32),  
-            new Display("insects","hive"), 
-            new Extents(5,7),
-            new PhysicsCollision(false,playerFilter,[]),
-            new Fixed(),
-            new Active()
-        ],"turret");  
 
         // var graph = new glaze.ai.navigation.Graph();
         // graph.pathfinder = new AStar();

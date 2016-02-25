@@ -302,5 +302,23 @@ class Intersect
         return true;
     }
 
+    /*
+    This is seperate to avoid overcomplicating the above function with too much branching
+    */
+    public static function AABBvsStaticSolidAABBFixedNormal(aabb_position_A:Vector2,aabb_extents_A:Vector2,aabb_position_B:Vector2,aabb_extents_B:Vector2,normal:Vector2,contact:Contact):Bool {
+
+        contact.normal.copy(normal);
+
+        var pcx = (contact.normal.x * (aabb_extents_A.x+aabb_extents_B.x) ) + aabb_position_B.x;
+        var pcy = (contact.normal.y * (aabb_extents_A.y+aabb_extents_B.y) ) + aabb_position_B.y;
+
+        var pdx = aabb_position_A.x - pcx;
+        var pdy = aabb_position_A.y - pcy;
+
+        contact.distance = pdx*contact.normal.x + pdy*contact.normal.y;
+
+        return true;
+    }
+
 
 }

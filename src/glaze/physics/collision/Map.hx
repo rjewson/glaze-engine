@@ -15,7 +15,8 @@ class Map
 
     public static inline var SOLID:Int              = 0x1 << 0;
     public static inline var ONE_WAY:Int            = 0x1 << 1;
-    public static inline var AABBCOLLIDABLE:Int     = SOLID | ONE_WAY;
+    public static inline var STEP:Int               = 0x1 << 2;
+    public static inline var AABBCOLLIDABLE:Int     = SOLID | ONE_WAY | STEP;
 
     public static inline var ONE_WAY_TOLLERANCE:Float = -4.0;
 
@@ -92,19 +93,24 @@ var c = 0;
                     if (cell&AABBCOLLIDABLE>0) {
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
+
+                        if (cell&STEP==STEP) {
+                            trace("step");
+                        }
+
                         if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
                             
                             //Check for 1 way platform?
                             if (cell&ONE_WAY==ONE_WAY ) {
-                                // if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
-                                //     body.respondStaticCollision(contact);
-                                //     proxy.collide(null,contact);
-                                // }
-                                if ( contact.normal.x!=0 && contact.distance<16) {
-
-                                    contact.normal.setTo(0,-1);
+                                if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
+                                    body.respondStaticCollision(contact);
+                                    proxy.collide(null,contact);
                                 }
-                                body.respondStaticCollision(contact);
+                                // if ( contact.normal.x!=0 && contact.distance<16) {
+
+                                //     contact.normal.setTo(0,-1);
+                                // }
+                                // body.respondStaticCollision(contact);
 
                             } else {
                                 var nextX:Int = x + Std.int(contact.normal.x);
