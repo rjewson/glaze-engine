@@ -35,7 +35,7 @@ class BeeFactory {
 
 	public static function create(engine:Engine,position:Position):Entity {
 
-        var beeBody = new Body(new Material());
+        var beeBody = new Body(new Material(1,0.3,0));
         beeBody.setMass(0.1);
         beeBody.setBounces(0);     
         beeBody.globalForceFactor = 0.0;

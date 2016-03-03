@@ -32,7 +32,7 @@ class InterpolatedEmitter implements IParticleEmitter
         var len:Int = Std.int(temp.length()/gap);
         if (len==0) len = 1;
         for (i in 0 ... len) {
-            temp.interpolate(prevPosition,position,i/len);
+            temp.interpolate(prevPosition,position,i/len); 
             var angle = RandomFloat(0,2*Math.PI);
             var vx = Math.cos(angle) * speed*RandomFloat(0,2); 
             var vy = Math.sin(angle) * speed*RandomFloat(0,2);

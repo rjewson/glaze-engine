@@ -52,6 +52,12 @@
 		"pattern":"explosion/9/frame{x}.png",
 		"start":1,
 		"end":4
+	},
+	"trail1" : {
+		"fps":1,
+		"pattern":"trails/1/frame{x}.png",
+		"start":1,
+		"end":4
 	}
 
 }

@@ -162,6 +162,21 @@
 		}
 	},
 
+	"bird":{
+		"frames":[
+			{ "id":"fly1",		"name":"bird/bird2/frame13.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly2",		"name":"bird/bird2/frame14.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly3",		"name":"bird/bird2/frame15.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly4",		"name":"bird/bird2/frame16.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly5",		"name":"bird/bird2/frame17.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly6",		"name":"bird/bird2/frame18.png",		"scale":{"x":2,"y":2} },
+			{ "id":"fly7",		"name":"bird/bird2/frame19.png",		"scale":{"x":2,"y":2} }
+		],
+		"animations":{
+			"fly":		{ "frames":[0,1,2,3,4,5,6],		"fps":10,	"looped":true }
+		}
+	},
+
 	"fish2":{
 		"frames":[
 			{ "id":"swim1",		"name":"fish2/fish1.png",		"scale":{"x":2,"y":2} },

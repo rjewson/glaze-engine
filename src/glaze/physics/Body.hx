@@ -52,6 +52,9 @@ class Body
     public var onGround:Bool = false;
     public var onGroundPrev:Bool = false;
     public var inWater:Bool = false;
+    public var inWaterPrev:Bool = false;
+    public var usesStairs:Bool = false;
+    public var collideOneWay:Bool = false;
 
     public var totalBounceCount:Int = 0;
     public var bounceCount:Int = 0;
@@ -70,6 +73,11 @@ class Body
 
     public function update(dt:Float,globalForces:Vector2,globalDamping:Float) {
         this.dt = dt;
+        onGroundPrev = onGround;
+        onGround = false;
+        inWaterPrev = inWater;
+        inWater = false;
+
         if (skip||isSleeping) return;
 
         motion = (SLEEP_BIAS * motion) + ((1 - SLEEP_BIAS) * velocity.lengthSqrd());
@@ -102,9 +110,6 @@ class Body
         forces.setTo(0,0);
         damping = 1;
 
-        onGroundPrev = onGround;
-        onGround = false;
-        inWater = false;
         stepContactCount = 0;
 
         toi = Math.POSITIVE_INFINITY;

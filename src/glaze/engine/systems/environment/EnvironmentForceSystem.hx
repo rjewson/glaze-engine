@@ -28,6 +28,10 @@ class EnvironmentForceSystem extends System {
 
     override public function entityAdded(entity:Entity) {
         entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(callback);
+        var force = entity.getComponent(EnvironmentForce);
+        // js.Lib.debug();
+        force.direction.copy(force.data[0].direction);
+        force.power = force.data[0].maxForce;
     }
 
     override public function entityRemoved(entity:Entity) {
@@ -40,9 +44,12 @@ class EnvironmentForceSystem extends System {
         var areaOverlap = b.aabb.overlapArea(a.aabb);
         var percent = areaOverlap/b.aabb.area();
         //trace(areaOverlap,percent);
-        var f = a.entity.getComponent(EnvironmentForce).direction.clone();
-        f.multEquals(percent);
-        b.body.addForce(f);
+        var force = a.entity.getComponent(EnvironmentForce);
+        //var f = a.entity.getComponent(EnvironmentForce).direction.clone();
+        temp.copy(force.direction);
+        temp.multEquals(force.power);
+        temp.multEquals(percent);
+        b.body.addForce(temp);
     }
 
 }

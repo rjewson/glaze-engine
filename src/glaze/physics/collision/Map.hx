@@ -32,6 +32,7 @@ class Map
     public var tilePosition:Vector2 = new Vector2();
     public var tileExtents:Vector2 = new Vector2();
     public var bias:Vector2 =  new Vector2(1,1);
+    public var step:Vector2 =  new Vector2(0,-1);
     public var plane:Plane = new Plane();
 
     public var contact:Contact;
@@ -94,14 +95,16 @@ var c = 0;
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
 
-                        if (cell&STEP==STEP) {
-                            trace("step");
+                        if (cell&STEP==STEP&&body.usesStairs) {
+                            Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,tilePosition,tileExtents,step,contact);
+                        } else {
+                            Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact);
                         }
 
-                        if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
+                        //if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
                             
                             //Check for 1 way platform?
-                            if (cell&ONE_WAY==ONE_WAY ) {
+                            if (cell&ONE_WAY==ONE_WAY&&body.collideOneWay) {
                                 if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
                                     body.respondStaticCollision(contact);
                                     proxy.collide(null,contact);
@@ -132,7 +135,7 @@ var c = 0;
                             //     proxy.collide(null,contact);
                             // } 
                             // }
-                        }
+                        //}
                     }
                 }
             }

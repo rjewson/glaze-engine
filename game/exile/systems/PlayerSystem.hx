@@ -116,7 +116,8 @@ class PlayerSystem extends System {
         physicsBody = entity.getComponent(PhysicsBody);
 
         physicsBody.body.setMass(50);
-
+        physicsBody.body.usesStairs = true;
+        
         characterController = new CharacterController2(input,physicsBody.body);
 
         playerLight = engine.createEntity( 

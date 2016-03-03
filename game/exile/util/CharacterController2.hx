@@ -25,6 +25,8 @@ class CharacterController2
 
     private static inline var MAX_BURN:Float = 4 * BASE_FORCE;
 
+    private static inline var BOOST_FACTOR:Float = 1.3;
+
     private var jumping:Bool = false;
 
     public var isWalking:Bool = false;
@@ -36,6 +38,7 @@ class CharacterController2
 
     public var left:Int;
     public var right:Int;
+    public var boost:Int;
 
     public function new(input:DigitalInput,body:Body) {
         this.input = input;
@@ -53,6 +56,7 @@ class CharacterController2
         var up = input.JustPressed(87);         //w
         var upDuration = input.PressedDuration(87);         //w
         var down = input.PressedDuration(83);   //s
+        boost = input.PressedDuration(16);
 
         //Just jumped?
         if (!jumping&&body.onGround&&up) {
@@ -69,12 +73,13 @@ class CharacterController2
             burn = 0;
         }
 
-        if (body.inWater) {
-            if (left>0)     controlForce.x -= WALK_FORCE;
-            if (right>0)    controlForce.x += WALK_FORCE;
-            if (up)         controlForce.y -= 400;
-            if (down>0)       controlForce.y += WALK_FORCE;
-        } else if (body.onGround) {
+        // if (body.inWater) {
+        //     if (left>0)     controlForce.x -= WALK_FORCE;
+        //     if (right>0)    controlForce.x += WALK_FORCE;
+        //     if (up)         controlForce.y -= 400;
+        //     if (down>0)       controlForce.y += WALK_FORCE;
+        // } else 
+        if (body.onGround) {
             if (left>0)     controlForce.x -= WALK_FORCE;
             if (right>0)    controlForce.x += WALK_FORCE;
             if (up)         {
@@ -90,9 +95,12 @@ class CharacterController2
             // if (up) burn-=10000;
             if (up) burn = MAX_BURN;
             if (upDuration>0) burn += 500;
-
         }
-        burn = Math.min(burn,MAX_BURN);
+        if (boost>0) {
+            burn = Math.min(burn,MAX_BURN*BOOST_FACTOR);     
+        } else {
+            burn = Math.min(burn,MAX_BURN);            
+        }
         controlForce.y -= burn;
         burn *= 0.95;
 

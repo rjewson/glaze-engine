@@ -28,9 +28,9 @@ class StandardBulletFactory {
 	public static function create(engine:Engine,position:Position,filter:Filter,targetPosition:Vector2):Entity {
 
         var bulletBody = new Body(new Material());
-        bulletBody.setMass(0.03);
+        bulletBody.setMass(10);
         bulletBody.setBounces(3);     
-        bulletBody.globalForceFactor = 0.5;
+        bulletBody.globalForceFactor = 1;//0.5;
         bulletBody.isBullet = true;
         bulletBody.maxScalarVelocity = 1000;
 

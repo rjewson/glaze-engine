@@ -36,6 +36,7 @@ import glaze.engine.components.Storeable;
 import glaze.engine.components.TileDisplay;
 import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
+import glaze.engine.factories.tmx.ForceFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.tmx.WaterFactory;
@@ -184,7 +185,7 @@ class GameTestA extends GameEngine {
     
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
-    
+          
 // js.Lib.debug(); 
         var background = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Background"));
         var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
@@ -192,8 +193,11 @@ class GameTestA extends GameEngine {
       
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"),glaze.EngineConstants.TILE_SIZE);
         
-        var tileMap = new TileMap();     
-        renderSystem.renderer.AddRenderer(tileMap);    
+        var tileMap = new TileMap();
+        var tileLayerProxy = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[2,1]);
+        renderSystem.renderer.AddRenderer(tileLayerProxy);    
+
+        var tileLayerProxy2 = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[0]);
         // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
   
         tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f2",1,1); 
@@ -209,6 +213,9 @@ class GameTestA extends GameEngine {
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
+        //Render the world top layer over the sprites
+        renderSystem.renderer.AddRenderer(tileLayerProxy2);    
+
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
      
@@ -224,7 +231,9 @@ class GameTestA extends GameEngine {
         exile.entities.creatures.BeeFactory.map = map; 
         physicsPhase.addSystem(new PhysicsUpdateSystem());
         physicsPhase.addSystem(new SteeringSystem());
- 
+    
+        engine.config.map = map;
+
         nf = new glaze.physics.collision.Intersect(); 
 
         // broadphase = new UniformGrid(map,nf,10,5,640);
@@ -298,12 +307,12 @@ class GameTestA extends GameEngine {
         playerFilter.categoryBits = ExileFilters.PLAYER_CAT;
         playerFilter.maskBits |= ExileFilters.PROJECTILE_CAT;
         playerFilter.groupIndex = ExileFilters.PLAYER_GROUP; 
-
+  
         var body = new glaze.physics.Body(new Material(1,0.3,0.1));
         body.maxScalarVelocity = 0; 
         body.maxVelocity.setTo(1600,1000);
                          
-        player = engine.createEntity([
+        player = engine.createEntity([ 
             new Player(),
             new Position(300,180),  
             new Extents(7,22), 
@@ -323,6 +332,7 @@ class GameTestA extends GameEngine {
         var tmxFactory = new TMXFactory(engine,tmxMap);
         tmxFactory.registerFactory(LightFactory);
         tmxFactory.registerFactory(WaterFactory);
+        tmxFactory.registerFactory(ForceFactory);
         tmxFactory.parseObjectGroup("Objects");
 
         createTurret();    
@@ -333,6 +343,7 @@ class GameTestA extends GameEngine {
         // exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
         // exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
+        exile.entities.creatures.BirdFactory.create(engine,mapPosition(20,20));
 
         loop.start();
     } 
@@ -344,28 +355,39 @@ class GameTestA extends GameEngine {
         return new Position(xTiles*TS,yTiles*TS);
     }
 
+    function mapPositionCenter(l:Int,t:Int,r:Int,b:Int):Position {
+        return mapPosition( l+((r-l)*0.5) , t+((b-t)*0.5) );
+    }
+
+    function mapExtents(l:Int,t:Int,r:Int,b:Int):Extents {
+        return new Extents( (r-l)*0.5*TS,(b-t)*0.5*TS);
+    }
+
     public function createWind() { 
 
 
-        engine.createEntity([
-            mapPosition(1.5,14.5),
-            new Extents(16,256), 
-            new PhysicsCollision(true,null,[]),
-            new Fixed(),
-            new EnvironmentForce(new Vector2(0,-1600)), 
-            new Wind(1/100),
-            new Active()      
-        ],"wind");         
+        // engine.createEntity([
+        //     mapPosition(1.5,14.5),
+        //     new Extents(16,256), 
+        //     new PhysicsCollision(true,null,[]),
+        //     new Fixed(),
+        //     // new EnvironmentForce(new Vector2(0,-1600)), 
+        //     new EnvironmentForce([new ForceData(0,1600,1600,0,0)]), 
+        //     new Wind(1/100),
+        //     new Active()      
+        // ],"wind");           
 
-        engine.createEntity([
-                mapPosition(39.5,27.5),
-                new Extents(6*32,1.5*32), 
-                new PhysicsCollision(true,null,[]),
-                new Fixed(),
-                new EnvironmentForce(new Vector2(-10,0)),
-                new Wind(1/100),
-                new Active()
-            ],"wind2");         
+        // engine.createEntity([
+        //     mapPositionCenter(38,20,46,38),
+        //     mapExtents(38,16,46,28),
+        //     // new Extents(6*32,1.5*32), 
+        //     new PhysicsCollision(true,null,[]),
+        //     new Fixed(),
+        //     // new EnvironmentForce(new Vector2(0,-1600)),
+        //     new EnvironmentForce([new ForceData(0,1600,1600,0,0)]), 
+        //     new Wind(1/1000),
+        //     new Active()
+        // ],"wind2");         
     }
 
 
@@ -394,11 +416,11 @@ class GameTestA extends GameEngine {
         ],"turret");        
           
         engine.createEntity([ 
-            mapPosition(3.5,22),
+            mapPosition(3,23),
             new Extents(16,32),
             new PhysicsCollision(true,null,[]),
             new Fixed(),
-            new Teleporter(new Vector2(32*24.5,32*2.5)),
+            new Teleporter(new Vector2(16*12,16*36)),
             new ParticleEmitters([new glaze.particle.emitter.ScanLineEmitter(200,100,600,10)]),
             new State(["on","off"],0,[]),
             new Active()
@@ -420,22 +442,22 @@ class GameTestA extends GameEngine {
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(), 
-            new PhysicsBody(new Body(null,20)),
+            new PhysicsBody(new Body(null,15)),
             new Holdable(),
             new Active()
         ],"rock");         
 
-        engine.createEntity([
-            mapPosition(40,4),
-            new Extents(5,2.5),
-            new Display("items","blaster"), 
-            new PhysicsCollision(false,new Filter(),[]),
-            new Moveable(), 
-            new PhysicsBody(new Body(null,1)),
-            new Holdable(),
-            new Storeable("blaster",1),
-            new Active()
-        ],"blaster"); 
+        // engine.createEntity([
+        //     mapPosition(40,4),
+        //     new Extents(5,2.5),
+        //     new Display("items","blaster"), 
+        //     new PhysicsCollision(false,new Filter(),[]),
+        //     new Moveable(), 
+        //     new PhysicsBody(new Body(null,1)),
+        //     new Holdable(),
+        //     new Storeable("blaster",1),
+        //     new Active()
+        // ],"blaster"); 
 
 
         // engine.createEntity([
@@ -494,14 +516,15 @@ class GameTestA extends GameEngine {
         var turret = engine.createEntity([
             mapPosition(25,1.5),
             // new Position(27*32,9.3*32),  
-            new Display("enemies","turret"), 
+            // new Display("enemies","turret"), 
+            new TileDisplay("turret"),
             new Extents(12,12),  
             new PhysicsCollision(false,filter,[]),
             new Fixed(),
             new Script(behavior), 
             new Active()  
         ],"turret");        
-        turret.getComponent(Display).displayObject.rotation=Math.PI;
+        // turret.getComponent(Display).displayObject.rotation=Math.PI;
     }
           
     public function fireBullet(pos:Vector2,target:Vector2):Void {
@@ -579,6 +602,19 @@ class GameTestA extends GameEngine {
         // }          
         // trace(nf.collideCount);
         // nf.collideCount=0;  
+
+        // for (xp in 10...50) {
+        //     for (yp in 10...50) {
+        //         blockParticleEngine.EmitParticle(
+        //             (xp+0.5)*16,
+        //             (yp+0.5)*16,
+        //             0,0,0,0,
+        //             17,1,false,true,null,16,128,0,0,128
+        //             );
+        //     }
+            
+        // }
+
         input.Update(-renderSystem.camera.position.x,-renderSystem.camera.position.y);
         if (killChickens) { 
             destroyChickens();
