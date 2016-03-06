@@ -6,6 +6,7 @@
 -lib glaze-render
 -lib glaze-eco
 -lib compiletime
+-lib actuate
 -main GameTestA
 #-debug
 #--no-traces

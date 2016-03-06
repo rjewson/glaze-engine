@@ -33,7 +33,7 @@ class HandGrenadeFactory {
             new Extents(8,8),
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(),
-            new PhysicsBody(body),
+            new PhysicsBody(body,false),
             new Holdable(),
             new Storeable(),
             new Grenade(),

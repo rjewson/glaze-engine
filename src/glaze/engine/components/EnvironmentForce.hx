@@ -29,6 +29,9 @@ class EnvironmentForce implements IComponent {
 
 	public var direction:Vector2 = new Vector2();
 	public var power:Float = 0;
+	public var ttl:Float = 0;
+
+	public var currentIndex:Int;
 
     // public function new(direction:Vector2) {
     public function new(data:Array<ForceData>) {

@@ -46,7 +46,7 @@ class MaggotFactory {
             new Extents((15/2)*2,(7/2)*2),
             new Display("maggot"), 
             new PhysicsCollision(false,new Filter(),[]),
-            new PhysicsBody(maggotBody), 
+            new PhysicsBody(maggotBody,true), 
             new Moveable(),
             new Holdable(),
             new SpriteAnimation("maggot",["idle","blink","jump"],"jump"),

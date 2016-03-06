@@ -95,17 +95,17 @@ var c = 0;
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
 
-                        if (cell&STEP==STEP&&body.usesStairs) {
-                            Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,tilePosition,tileExtents,step,contact);
-                        } else {
+                        // if (cell&STEP==STEP&&body.usesStairs) {
+                            // Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,tilePosition,tileExtents,step,contact);
+                        // } else {
                             Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact);
-                        }
+                        // }
 
                         //if (Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact)==true) {
                             
                             //Check for 1 way platform?
-                            if (cell&ONE_WAY==ONE_WAY&&body.collideOneWay) {
-                                if ( contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
+                            if (cell&ONE_WAY==ONE_WAY) {
+                                if ( body.collideOneWay && contact.normal.y<0&&contact.distance>=ONE_WAY_TOLLERANCE ) {
                                     body.respondStaticCollision(contact);
                                     proxy.collide(null,contact);
                                 }

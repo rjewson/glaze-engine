@@ -54,7 +54,7 @@ class Body
     public var inWater:Bool = false;
     public var inWaterPrev:Bool = false;
     public var usesStairs:Bool = false;
-    public var collideOneWay:Bool = false;
+    public var collideOneWay:Bool = true;
 
     public var totalBounceCount:Int = 0;
     public var bounceCount:Int = 0;
@@ -226,9 +226,18 @@ class Body
         wake();
     }
 
+    inline public function addProportionalForce(f:Vector2) {
+        forces.plusMultEquals(f,mass);
+        wake();
+    }
+
     public function setMass(mass) {
         this.mass = mass;
         this.invMass = 1/mass;
+    }
+
+    public function setMassFromVolumeMaterial(volume:Float) {
+        setMass(material.density*volume);
     }
 
     public function setPosition(x:Float,y:Float) {

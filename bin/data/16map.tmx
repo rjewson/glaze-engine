@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="8" tileheight="8" nextobjectid="8">
+<map version="1.0" orientation="orthogonal" renderorder="right-down" width="100" height="100" tilewidth="8" tileheight="8" nextobjectid="15">
  <tileset firstgid="1" name="Collision" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
   <properties>
    <property name="superTile" value="1"/>
@@ -21,6 +21,15 @@
  <tileset firstgid="5121" name="SetE" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
   <image source="../../resources/tiles2/set6.png" width="256" height="256"/>
  </tileset>
+ <tileset firstgid="6145" name="SetF" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set7.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="7169" name="SetG" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set8.png" width="256" height="256"/>
+ </tileset>
+ <tileset firstgid="8193" name="One Way" tilewidth="8" tileheight="8" tilecount="1024" columns="32">
+  <image source="../../resources/tiles2/set9.png" width="256" height="256"/>
+ </tileset>
  <layer name="Background" width="100" height="100" visible="0">
   <data encoding="base64" compression="zlib">
    eJztwTEBAAAAwqD1T+1lC6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAbnEAAAQ==
@@ -28,27 +37,42 @@
  </layer>
  <layer name="Foreground1" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   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
+   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
   </data>
  </layer>
  <layer name="Foreground2" width="100" height="100">
   <data encoding="base64" compression="zlib">
-   eJzt1DEOgzAQRUFDiqSgcMEJuGNCgMtnS1oLoxgxI712my9tSgAAAAAAAAAAAHAP3XD8xjun9Inm6Bst0Rpt+fjtu6mxB/W8Yo++oMl+TXnstuH//Le22KMtT3sAAABAdf1YFufqxrI4lz3aYg8AAAAAAAAAAAAAAAAAAAAAAAAAAACu5getkQkD
+   eJzt2DsOwjAURUEnFFBQpMgK2CP/zeOS1rKR3jMz0m1d5MguUgoAAAAAAAAAAJEs+5gxhh6x6BFLxm+/nPvPuG6l3OrudY+6Z92r7r31n90j4/0Y0SOqjD1OtcfasEuifhl7tDp8tYnuH3rM/L5lpEcsRz0AAABguHVvG78107/OGegRix4AAAAAAAAAAAAAAAAAAAAAAAAAAABk8wHdfRRq
   </data>
  </layer>
  <layer name="Collision" width="100" height="100" opacity="0.47">
   <data encoding="base64" compression="zlib">
-   eJzt11Fq20AUQNEx3WiW1qV0aU0ghQoCHimR5mKdC/Npa/SONNiPMcbDSi014tGKRyserXi04tGKRysera70+LzW28S6bVd5+G861xUzYDHf2XNgsa8zZ8Fif2fNg8WxzpjJd39Hze7pFT2L9zTz7rzq+1W8p2fn2Sufd8Vz3nk190z+VL+efB+P6zyeWfy/pzu251n8bjMW/67F49xmLcbgcfa977EYg8eZ977XYgwehfXVnu7Yagce21Y7zBrdpdUz57Ft9czvPPuvWu3AY9tqBx7bVjvw2Lbagce21Q48tj2bh3ldG49WPFrxaMWjFY9WZ3m8f+bPxzq0qRvHoxWPVjxaTXj8Prh4HIhHK79nW/FoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1Y8WvFoxaMVj1YPK7f+Au+HJPQ=
+   eJzt111OwzAQAGEHLsrROApHAyQq8VAl/tv1OJ2R/JY0G3+4Kkcp5XChljHSg5UerPRgpQcrPVjpwUoPVpkef8/6qFgvW5aH/5vWlbEHWtQXvQ9atBW5F1q0F7UfWvQVsSejv6NqZ7qjJ/Gdas7O2TW1Z3D2u894Ft2jdb9bvhPJHqTv+azZd/J4dt2s3i8+L9vj7cnqaUePK4v/M1115/NRc91oNRaPZ+kRW61FKXpEe7RYlKJHpEerRSl7eEQ9q+WdIlf07Gf3z0oPPVYZjc5+dv+s9NAjY++zPTL+jvTQY9b8WR6Z7eKRNfvqdvDInH11euztMfo5lPTgtfLMj57TO3o8Wr33euyfHqz0YBXl8XPP1+/qGuqF04OVHqz0YFXh8dm59OhID1b+nmWlBys9WOnBSg9WerDSg5UerPRgpQcrPVjpwUoPVnqw0oOVHqz0YKUHKz1Y6cFKD1Z6sNKDlR6s9GClBys9WOnBSg9WerDSg5UerPRgpQcrPVjpwUoPVnqw0oOVHqz0YKUHKz1Y6cFKD1Z6sNKDlR6s9GClBys9WOnB6nDh1jcxySaj
   </data>
  </layer>
  <objectgroup name="Objects">
   <object id="3" name="Water" type="Water" x="72" y="328" width="96" height="32"/>
   <object id="5" name="Force" type="Force" x="304" y="160" width="64" height="120">
    <properties>
-    <property name="config" value="0,1000,1000,3,5"/>
-    <property name="config1" value="180,1000,1000,3,5"/>
+    <property name="config0" value="0,1600,1600,0,0"/>
    </properties>
   </object>
+  <object id="8" name="Force" type="Force" x="672" y="128" width="40" height="120">
+   <properties>
+    <property name="config0" value="180,2000,2000,0,0"/>
+   </properties>
+  </object>
+  <object id="12" name="Force" type="Force" x="496" y="248" width="216" height="40">
+   <properties>
+    <property name="config0" value="270,2000,2000,0,0"/>
+   </properties>
+  </object>
+  <object id="13" name="Force" type="Force" x="456" y="128" width="40" height="160">
+   <properties>
+    <property name="config0" value="0,2000,2000,0,0"/>
+   </properties>
+  </object>
+  <object id="14" name="Water" type="Water" x="512" y="168" width="144" height="64"/>
  </objectgroup>
  <objectgroup name="Waypoints" visible="0"/>
 </map>

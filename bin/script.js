@@ -62,7 +62,17 @@ GameTestA.main = function() {
 		game.dropGrenades();
 	});
 	window.document.getElementById("debug3button").addEventListener("click",function(event4) {
-		game.broadphase.dump();
+		var rockbody = game.rock.map.PhysicsBody;
+		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 637, className : "GameTestA", methodName : "main"});
+		var _this = rockbody.body;
+		var f_x = 0;
+		var f_y = -128000;
+		var _this1 = _this.forces;
+		var s = _this.invMass;
+		_this1.x += f_x * s;
+		_this1.y += f_y * s;
+		_this.canSleep = false;
+		_this.motion = 10;
 	});
 	window.document.getElementById("debug4button").addEventListener("click",function(event5) {
 		game.shakeIt = 15;
@@ -87,7 +97,6 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.tmxMap = new glaze_tmx_TmxMap(tmp,16);
 		var aiphase = this.engine.createPhase();
 		var corephase = this.engine.createPhase();
-		var physicsPhase = this.engine.createPhase();
 		this.messageBus = new glaze_util_MessageBus();
 		var cameraRange = new glaze_geom_AABB2(0,this.TS * this.tmxMap.width,this.TS * this.tmxMap.height,0);
 		cameraRange.expand(-32);
@@ -157,23 +166,23 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.spriteParticleEngine.renderer.SetSpriteSheet(tmp11.texture,16,16,16);
 		var map = new glaze_physics_collision_Map(collisionData);
 		exile_entities_creatures_BeeFactory.map = map;
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
-		physicsPhase.addSystem(new glaze_ai_steering_systems_SteeringSystem());
+		corephase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
+		corephase.addSystem(new glaze_ai_steering_systems_SteeringSystem());
 		this.engine.config.map = map;
 		this.nf = new glaze_physics_collision_Intersect();
 		this.broadphase = new glaze_physics_collision_broadphase_BruteforceBroadphase(map,this.nf);
 		exile_util_CombatUtils.setBroadphase(this.broadphase);
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsStaticSystem(this.broadphase));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsMoveableSystem(this.broadphase));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(this.broadphase));
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsConstraintSystem());
-		physicsPhase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
-		physicsPhase.addSystem(new glaze_physics_systems_ContactRouterSystem());
+		corephase.addSystem(new glaze_physics_systems_PhysicsStaticSystem(this.broadphase));
+		corephase.addSystem(new glaze_physics_systems_PhysicsMoveableSystem(this.broadphase));
+		corephase.addSystem(new glaze_physics_systems_PhysicsCollisionSystem(this.broadphase));
+		corephase.addSystem(new glaze_physics_systems_PhysicsMassSystem());
+		corephase.addSystem(new glaze_physics_systems_PhysicsPositionSystem());
+		corephase.addSystem(new glaze_engine_systems_HeldSystem());
+		corephase.addSystem(new glaze_physics_systems_ContactRouterSystem());
 		corephase.addSystem(new glaze_engine_systems_WaterSystem(this.blockParticleEngine));
 		corephase.addSystem(new glaze_engine_systems_environment_EnvironmentForceSystem());
 		corephase.addSystem(new glaze_engine_systems_environment_WindRenderSystem(this.blockParticleEngine));
 		corephase.addSystem(new glaze_engine_systems_HolderSystem(64));
-		corephase.addSystem(new glaze_engine_systems_HeldSystem());
 		corephase.addSystem(new glaze_engine_systems_HoldableSystem(64));
 		corephase.addSystem(new glaze_engine_systems_HealthSystem());
 		corephase.addSystem(new glaze_engine_systems_AgeSystem());
@@ -213,7 +222,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var _this13 = body.maxVelocity;
 		_this13.x = 1600;
 		_this13.y = 1000;
-		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(7,22),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
+		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(10,21),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body,false),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player");
 		chickenSystem.scaredOfPosition = this.player.map.Position;
 		rabbitSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
@@ -223,9 +232,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_ForceFactory);
 		tmxFactory.parseObjectGroup("Objects");
 		this.createTurret();
-		this.createWind();
 		this.createDoor();
-		exile_entities_creatures_BirdFactory.create(this.engine,this.mapPosition(20,20));
+		exile_entities_creatures_BirdFactory.create(this.engine,this.mapPosition(20,20),this.player.map.Position);
 		this.loop.start();
 	}
 	,setupMap: function() {
@@ -239,14 +247,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	,mapExtents: function(l,t,r,b) {
 		return new glaze_engine_components_Extents((r - l) * 0.5 * this.TS,(b - t) * 0.5 * this.TS);
 	}
-	,createWind: function() {
-	}
 	,createDoor: function() {
 		this.door = this.engine.createEntity([this.mapPosition(9.5,23.5),new glaze_engine_components_Extents(3,34),new glaze_engine_components_TileDisplay("doorClosed"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new exile_components_Door(false,""),new glaze_engine_components_State(["closed","open"],0,["doorA"]),new glaze_engine_components_Active()],"door");
 		this.engine.createEntity([this.mapPosition(10.5,18.5),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(false,1000,["doorA"]),new glaze_engine_components_Active(),new glaze_engine_components_TileDisplay("switchOff")],"turret");
 		this.engine.createEntity([this.mapPosition(3,23),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(192,576)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
 		this.engine.createEntity([this.mapPosition(20.5,17),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("insects","hive"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(5)],"BeeHive");
-		this.engine.createEntity([this.mapPosition(9,4),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(null,15)),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.rock = this.engine.createEntity([this.mapPosition(9,4),new glaze_engine_components_Extents(8,8),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(glaze_physics_Material.ROCK),true),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 	}
 	,createTurret: function() {
 		var filter = new glaze_physics_collision_Filter();
@@ -334,7 +340,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 623, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 611, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -783,12 +789,12 @@ var exile_entities_creatures_BeeFactory = function() {
 };
 exile_entities_creatures_BeeFactory.__name__ = ["exile","entities","creatures","BeeFactory"];
 exile_entities_creatures_BeeFactory.create = function(engine,position) {
-	var beeBody = new glaze_physics_Body(new glaze_physics_Material(1,0.3,0));
+	var beeBody = new glaze_physics_Body(new glaze_physics_Material(0.1,0.3,0));
 	beeBody.setMass(0.1);
 	beeBody.setBounces(0);
 	beeBody.globalForceFactor = 0.0;
 	beeBody.maxScalarVelocity = 200;
-	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(),new glaze_ai_steering_behaviors_WallAvoidance(exile_entities_creatures_BeeFactory.map,40)]),new glaze_engine_components_Age(100000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(),new glaze_ai_steering_behaviors_WallAvoidance(exile_entities_creatures_BeeFactory.map,40)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
 	return bee;
 };
 exile_entities_creatures_BeeFactory.prototype = {
@@ -797,14 +803,14 @@ exile_entities_creatures_BeeFactory.prototype = {
 var exile_entities_creatures_BirdFactory = function() {
 };
 exile_entities_creatures_BirdFactory.__name__ = ["exile","entities","creatures","BirdFactory"];
-exile_entities_creatures_BirdFactory.create = function(engine,position) {
+exile_entities_creatures_BirdFactory.create = function(engine,position,follow) {
 	var birdBody = new glaze_physics_Body(new glaze_physics_Material());
-	birdBody.setMass(0.1);
+	birdBody.setMass(1);
 	birdBody.setBounces(0);
 	birdBody.globalForceFactor = 0.0;
 	birdBody.maxScalarVelocity = 200;
 	var map = engine.config.map;
-	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(),new glaze_ai_steering_behaviors_WallAvoidance(map,40)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
+	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Arrival(follow.coords,64,16),new glaze_ai_steering_behaviors_WallAvoidance(map,40)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
 	return bird;
 };
 exile_entities_creatures_BirdFactory.prototype = {
@@ -816,11 +822,10 @@ exile_entities_creatures_ChickenFactory.__name__ = ["exile","entities","creature
 exile_entities_creatures_ChickenFactory.create = function(engine,position) {
 	var filter = new glaze_physics_collision_Filter();
 	var chickenBody = new glaze_physics_Body(new glaze_physics_Material());
-	chickenBody.setMass(3);
 	chickenBody.setBounces(3);
 	chickenBody.maxScalarVelocity = 1000;
 	chickenBody.globalForceFactor = 0.5;
-	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(12.,15.),new glaze_engine_components_Display("chicken"),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_physics_components_PhysicsBody(chickenBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("chicken",["walk"],"walk"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
+	var chicken = engine.createEntity([position,new exile_components_Chicken(),new glaze_engine_components_Extents(12,12),new glaze_engine_components_Display("chicken"),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_physics_components_PhysicsBody(chickenBody,true),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("chicken",["walk"],"walk"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"chicken");
 	return chicken;
 };
 exile_entities_creatures_ChickenFactory.prototype = {
@@ -835,7 +840,7 @@ exile_entities_creatures_RabbitFactory.create = function(engine,position) {
 	rabbitBody.setBounces(3);
 	rabbitBody.maxScalarVelocity = 1000;
 	rabbitBody.globalForceFactor = 1;
-	var rabbit = engine.createEntity([position,new exile_components_Rabbit(),new glaze_engine_components_Extents(12,16),new glaze_engine_components_Display("rabbit"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(rabbitBody),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("rabbit",["idle","blink","jump","eat","listen"],"jump"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"rabbit");
+	var rabbit = engine.createEntity([position,new exile_components_Rabbit(),new glaze_engine_components_Extents(12,16),new glaze_engine_components_Display("rabbit"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_physics_components_PhysicsBody(rabbitBody,true),new glaze_engine_components_Moveable(),new glaze_engine_components_Holdable(),new glaze_animation_components_SpriteAnimation("rabbit",["idle","blink","jump","eat","listen"],"jump"),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"rabbit");
 	return rabbit;
 };
 exile_entities_creatures_RabbitFactory.prototype = {
@@ -845,12 +850,12 @@ var exile_entities_projectile_PlasmaProjectileFactory = function() {
 };
 exile_entities_projectile_PlasmaProjectileFactory.__name__ = ["exile","entities","projectile","PlasmaProjectileFactory"];
 exile_entities_projectile_PlasmaProjectileFactory.create = function(engine,position,filter,targetPosition) {
-	var bulletBody = new glaze_physics_Body(new glaze_physics_Material());
+	var bulletBody = new glaze_physics_Body(glaze_physics_Material.LIGHTMETAL);
 	bulletBody.setMass(0.3);
 	bulletBody.setBounces(0);
 	bulletBody.globalForceFactor = 0.1;
 	bulletBody.isBullet = true;
-	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","plasma"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_FireballEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 1, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
+	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","plasma"),new glaze_physics_components_PhysicsBody(bulletBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_FireballEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 1, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
 	glaze_util_Ballistics.calcProjectileVelocity(bulletBody,targetPosition,600);
 	return bullet;
 };
@@ -861,15 +866,15 @@ var exile_entities_projectile_StandardBulletFactory = function() {
 };
 exile_entities_projectile_StandardBulletFactory.__name__ = ["exile","entities","projectile","StandardBulletFactory"];
 exile_entities_projectile_StandardBulletFactory.create = function(engine,position,filter,targetPosition) {
-	var bulletBody = new glaze_physics_Body(new glaze_physics_Material());
-	bulletBody.setMass(10);
+	var bulletBody = new glaze_physics_Body(glaze_physics_Material.LIGHTMETAL);
+	bulletBody.setMass(24);
 	bulletBody.setBounces(3);
 	bulletBody.globalForceFactor = 1;
 	bulletBody.isBullet = true;
 	bulletBody.maxScalarVelocity = 1000;
 	filter.categoryBits |= 8;
 	filter.maskBits |= 16;
-	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 3, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
+	var bullet = engine.createEntity([position,new glaze_engine_components_Extents(2,2),new glaze_engine_components_Display("projectiles","standard"),new glaze_physics_components_PhysicsBody(bulletBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,filter,[]),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_InterpolatedEmitter(0,10)]),new exile_components_Projectile({ ttl : 1000, bounce : 3, power : 10, range : 32}),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Age(1000),new glaze_engine_components_Active()],"StandardBullet");
 	glaze_util_Ballistics.calcProjectileVelocity(bulletBody,targetPosition,2500);
 	return bullet;
 };
@@ -881,7 +886,7 @@ exile_entities_weapon_HandGrenadeFactory.__name__ = ["exile","entities","weapon"
 exile_entities_weapon_HandGrenadeFactory.create = function(engine,x,y) {
 	var body = new glaze_physics_Body(new glaze_physics_Material());
 	body.maxScalarVelocity = 200;
-	var grenade = engine.createEntity([new glaze_engine_components_Position(x,y),new glaze_engine_components_Display("grenade","off"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body),new glaze_engine_components_Holdable(),new glaze_engine_components_Storeable(),new exile_components_Grenade(),new glaze_engine_components_Health(100,100,0),new glaze_engine_components_State(["off","on"],0,[]),new glaze_engine_components_Active()],"grenade" + exile_entities_weapon_HandGrenadeFactory.count++);
+	var grenade = engine.createEntity([new glaze_engine_components_Position(x,y),new glaze_engine_components_Display("grenade","off"),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(body,false),new glaze_engine_components_Holdable(),new glaze_engine_components_Storeable(),new exile_components_Grenade(),new glaze_engine_components_Health(100,100,0),new glaze_engine_components_State(["off","on"],0,[]),new glaze_engine_components_Active()],"grenade" + exile_entities_weapon_HandGrenadeFactory.count++);
 	return grenade;
 };
 var glaze_eco_core_System = function(componentSignature) {
@@ -1012,8 +1017,8 @@ exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,
 			}
 			if(dist < 4096) {
 				if(Math.random() < 0.1) {
-					var f_x = dir * 10;
-					var f_y = -10;
+					var f_x = dir * 50000;
+					var f_y = -50000;
 					var _this1 = body.forces;
 					var s = body.invMass;
 					_this1.x += f_x * s;
@@ -1025,8 +1030,8 @@ exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,
 			} else if(Math.random() < 0.02) {
 				var dir1 = Math.random() < 0.5?1:-1;
 				entity.map.Position.direction.x = -dir1;
-				var f_x1 = dir1 * 10;
-				var f_y1 = -10;
+				var f_x1 = dir1 * 50000;
+				var f_y1 = -50000;
 				var _this2 = body.forces;
 				var s1 = body.invMass;
 				_this2.x += f_x1 * s1;
@@ -1194,7 +1199,7 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		this.player = entity;
 		this.position = entity.map.Position;
 		this.physicsBody = entity.map.PhysicsBody;
-		this.physicsBody.body.setMass(50);
+		this.physicsBody.body.setMass(880);
 		this.physicsBody.body.usesStairs = true;
 		this.characterController = new exile_util_CharacterController2(this.input,this.physicsBody.body);
 		this.playerLight = this.engine.createEntity([this.position,new glaze_lighting_components_Light(256,1,1,0,255,255,255),new glaze_engine_components_Viewable(),new glaze_engine_components_Moveable(),new glaze_engine_components_Active()],"player light");
@@ -1212,6 +1217,7 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		if(this.physicsBody.body.onGround && Math.abs(this.physicsBody.body.velocity.x) > 10) this.animation.animationController.play("runright"); else if(!this.physicsBody.body.onGround) this.animation.animationController.play("fly"); else this.animation.animationController.play("idle");
 		if(this.characterController.left > 0) this.position.direction.x = -1;
 		if(this.characterController.right > 0) this.position.direction.x = 1;
+		this.physicsBody.body.collideOneWay = !(this.characterController.down > 0);
 		var tmp;
 		var _this = this.input;
 		tmp = _this.keyMap[32] == _this.frameRef - 1;
@@ -1275,7 +1281,7 @@ exile_systems_PlayerSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 		if(this.characterController.burn > 0) {
 			var offsetx = this.position.coords.x - 6 * this.position.direction.x;
 			var velocity = 200 + Math.floor(Math.random() * 300 + -150);
-			var count = Math.floor((this.characterController.burn + 500) / 1000);
+			var count = Math.floor((this.characterController.burn + 500) / 10000);
 			if(count > 0) this.particleEngine.EmitParticle(offsetx,this.position.coords.y + 6,Math.random() * 20 + -10,velocity,0,0,40,0.9,false,false,null,4,255,255,0,0);
 			var _g = 0;
 			while(_g < count) {
@@ -1484,31 +1490,33 @@ exile_util_CharacterController2.prototype = {
 		var duration2 = _this4.keyMap[87];
 		if(duration2 > 0) tmp3 = _this4.frameRef - duration2; else tmp3 = -1;
 		var upDuration = tmp3;
+		var tmp4;
 		var _this5 = this.input;
 		var duration3 = _this5.keyMap[83];
-		if(duration3 > 0) _this5.frameRef - duration3; else -1;
-		var tmp4;
+		if(duration3 > 0) tmp4 = _this5.frameRef - duration3; else tmp4 = -1;
+		this.down = tmp4;
+		var tmp5;
 		var _this6 = this.input;
 		var duration4 = _this6.keyMap[16];
-		if(duration4 > 0) tmp4 = _this6.frameRef - duration4; else tmp4 = -1;
-		this.boost = tmp4;
+		if(duration4 > 0) tmp5 = _this6.frameRef - duration4; else tmp5 = -1;
+		this.boost = tmp5;
 		if(!this.jumping && this.body.onGround && up) {
 			this.jumping = true;
-			this.controlForce.y -= 15000. / 5;
+			this.controlForce.y -= 300000. / 5;
 		}
 		if(this.jumping && this.input.keyMap[87] == 0 || this.body.lastNormal.y > 0) this.jumping = false;
 		if(this.body.onGround && !this.body.onGroundPrev) this.burn = 0;
 		if(this.body.onGround) {
-			if(this.left > 0) this.controlForce.x -= 1000.;
-			if(this.right > 0) this.controlForce.x += 1000.;
-			if(up) this.controlForce.y -= 15000.;
+			if(this.left > 0) this.controlForce.x -= 20000.;
+			if(this.right > 0) this.controlForce.x += 20000.;
+			if(up) this.controlForce.y -= 300000.;
 		} else {
-			if(this.left > 0) this.controlForce.x -= 500;
-			if(this.right > 0) this.controlForce.x += 500;
-			if(up) this.burn = 2000.;
-			if(upDuration > 0) this.burn += 500;
+			if(this.left > 0) this.controlForce.x -= 10000;
+			if(this.right > 0) this.controlForce.x += 10000;
+			if(up) this.burn = 40000.;
+			if(upDuration > 0) this.burn += 10000;
 		}
-		if(this.boost > 0) this.burn = Math.min(this.burn,2000. * 1.3); else this.burn = Math.min(this.burn,2000.);
+		if(this.boost > 0) this.burn = Math.min(this.burn,40000. * 1.3); else this.burn = Math.min(this.burn,40000.);
 		this.controlForce.y -= this.burn;
 		this.burn *= 0.95;
 		this.isWalking = this.body.onGround && (this.left > 0 || this.right > 0);
@@ -1601,6 +1609,7 @@ glaze_ai_behaviortree_Behavior.prototype = {
 		return this.status;
 	}
 	,__class__: glaze_ai_behaviortree_Behavior
+	,__properties__: {get_running:"get_running",get_terminated:"get_terminated"}
 };
 var glaze_ai_behaviortree_Action = function(action,actionContext) {
 	glaze_ai_behaviortree_Behavior.call(this);
@@ -1781,7 +1790,7 @@ glaze_ai_navigation_Node.prototype = {
 	,__class__: glaze_ai_navigation_Node
 };
 var glaze_ai_steering_SteeringAgentParameters = function() {
-	this.maxAcceleration = 2;
+	this.maxAcceleration = 800;
 };
 glaze_ai_steering_SteeringAgentParameters.__name__ = ["glaze","ai","steering","SteeringAgentParameters"];
 glaze_ai_steering_SteeringAgentParameters.prototype = {
@@ -1891,6 +1900,63 @@ glaze_ai_steering_behaviors_Behavior.prototype = {
 	}
 	,__class__: glaze_ai_steering_behaviors_Behavior
 };
+var glaze_ai_steering_behaviors_Arrival = function(target,arrivalZone,seekDist) {
+	if(seekDist == null) seekDist = 0;
+	if(arrivalZone == null) arrivalZone = 0;
+	glaze_ai_steering_behaviors_Behavior.call(this,1,70);
+	this.target = target;
+	this.arrivalZone = arrivalZone;
+	this.seekDist = seekDist;
+};
+glaze_ai_steering_behaviors_Arrival.__name__ = ["glaze","ai","steering","behaviors","Arrival"];
+glaze_ai_steering_behaviors_Arrival.calc = function(agent,result,target,arrivalZone,seekDist) {
+	if(seekDist == null) seekDist = 0;
+	if(arrivalZone == null) arrivalZone = 0;
+	var dX = target.x - agent.position.x + 0.000001;
+	var dY = target.y - agent.position.y + 0.000001;
+	var d = dX * dX + dY * dY;
+	if(seekDist > 0 && d < seekDist * seekDist) return false;
+	var t = Math.sqrt(d);
+	var scale = 1000.0;
+	if(t < arrivalZone) {
+		scale = t / arrivalZone;
+		scale *= 1000;
+	}
+	result.x = dX / t;
+	result.x *= scale;
+	result.x -= agent.velocity.x * 0.016;
+	result.y = dY / t;
+	result.y *= scale;
+	result.y -= agent.velocity.y * 0.016;
+	return true;
+};
+glaze_ai_steering_behaviors_Arrival.__super__ = glaze_ai_steering_behaviors_Behavior;
+glaze_ai_steering_behaviors_Arrival.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
+	calculate: function(agent,result) {
+		var target = this.target;
+		var arrivalZone = this.arrivalZone;
+		var seekDist = this.seekDist;
+		var dX = target.x - agent.position.x + 0.000001;
+		var dY = target.y - agent.position.y + 0.000001;
+		var d = dX * dX + dY * dY;
+		if(seekDist > 0 && d < seekDist * seekDist) {
+		} else {
+			var t = Math.sqrt(d);
+			var scale = 1000.0;
+			if(t < arrivalZone) {
+				scale = t / arrivalZone;
+				scale *= 1000;
+			}
+			result.x = dX / t;
+			result.x *= scale;
+			result.x -= agent.velocity.x * 0.016;
+			result.y = dY / t;
+			result.y *= scale;
+			result.y -= agent.velocity.y * 0.016;
+		}
+	}
+	,__class__: glaze_ai_steering_behaviors_Arrival
+});
 var glaze_ai_steering_behaviors_Feeler = function(angle,length) {
 	this.angle = angle;
 	this.length = length;
@@ -1971,7 +2037,6 @@ glaze_ai_steering_behaviors_Seek.calc = function(agent,result,target,seekDistSq)
 	var dX = target.x - agent.position.x + 0.000001;
 	var dY = target.y - agent.position.y + 0.000001;
 	var d = dX * dX + dY * dY;
-	haxe_Log.trace(seekDistSq,{ fileName : "Seek.hx", lineNumber : 33, className : "glaze.ai.steering.behaviors.Seek", methodName : "calc"});
 	if(seekDistSq > 0 && d < seekDistSq) return false;
 	var t = Math.sqrt(d);
 	result.x = dX / t;
@@ -1990,7 +2055,6 @@ glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors
 		var dX = target.x - agent.position.x + 0.000001;
 		var dY = target.y - agent.position.y + 0.000001;
 		var d = dX * dX + dY * dY;
-		haxe_Log.trace(seekDistSq,{ fileName : "Seek.hx", lineNumber : 33, className : "glaze.ai.steering.behaviors.Seek", methodName : "calc"});
 		if(seekDistSq > 0 && d < seekDistSq) {
 		} else {
 			var t = Math.sqrt(d);
@@ -2781,6 +2845,7 @@ glaze_ds_EntityCollection.prototype = {
 		}
 	}
 	,__class__: glaze_ds_EntityCollection
+	,__properties__: {get_length:"get_length"}
 };
 var glaze_ds_EntityCollectionItem = function() {
 };
@@ -3355,6 +3420,7 @@ glaze_engine_components_Display.prototype = {
 		this.set_frame(this.frameList.getFrame(id));
 	}
 	,__class__: glaze_engine_components_Display
+	,__properties__: {set_frame:"set_frame"}
 };
 var glaze_engine_components_ForceData = function(direction,minForce,maxForce,minDuration,maxDuration) {
 	this.direction = new glaze_geom_Vector2();
@@ -3369,6 +3435,7 @@ glaze_engine_components_ForceData.prototype = {
 	__class__: glaze_engine_components_ForceData
 };
 var glaze_engine_components_EnvironmentForce = function(data) {
+	this.ttl = 0;
 	this.power = 0;
 	this.direction = new glaze_geom_Vector2();
 	this.data = data;
@@ -3600,6 +3667,7 @@ glaze_engine_components_TileDisplay.prototype = {
 		return value;
 	}
 	,__class__: glaze_engine_components_TileDisplay
+	,__properties__: {set_tileFrameId:"set_tileFrameId"}
 };
 var glaze_engine_components_Viewable = function() {
 };
@@ -3629,6 +3697,7 @@ var glaze_engine_factories_IEntityFactory = function() { };
 glaze_engine_factories_IEntityFactory.__name__ = ["glaze","engine","factories","IEntityFactory"];
 glaze_engine_factories_IEntityFactory.prototype = {
 	__class__: glaze_engine_factories_IEntityFactory
+	,__properties__: {get_mapping:"get_mapping"}
 };
 var glaze_engine_factories_BaseEntityFactory = function() {
 };
@@ -3667,6 +3736,7 @@ glaze_engine_factories_BaseEntityFactory.prototype = {
 		return Type.createInstance(componentClass,params);
 	}
 	,__class__: glaze_engine_factories_BaseEntityFactory
+	,__properties__: {get_mapping:"get_mapping"}
 };
 var glaze_engine_factories_ComponentFactory = function() {
 	this.map = new haxe_ds_StringMap();
@@ -3787,12 +3857,21 @@ glaze_engine_factories_tmx_ForceFactory.prototype = $extend(glaze_engine_factori
 		components.push(new glaze_physics_components_PhysicsCollision(true,null,[]));
 		components.push(new glaze_engine_components_Fixed());
 		components.push(new glaze_engine_components_Active());
-		var tmp;
-		var _this = this.tmxObject.combined;
-		if(__map_reserved.config != null) tmp = _this.getReserved("config"); else tmp = _this.h["config"];
-		var config = glaze_engine_factories_BaseEntityFactory.getCSVParams(tmp);
-		var forceData = new glaze_engine_components_ForceData(config[0],config[1],config[2],config[3],config[4]);
-		components.push(new glaze_engine_components_EnvironmentForce([forceData]));
+		var forceDataArray = [];
+		var _g = 0;
+		while(_g < 10) {
+			var i = _g++;
+			var tmp;
+			var _this = this.tmxObject.combined;
+			var key = "config" + i;
+			if(__map_reserved[key] != null) tmp = _this.getReserved(key); else tmp = _this.h[key];
+			var raw = tmp;
+			if(raw != null) {
+				var config = glaze_engine_factories_BaseEntityFactory.getCSVParams(raw);
+				forceDataArray.push(new glaze_engine_components_ForceData(config[0],config[1],config[2],config[3],config[4]));
+			}
+		}
+		components.push(new glaze_engine_components_EnvironmentForce(forceDataArray));
 		components.push(new glaze_engine_components_Wind(0.001));
 		engine.createEntity(components,this.tmxObject.name);
 	}
@@ -4155,11 +4234,17 @@ glaze_engine_systems_HeldSystem.prototype = $extend(glaze_eco_core_System.protot
 			var entity = _g1[_g];
 			++_g;
 			var holder = entity.map.Held.holder;
-			var holderPos = holder.map.Position.coords;
-			var _this = entity.map.Position.coords;
-			_this.x = holderPos.x;
-			_this.y = holderPos.y;
-			entity.map.PhysicsBody.body.setPosition(holderPos.x,holderPos.y - 15);
+			var holderPos = holder.map.Position;
+			entity.map.PhysicsBody.body.setPosition(holderPos.coords.x + holderPos.direction.x * 4,holderPos.coords.y);
+			var _this = entity.map.Position;
+			var position = entity.map.PhysicsBody.body.position;
+			var _this1 = _this.prevCoords;
+			var v = _this.coords;
+			_this1.x = v.x;
+			_this1.y = v.y;
+			var _this11 = _this.coords;
+			_this11.x = position.x;
+			_this11.y = position.y;
 		}
 	}
 	,callback: function(a,b,contact) {
@@ -4513,7 +4598,7 @@ glaze_engine_systems_WaterSystem.prototype = $extend(glaze_eco_core_System.proto
 		b.body.damping = 0.90;
 		var _this = b.body;
 		var f_x = 0;
-		var f_y = -area * 3;
+		var f_y = -area * 40;
 		var _this1 = _this.forces;
 		var s = _this.invMass;
 		_this1.x += f_x * s;
@@ -4599,39 +4684,62 @@ glaze_engine_systems_environment_EnvironmentForceSystem.prototype = $extend(glaz
 	entityAdded: function(entity) {
 		entity.map.PhysicsCollision.proxy.contactCallbacks.push($bind(this,this.callback));
 		var force = entity.map.EnvironmentForce;
-		var _this = force.direction;
-		var v = force.data[0].direction;
-		_this.x = v.x;
-		_this.y = v.y;
-		force.power = force.data[0].maxForce;
+		this.setActiveForce(force,0);
 	}
 	,entityRemoved: function(entity) {
 	}
 	,update: function(timestamp,delta) {
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var force = entity.map.EnvironmentForce;
+			if(force.ttl > 0) {
+				force.ttl -= delta;
+				if(force.ttl <= 0) motion_Actuate.tween(force,1,{ power : 0}).onComplete($bind(this,this.onFinished),[force]);
+			}
+		}
+	}
+	,onFinished: function(force) {
+		force.currentIndex++;
+		if(force.currentIndex >= force.data.length) force.currentIndex = 0;
+		this.setActiveForce(force,force.currentIndex);
+	}
+	,setActiveForce: function(envForce,index) {
+		envForce.currentIndex = index;
+		var item = envForce.data[index];
+		var _this = envForce.direction;
+		var v = item.direction;
+		_this.x = v.x;
+		_this.y = v.y;
+		envForce.power = item.maxForce;
+		var tmp;
+		if(item.minDuration == 0) tmp = -1; else {
+			var min = item.minDuration * 1000;
+			tmp = Math.random() * (item.maxDuration * 1000 - min) + min;
+		}
+		envForce.ttl = tmp;
 	}
 	,callback: function(a,b,contact) {
-		var areaOverlap = b.aabb.overlapArea(a.aabb);
-		var percent = areaOverlap / b.aabb.area();
+		var area = a.aabb.overlapArea(b.aabb);
 		var force = a.entity.map.EnvironmentForce;
 		var _this = this.temp;
 		var v = force.direction;
 		_this.x = v.x;
 		_this.y = v.y;
 		var _this1 = this.temp;
-		var s = force.power;
+		var s = 40 * area;
 		_this1.x *= s;
 		_this1.y *= s;
-		var _this2 = this.temp;
-		_this2.x *= percent;
-		_this2.y *= percent;
-		var _this3 = b.body;
+		var _this2 = b.body;
 		var f = this.temp;
-		var _this4 = _this3.forces;
-		var s1 = _this3.invMass;
-		_this4.x += f.x * s1;
-		_this4.y += f.y * s1;
-		_this3.canSleep = false;
-		_this3.motion = 10;
+		var _this3 = _this2.forces;
+		var s1 = _this2.invMass;
+		_this3.x += f.x * s1;
+		_this3.y += f.y * s1;
+		_this2.canSleep = false;
+		_this2.motion = 10;
 	}
 	,__class__: glaze_engine_systems_environment_EnvironmentForceSystem
 });
@@ -4679,7 +4787,7 @@ glaze_engine_systems_environment_WindRenderSystem.prototype = $extend(glaze_eco_
 				var _this3 = proxy.aabb;
 				tmp5 = _this3.position.y + _this3.extents.y;
 				tmp1 = Math.random() * (tmp5 - min1) + min1;
-				this.particleEngine.EmitParticle(tmp,tmp1,envForce.direction.x * envForce.power / 5,envForce.direction.y * envForce.power / 5,0,1,Math.floor(Math.random() * 300 + 300),1,true,true,null,4,255,255,255,255);
+				this.particleEngine.EmitParticle(tmp,tmp1,envForce.direction.x * envForce.power / 5,envForce.direction.y * envForce.power / 5,0,1,Math.floor(Math.random() * 200 + 200),1,true,true,null,4,255,255,255,255);
 				wind.particleCount--;
 			}
 		}
@@ -4738,6 +4846,7 @@ glaze_geom_AABB.prototype = {
 		return aabb1;
 	}
 	,__class__: glaze_geom_AABB
+	,__properties__: {get_b:"get_b",get_r:"get_r",get_t:"get_t",get_l:"get_l"}
 };
 var glaze_geom_AABB2 = function(t,r,b,l) {
 	if(l == null) l = .0;
@@ -4810,6 +4919,7 @@ glaze_geom_AABB2.prototype = {
 		this.b -= height / 2;
 	}
 	,__class__: glaze_geom_AABB2
+	,__properties__: {get_height:"get_height",get_width:"get_width"}
 };
 var glaze_geom_Matrix3 = function() { };
 glaze_geom_Matrix3.__name__ = ["glaze","geom","Matrix3"];
@@ -5751,7 +5861,7 @@ var glaze_physics_Body = function(material,mass) {
 	this.debug = 0;
 	this.bounceCount = 0;
 	this.totalBounceCount = 0;
-	this.collideOneWay = false;
+	this.collideOneWay = true;
 	this.usesStairs = false;
 	this.inWaterPrev = false;
 	this.inWater = false;
@@ -6006,9 +6116,20 @@ glaze_physics_Body.prototype = {
 		this.canSleep = false;
 		this.motion = 10;
 	}
+	,addProportionalForce: function(f) {
+		var _this = this.forces;
+		var s = this.mass;
+		_this.x += f.x * s;
+		_this.y += f.y * s;
+		this.canSleep = false;
+		this.motion = 10;
+	}
 	,setMass: function(mass) {
 		this.mass = mass;
 		this.invMass = 1 / mass;
+	}
+	,setMassFromVolumeMaterial: function(volume) {
+		this.setMass(this.material.density * volume);
 	}
 	,setPosition: function(x,y) {
 		var _this = this.position;
@@ -6029,6 +6150,7 @@ glaze_physics_Body.prototype = {
 		this.motion = 10;
 	}
 	,__class__: glaze_physics_Body
+	,__properties__: {get_canBounce:"get_canBounce"}
 };
 var glaze_physics_Material = function(density,elasticity,friction) {
 	if(friction == null) friction = 0.1;
@@ -6409,9 +6531,9 @@ glaze_physics_collision_Map.prototype = {
 					if((cell1 & 7) > 0) {
 						this.tilePosition.x = x1 * this.tileSize + this.tileHalfSize;
 						this.tilePosition.y = y1 * this.tileSize + this.tileHalfSize;
-						if((cell1 & 4) == 4 && body.usesStairs) glaze_physics_collision_Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,this.tilePosition,this.tileExtents,this.step,this.contact); else glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,this.tilePosition,this.tileExtents,this.bias,this.contact);
-						if((cell1 & 2) == 2 && body.collideOneWay) {
-							if(this.contact.normal.y < 0 && this.contact.distance >= -4.0) {
+						glaze_physics_collision_Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,this.tilePosition,this.tileExtents,this.bias,this.contact);
+						if((cell1 & 2) == 2) {
+							if(body.collideOneWay && this.contact.normal.y < 0 && this.contact.distance >= -4.0) {
 								body.respondStaticCollision(this.contact);
 								proxy.collide(null,this.contact);
 							}
@@ -7112,8 +7234,9 @@ glaze_physics_components_ContactRouter.prototype = {
 	}
 	,__class__: glaze_physics_components_ContactRouter
 };
-var glaze_physics_components_PhysicsBody = function(body) {
+var glaze_physics_components_PhysicsBody = function(body,setMassFromVolume) {
 	this.body = body;
+	this.setMassFromVolume = setMassFromVolume;
 };
 glaze_physics_components_PhysicsBody.__name__ = ["glaze","physics","components","PhysicsBody"];
 glaze_physics_components_PhysicsBody.__interfaces__ = [glaze_eco_core_IComponent];
@@ -7268,6 +7391,24 @@ glaze_physics_systems_PhysicsConstraintSystem.prototype = $extend(glaze_eco_core
 		}
 	}
 	,__class__: glaze_physics_systems_PhysicsConstraintSystem
+});
+var glaze_physics_systems_PhysicsMassSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_physics_components_PhysicsBody,glaze_engine_components_Extents]);
+	this.hasUpdate = false;
+};
+glaze_physics_systems_PhysicsMassSystem.__name__ = ["glaze","physics","systems","PhysicsMassSystem"];
+glaze_physics_systems_PhysicsMassSystem.__super__ = glaze_eco_core_System;
+glaze_physics_systems_PhysicsMassSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+		var extents = entity.map.Extents;
+		var body = entity.map.PhysicsBody;
+		if(body.setMassFromVolume) body.body.setMassFromVolumeMaterial(extents.halfWidths.x * extents.halfWidths.y * 4);
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+	}
+	,__class__: glaze_physics_systems_PhysicsMassSystem
 });
 var glaze_physics_systems_PhysicsMoveableSystem = function(broadphase) {
 	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_engine_components_Extents,glaze_physics_components_PhysicsCollision,glaze_engine_components_Moveable]);
@@ -7502,6 +7643,7 @@ glaze_render_animation_Animation.prototype = {
 		return new glaze_render_animation_Animation(Parent,this.name,this._frames,this.frameRate,this.looped,this.flipX,this.flipY);
 	}
 	,__class__: glaze_render_animation_Animation
+	,__properties__: {set_curIndex:"set_curIndex",get_numFrames:"get_numFrames",set_curFrame:"set_curFrame",set_frameRate:"set_frameRate"}
 };
 var glaze_render_animation_AnimationController = function(Frames) {
 	this.frameIndex = -1;
@@ -7711,6 +7853,7 @@ glaze_render_animation_AnimationController.prototype = {
 		if(this._curAnim.flipY) sprite.scale.y *= -1;
 	}
 	,__class__: glaze_render_animation_AnimationController
+	,__properties__: {get_frames:"get_frames",set_finished:"set_finished",get_finished:"get_finished",set_paused:"set_paused",get_paused:"get_paused",set_name:"set_name",get_name:"get_name",set_frameName:"set_frameName",get_frameName:"get_frameName",set_frameIndex:"set_frameIndex",set_curAnim:"set_curAnim",get_curAnim:"get_curAnim"}
 };
 var glaze_render_display_DisplayObject = function() {
 	this.position = new glaze_geom_Vector2();
@@ -7791,6 +7934,7 @@ glaze_render_display_DisplayObject.prototype = {
 		return slot(this,p);
 	}
 	,__class__: glaze_render_display_DisplayObject
+	,__properties__: {set_visible:"set_visible",get_visible:"get_visible",set_rotation:"set_rotation",get_rotation:"get_rotation"}
 };
 var glaze_render_display_DisplayObjectContainer = function() {
 	glaze_render_display_DisplayObject.call(this);
@@ -8222,6 +8366,7 @@ glaze_render_frame_FrameList.prototype = {
 		return this.frames.length;
 	}
 	,__class__: glaze_render_frame_FrameList
+	,__properties__: {get_numFrames:"get_numFrames"}
 };
 var glaze_render_frame_FrameListManager = function(textureManager) {
 	this.textureManager = textureManager;
@@ -9580,11 +9725,11 @@ var glaze_tmx_TmxMap = function(data,realTileSize) {
 		var _this4 = _this3._map;
 		if(__map_reserved[key] != null) tmp3 = _this4.existsReserved(key); else tmp3 = _this4.h.hasOwnProperty(key);
 		if(!tmp3) _this3._keys.push(key);
-		var _this11 = _this3._map;
-		if(__map_reserved[key] != null) _this11.setReserved(key,value); else _this11.h[key] = value;
+		var _this5 = _this3._map;
+		if(__map_reserved[key] != null) _this5.setReserved(key,value); else _this5.h[key] = value;
 	}
-	var _this5 = source.nodes.resolve("objectgroup");
-	var _g_head3 = _this5.h;
+	var _this6 = source.nodes.resolve("objectgroup");
+	var _g_head3 = _this6.h;
 	var _g_val3 = null;
 	while(_g_head3 != null) {
 		var tmp4;
@@ -9592,33 +9737,29 @@ var glaze_tmx_TmxMap = function(data,realTileSize) {
 		_g_head3 = _g_head3[1];
 		tmp4 = _g_val3;
 		var node4 = tmp4;
-		var _this6 = this.objectGroups;
+		var _this7 = this.objectGroups;
 		var key1 = node4.att.resolve("name");
 		var value1 = new glaze_tmx_TmxObjectGroup(node4,this);
 		var tmp5;
-		var _this7 = _this6._map;
-		if(__map_reserved[key1] != null) tmp5 = _this7.existsReserved(key1); else tmp5 = _this7.h.hasOwnProperty(key1);
-		if(!tmp5) _this6._keys.push(key1);
-		var _this12 = _this6._map;
-		if(__map_reserved[key1] != null) _this12.setReserved(key1,value1); else _this12.h[key1] = value1;
+		var _this8 = _this7._map;
+		if(__map_reserved[key1] != null) tmp5 = _this8.existsReserved(key1); else tmp5 = _this8.h.hasOwnProperty(key1);
+		if(!tmp5) _this7._keys.push(key1);
+		var _this9 = _this7._map;
+		if(__map_reserved[key1] != null) _this9.setReserved(key1,value1); else _this9.h[key1] = value1;
 	}
 };
 glaze_tmx_TmxMap.__name__ = ["glaze","tmx","TmxMap"];
 glaze_tmx_TmxMap.prototype = {
 	getLayer: function(name) {
 		var tmp;
-		var tmp1;
 		var _this = this.layers._map;
-		if(__map_reserved[name] != null) tmp1 = _this.getReserved(name); else tmp1 = _this.h[name];
-		tmp = tmp1;
+		if(__map_reserved[name] != null) tmp = _this.getReserved(name); else tmp = _this.h[name];
 		return tmp;
 	}
 	,getObjectGroup: function(name) {
 		var tmp;
-		var tmp1;
 		var _this = this.objectGroups._map;
-		if(__map_reserved[name] != null) tmp1 = _this.getReserved(name); else tmp1 = _this.h[name];
-		tmp = tmp1;
+		if(__map_reserved[name] != null) tmp = _this.getReserved(name); else tmp = _this.h[name];
 		return tmp;
 	}
 	,getGidOwner: function(gid) {
@@ -9907,6 +10048,7 @@ glaze_tmx_TmxTileSet.prototype = {
 		return new glaze_geom_Rectangle(0,0,id % this.numCols * this.tileWidth,id / this.numCols * this.tileHeight);
 	}
 	,__class__: glaze_tmx_TmxTileSet
+	,__properties__: {set_image:"set_image",get_image:"get_image"}
 };
 var glaze_util_AssetLoader = function() {
 	this.assets = new haxe_ds_StringMap();
@@ -10275,6 +10417,21 @@ haxe_Log.__name__ = ["haxe","Log"];
 haxe_Log.trace = function(v,infos) {
 	js_Boot.__trace(v,infos);
 };
+var haxe_Timer = function(time_ms) {
+	var me = this;
+	this.id = setInterval(function() {
+		me.run();
+	},time_ms);
+};
+haxe_Timer.__name__ = ["haxe","Timer"];
+haxe_Timer.stamp = function() {
+	return new Date().getTime() / 1000;
+};
+haxe_Timer.prototype = {
+	run: function() {
+	}
+	,__class__: haxe_Timer
+};
 var haxe_crypto_Adler32 = function() {
 	this.a1 = 1;
 	this.a2 = 0;
@@ -10463,6 +10620,42 @@ haxe_ds_IntMap.__name__ = ["haxe","ds","IntMap"];
 haxe_ds_IntMap.__interfaces__ = [haxe_IMap];
 haxe_ds_IntMap.prototype = {
 	__class__: haxe_ds_IntMap
+};
+var haxe_ds_ObjectMap = function() {
+	this.h = { };
+	this.h.__keys__ = { };
+};
+haxe_ds_ObjectMap.__name__ = ["haxe","ds","ObjectMap"];
+haxe_ds_ObjectMap.__interfaces__ = [haxe_IMap];
+haxe_ds_ObjectMap.prototype = {
+	set: function(key,value) {
+		var id = key.__id__ || (key.__id__ = ++haxe_ds_ObjectMap.count);
+		this.h[id] = value;
+		this.h.__keys__[id] = key;
+	}
+	,remove: function(key) {
+		var id = key.__id__;
+		if(this.h.__keys__[id] == null) return false;
+		delete(this.h[id]);
+		delete(this.h.__keys__[id]);
+		return true;
+	}
+	,keys: function() {
+		var a = [];
+		for( var key in this.h.__keys__ ) {
+		if(this.h.hasOwnProperty(key)) a.push(this.h.__keys__[key]);
+		}
+		return HxOverrides.iter(a);
+	}
+	,iterator: function() {
+		return { ref : this.h, it : this.keys(), hasNext : function() {
+			return this.it.hasNext();
+		}, next : function() {
+			var i = this.it.next();
+			return this.ref[i.__id__];
+		}};
+	}
+	,__class__: haxe_ds_ObjectMap
 };
 var haxe_ds_StringMap = function() {
 	this.h = { };
@@ -10798,6 +10991,7 @@ haxe_xml_Fast.prototype = {
 		return tmp1;
 	}
 	,__class__: haxe_xml_Fast
+	,__properties__: {get_innerData:"get_innerData",get_name:"get_name"}
 };
 var haxe_xml_Parser = function() { };
 haxe_xml_Parser.__name__ = ["haxe","xml","Parser"];
@@ -11954,6 +12148,1089 @@ js_html_compat_Uint8Array._subarray = function(start,end) {
 	a.byteOffset = start;
 	return a;
 };
+var motion_actuators_IGenericActuator = function() { };
+motion_actuators_IGenericActuator.__name__ = ["motion","actuators","IGenericActuator"];
+motion_actuators_IGenericActuator.prototype = {
+	__class__: motion_actuators_IGenericActuator
+};
+var motion_actuators_GenericActuator = function(target,duration,properties) {
+	this._autoVisible = true;
+	this._delay = 0;
+	this._reflect = false;
+	this._repeat = 0;
+	this._reverse = false;
+	this._smartRotation = false;
+	this._snapping = false;
+	this.special = false;
+	this.target = target;
+	this.properties = properties;
+	this.duration = duration;
+	this._ease = motion_Actuate.defaultEase;
+};
+motion_actuators_GenericActuator.__name__ = ["motion","actuators","GenericActuator"];
+motion_actuators_GenericActuator.__interfaces__ = [motion_actuators_IGenericActuator];
+motion_actuators_GenericActuator.prototype = {
+	apply: function() {
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(this.target,i)) {
+				var value = Reflect.field(this.properties,i);
+				this.target[i] = value;
+			} else {
+				var o = this.target;
+				var value1 = Reflect.field(this.properties,i);
+				var tmp;
+				if(o.__properties__ && (tmp = o.__properties__["set_" + i])) o[tmp](value1); else o[i] = value1;
+			}
+		}
+	}
+	,autoVisible: function(value) {
+		if(value == null) value = true;
+		this._autoVisible = value;
+		return this;
+	}
+	,callMethod: function(method,params) {
+		if(params == null) params = [];
+		var tmp;
+		var func = method;
+		tmp = func.apply(method,params);
+		return tmp;
+	}
+	,change: function() {
+		if(this._onUpdate != null) {
+			var method = this._onUpdate;
+			var params = this._onUpdateParams;
+			if(params == null) params = [];
+			var func = method;
+			func.apply(method,params);
+		}
+	}
+	,complete: function(sendEvent) {
+		if(sendEvent == null) sendEvent = true;
+		if(sendEvent) {
+			this.change();
+			if(this._onComplete != null) {
+				var method = this._onComplete;
+				var params = this._onCompleteParams;
+				if(params == null) params = [];
+				var func = method;
+				func.apply(method,params);
+			}
+		}
+		motion_Actuate.unload(this);
+	}
+	,delay: function(duration) {
+		this._delay = duration;
+		return this;
+	}
+	,ease: function(easing) {
+		this._ease = easing;
+		return this;
+	}
+	,move: function() {
+	}
+	,onComplete: function(handler,parameters) {
+		this._onComplete = handler;
+		if(parameters == null) this._onCompleteParams = []; else this._onCompleteParams = parameters;
+		if(this.duration == 0) this.complete();
+		return this;
+	}
+	,onRepeat: function(handler,parameters) {
+		this._onRepeat = handler;
+		if(parameters == null) this._onRepeatParams = []; else this._onRepeatParams = parameters;
+		return this;
+	}
+	,onUpdate: function(handler,parameters) {
+		this._onUpdate = handler;
+		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
+		return this;
+	}
+	,onPause: function(handler,parameters) {
+		this._onPause = handler;
+		if(parameters == null) this._onPauseParams = []; else this._onPauseParams = parameters;
+		return this;
+	}
+	,onResume: function(handler,parameters) {
+		this._onResume = handler;
+		if(parameters == null) this._onResumeParams = []; else this._onResumeParams = parameters;
+		return this;
+	}
+	,pause: function() {
+		if(this._onPause != null) {
+			var method = this._onPause;
+			var params = this._onPauseParams;
+			if(params == null) params = [];
+			var func = method;
+			func.apply(method,params);
+		}
+	}
+	,reflect: function(value) {
+		if(value == null) value = true;
+		this._reflect = value;
+		this.special = true;
+		return this;
+	}
+	,repeat: function(times) {
+		if(times == null) times = -1;
+		this._repeat = times;
+		return this;
+	}
+	,resume: function() {
+		if(this._onResume != null) {
+			var method = this._onResume;
+			var params = this._onResumeParams;
+			if(params == null) params = [];
+			var func = method;
+			func.apply(method,params);
+		}
+	}
+	,reverse: function(value) {
+		if(value == null) value = true;
+		this._reverse = value;
+		this.special = true;
+		return this;
+	}
+	,smartRotation: function(value) {
+		if(value == null) value = true;
+		this._smartRotation = value;
+		this.special = true;
+		return this;
+	}
+	,snapping: function(value) {
+		if(value == null) value = true;
+		this._snapping = value;
+		this.special = true;
+		return this;
+	}
+	,stop: function(properties,complete,sendEvent) {
+	}
+	,__class__: motion_actuators_GenericActuator
+};
+var motion_actuators_SimpleActuator = function(target,duration,properties) {
+	this.active = true;
+	this.propertyDetails = [];
+	this.sendChange = false;
+	this.paused = false;
+	this.cacheVisible = false;
+	this.initialized = false;
+	this.setVisible = false;
+	this.toggleVisible = false;
+	this.startTime = haxe_Timer.stamp();
+	motion_actuators_GenericActuator.call(this,target,duration,properties);
+	if(!motion_actuators_SimpleActuator.addedEvent) {
+		motion_actuators_SimpleActuator.addedEvent = true;
+		motion_actuators_SimpleActuator.timer = new haxe_Timer(33);
+		motion_actuators_SimpleActuator.timer.run = motion_actuators_SimpleActuator.stage_onEnterFrame;
+	}
+};
+motion_actuators_SimpleActuator.__name__ = ["motion","actuators","SimpleActuator"];
+motion_actuators_SimpleActuator.stage_onEnterFrame = function() {
+	var currentTime = haxe_Timer.stamp();
+	var actuator;
+	var j = 0;
+	var _g1 = 0;
+	var _g = motion_actuators_SimpleActuator.actuatorsLength;
+	while(_g1 < _g) {
+		_g1++;
+		actuator = motion_actuators_SimpleActuator.actuators[j];
+		if(actuator != null && actuator.active) {
+			if(currentTime >= actuator.timeOffset) actuator.update(currentTime);
+			j++;
+		} else {
+			motion_actuators_SimpleActuator.actuators.splice(j,1);
+			--motion_actuators_SimpleActuator.actuatorsLength;
+		}
+	}
+};
+motion_actuators_SimpleActuator.__super__ = motion_actuators_GenericActuator;
+motion_actuators_SimpleActuator.prototype = $extend(motion_actuators_GenericActuator.prototype,{
+	setField_motion_actuators_MotionPathActuator_T: function(target,propertyName,value) {
+		if(Object.prototype.hasOwnProperty.call(target,propertyName)) target[propertyName] = value; else {
+			var tmp;
+			if(target.__properties__ && (tmp = target.__properties__["set_" + propertyName])) target[tmp](value); else target[propertyName] = value;
+		}
+	}
+	,setField_motion_actuators_SimpleActuator_T: function(target,propertyName,value) {
+		if(Object.prototype.hasOwnProperty.call(target,propertyName)) target[propertyName] = value; else {
+			var tmp;
+			if(target.__properties__ && (tmp = target.__properties__["set_" + propertyName])) target[tmp](value); else target[propertyName] = value;
+		}
+	}
+	,autoVisible: function(value) {
+		if(value == null) value = true;
+		this._autoVisible = value;
+		if(!value) {
+			this.toggleVisible = false;
+			if(this.setVisible) {
+				var target = this.target;
+				var value1 = this.cacheVisible;
+				if(Object.prototype.hasOwnProperty.call(target,"visible")) target.visible = value1; else {
+					var tmp;
+					if(target.__properties__ && (tmp = target.__properties__["set_" + "visible"])) target[tmp](value1); else target.visible = value1;
+				}
+			}
+		}
+		return this;
+	}
+	,delay: function(duration) {
+		this._delay = duration;
+		this.timeOffset = this.startTime + duration;
+		return this;
+	}
+	,getField: function(target,propertyName) {
+		var value = null;
+		if(Object.prototype.hasOwnProperty.call(target,propertyName)) value = Reflect.field(target,propertyName); else {
+			var tmp;
+			var tmp1;
+			if(target == null) tmp = null; else if(target.__properties__ && (tmp1 = target.__properties__["get_" + propertyName])) tmp = target[tmp1](); else tmp = target[propertyName];
+			value = tmp;
+		}
+		return value;
+	}
+	,initialize: function() {
+		var details;
+		var start;
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var i = _g1[_g];
+			++_g;
+			var isField = true;
+			if(Object.prototype.hasOwnProperty.call(this.target,i)) start = Reflect.field(this.target,i); else {
+				isField = false;
+				var tmp;
+				var o = this.target;
+				var tmp1;
+				if(o == null) tmp = null; else if(o.__properties__ && (tmp1 = o.__properties__["get_" + i])) tmp = o[tmp1](); else tmp = o[i];
+				start = tmp;
+			}
+			if(typeof(start) == "number") {
+				var tmp2;
+				var target = this.properties;
+				var value1 = null;
+				if(Object.prototype.hasOwnProperty.call(target,i)) value1 = Reflect.field(target,i); else {
+					var tmp3;
+					var tmp4;
+					if(target == null) tmp3 = null; else if(target.__properties__ && (tmp4 = target.__properties__["get_" + i])) tmp3 = target[tmp4](); else tmp3 = target[i];
+					value1 = tmp3;
+				}
+				tmp2 = value1;
+				var value = tmp2;
+				if(start == null) start = 0;
+				if(value == null) value = 0;
+				details = new motion_actuators_PropertyDetails(this.target,i,start,value - start,isField);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,move: function() {
+		this.toggleVisible = Object.prototype.hasOwnProperty.call(this.properties,"alpha") && Object.prototype.hasOwnProperty.call(this.properties,"visible");
+		var tmp;
+		if(this.toggleVisible && this.properties.alpha != 0) {
+			var tmp1;
+			var target = this.target;
+			var value = null;
+			if(Object.prototype.hasOwnProperty.call(target,"visible")) value = Reflect.field(target,"visible"); else {
+				var tmp2;
+				var tmp3;
+				if(target == null) tmp2 = null; else if(target.__properties__ && (tmp3 = target.__properties__["get_" + "visible"])) tmp2 = target[tmp3](); else tmp2 = target.visible;
+				value = tmp2;
+			}
+			tmp1 = value;
+			tmp = !tmp1;
+		} else tmp = false;
+		if(tmp) {
+			this.setVisible = true;
+			var tmp4;
+			var target1 = this.target;
+			var value1 = null;
+			if(Object.prototype.hasOwnProperty.call(target1,"visible")) value1 = Reflect.field(target1,"visible"); else {
+				var tmp5;
+				var tmp6;
+				if(target1 == null) tmp5 = null; else if(target1.__properties__ && (tmp6 = target1.__properties__["get_" + "visible"])) tmp5 = target1[tmp6](); else tmp5 = target1.visible;
+				value1 = tmp5;
+			}
+			tmp4 = value1;
+			this.cacheVisible = tmp4;
+			var target2 = this.target;
+			if(Object.prototype.hasOwnProperty.call(target2,"visible")) target2.visible = true; else {
+				var tmp7;
+				if(target2.__properties__ && (tmp7 = target2.__properties__["set_" + "visible"])) target2[tmp7](true); else target2.visible = true;
+			}
+		}
+		this.timeOffset = this.startTime;
+		motion_actuators_SimpleActuator.actuators.push(this);
+		++motion_actuators_SimpleActuator.actuatorsLength;
+	}
+	,onUpdate: function(handler,parameters) {
+		this._onUpdate = handler;
+		if(parameters == null) this._onUpdateParams = []; else this._onUpdateParams = parameters;
+		this.sendChange = true;
+		return this;
+	}
+	,pause: function() {
+		if(!this.paused) {
+			this.paused = true;
+			motion_actuators_GenericActuator.prototype.pause.call(this);
+			this.pauseTime = haxe_Timer.stamp();
+		}
+	}
+	,resume: function() {
+		if(this.paused) {
+			this.paused = false;
+			this.timeOffset += haxe_Timer.stamp() - this.pauseTime;
+			motion_actuators_GenericActuator.prototype.resume.call(this);
+		}
+	}
+	,setProperty: function(details,value) {
+		if(details.isField) details.target[details.propertyName] = value; else {
+			var o = details.target;
+			var field = details.propertyName;
+			var tmp;
+			if(o.__properties__ && (tmp = o.__properties__["set_" + field])) o[tmp](value); else o[field] = value;
+		}
+	}
+	,stop: function(properties,complete,sendEvent) {
+		if(this.active) {
+			if(properties == null) {
+				this.active = false;
+				if(complete) this.apply();
+				this.complete(sendEvent);
+				return;
+			}
+			var _g = 0;
+			var _g1 = Reflect.fields(properties);
+			while(_g < _g1.length) {
+				var i = _g1[_g];
+				++_g;
+				if(Object.prototype.hasOwnProperty.call(this.properties,i)) {
+					this.active = false;
+					if(complete) this.apply();
+					this.complete(sendEvent);
+					return;
+				}
+			}
+		}
+	}
+	,update: function(currentTime) {
+		if(!this.paused) {
+			var details;
+			var easing;
+			var i;
+			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
+			if(tweenPosition > 1) tweenPosition = 1;
+			if(!this.initialized) this.initialize();
+			if(!this.special) {
+				easing = this._ease.calculate(tweenPosition);
+				var _g1 = 0;
+				var _g = this.detailsLength;
+				while(_g1 < _g) {
+					var i1 = _g1++;
+					details = this.propertyDetails[i1];
+					var value = details.start + details.change * easing;
+					if(details.isField) details.target[details.propertyName] = value; else {
+						var o = details.target;
+						var field = details.propertyName;
+						var tmp;
+						if(o.__properties__ && (tmp = o.__properties__["set_" + field])) o[tmp](value); else o[field] = value;
+					}
+				}
+			} else {
+				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
+				var endValue;
+				var _g11 = 0;
+				var _g2 = this.detailsLength;
+				while(_g11 < _g2) {
+					var i2 = _g11++;
+					details = this.propertyDetails[i2];
+					var tmp1;
+					if(this._smartRotation) {
+						var tmp2;
+						if(!(details.propertyName == "rotation")) tmp2 = details.propertyName == "rotationX"; else tmp2 = true;
+						var tmp3;
+						if(!tmp2) tmp3 = details.propertyName == "rotationY"; else tmp3 = true;
+						if(!tmp3) tmp1 = details.propertyName == "rotationZ"; else tmp1 = true;
+					} else tmp1 = false;
+					if(tmp1) {
+						var rotation = details.change % 360;
+						if(rotation > 180) rotation -= 360; else if(rotation < -180) rotation += 360;
+						endValue = details.start + rotation * easing;
+					} else endValue = details.start + details.change * easing;
+					if(!this._snapping) {
+						if(details.isField) details.target[details.propertyName] = endValue; else {
+							var o1 = details.target;
+							var field1 = details.propertyName;
+							var tmp4;
+							if(o1.__properties__ && (tmp4 = o1.__properties__["set_" + field1])) o1[tmp4](endValue); else o1[field1] = endValue;
+						}
+					} else {
+						var value1 = Math.round(endValue);
+						if(details.isField) details.target[details.propertyName] = value1; else {
+							var o2 = details.target;
+							var field2 = details.propertyName;
+							var tmp5;
+							if(o2.__properties__ && (tmp5 = o2.__properties__["set_" + field2])) o2[tmp5](value1); else o2[field2] = value1;
+						}
+					}
+				}
+			}
+			if(tweenPosition == 1) {
+				if(this._repeat == 0) {
+					this.active = false;
+					var tmp6;
+					if(this.toggleVisible) {
+						var tmp7;
+						var target = this.target;
+						var value2 = null;
+						if(Object.prototype.hasOwnProperty.call(target,"alpha")) value2 = Reflect.field(target,"alpha"); else {
+							var tmp8;
+							var tmp9;
+							if(target == null) tmp8 = null; else if(target.__properties__ && (tmp9 = target.__properties__["get_" + "alpha"])) tmp8 = target[tmp9](); else tmp8 = target.alpha;
+							value2 = tmp8;
+						}
+						tmp7 = value2;
+						tmp6 = tmp7 == 0;
+					} else tmp6 = false;
+					if(tmp6) {
+						var target1 = this.target;
+						if(Object.prototype.hasOwnProperty.call(target1,"visible")) target1.visible = false; else {
+							var tmp10;
+							if(target1.__properties__ && (tmp10 = target1.__properties__["set_" + "visible"])) target1[tmp10](false); else target1.visible = false;
+						}
+					}
+					this.complete(true);
+					return;
+				} else {
+					if(this._onRepeat != null) {
+						var method = this._onRepeat;
+						var params = this._onRepeatParams;
+						if(params == null) params = [];
+						var func = method;
+						func.apply(method,params);
+					}
+					if(this._reflect) this._reverse = !this._reverse;
+					this.startTime = currentTime;
+					this.timeOffset = this.startTime + this._delay;
+					if(this._repeat > 0) this._repeat--;
+				}
+			}
+			if(this.sendChange) this.change();
+		}
+	}
+	,__class__: motion_actuators_SimpleActuator
+});
+var motion_easing_Expo = function() { };
+motion_easing_Expo.__name__ = ["motion","easing","Expo"];
+motion_easing_Expo.__properties__ = {get_easeOut:"get_easeOut",get_easeInOut:"get_easeInOut",get_easeIn:"get_easeIn"}
+motion_easing_Expo.get_easeIn = function() {
+	return new motion_easing_ExpoEaseIn();
+};
+motion_easing_Expo.get_easeInOut = function() {
+	return new motion_easing_ExpoEaseInOut();
+};
+motion_easing_Expo.get_easeOut = function() {
+	return new motion_easing_ExpoEaseOut();
+};
+var motion_easing_IEasing = function() { };
+motion_easing_IEasing.__name__ = ["motion","easing","IEasing"];
+motion_easing_IEasing.prototype = {
+	__class__: motion_easing_IEasing
+};
+var motion_easing_ExpoEaseOut = function() {
+};
+motion_easing_ExpoEaseOut.__name__ = ["motion","easing","ExpoEaseOut"];
+motion_easing_ExpoEaseOut.__interfaces__ = [motion_easing_IEasing];
+motion_easing_ExpoEaseOut.prototype = {
+	calculate: function(k) {
+		return k == 1?1:1 - Math.pow(2,-10 * k);
+	}
+	,ease: function(t,b,c,d) {
+		return t == d?b + c:c * (1 - Math.pow(2,-10 * t / d)) + b;
+	}
+	,__class__: motion_easing_ExpoEaseOut
+};
+var motion_Actuate = function() { };
+motion_Actuate.__name__ = ["motion","Actuate"];
+motion_Actuate.apply = function(target,properties,customActuator) {
+	motion_Actuate.stop(target,properties);
+	if(customActuator == null) customActuator = motion_Actuate.defaultActuator;
+	var actuator = Type.createInstance(customActuator,[target,0,properties]);
+	actuator.apply();
+	return actuator;
+};
+motion_Actuate.getLibrary = function(target,allowCreation) {
+	if(allowCreation == null) allowCreation = true;
+	if(!(motion_Actuate.targetLibraries.h.__keys__[target.__id__] != null) && allowCreation) motion_Actuate.targetLibraries.set(target,[]);
+	return motion_Actuate.targetLibraries.h[target.__id__];
+};
+motion_Actuate.isActive = function() {
+	var result = false;
+	var $it0 = motion_Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		result = true;
+		break;
+	}
+	return true;
+};
+motion_Actuate.motionPath = function(target,duration,properties,overwrite) {
+	if(overwrite == null) overwrite = true;
+	return motion_Actuate.tween(target,duration,properties,overwrite,motion_actuators_MotionPathActuator);
+};
+motion_Actuate.pause = function(target) {
+	if(js_Boot.__instanceof(target,motion_actuators_IGenericActuator)) {
+		var actuator = target;
+		actuator.pause();
+	} else {
+		var library = motion_Actuate.getLibrary(target,false);
+		if(library != null) {
+			var _g = 0;
+			while(_g < library.length) {
+				var actuator1 = library[_g];
+				++_g;
+				actuator1.pause();
+			}
+		}
+	}
+};
+motion_Actuate.pauseAll = function() {
+	var $it0 = motion_Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var _g = 0;
+		while(_g < library.length) {
+			var actuator = library[_g];
+			++_g;
+			actuator.pause();
+		}
+	}
+};
+motion_Actuate.reset = function() {
+	var $it0 = motion_Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var i = library.length - 1;
+		while(i >= 0) {
+			library[i].stop(null,false,false);
+			i--;
+		}
+	}
+	motion_Actuate.targetLibraries = new haxe_ds_ObjectMap();
+};
+motion_Actuate.resume = function(target) {
+	if(js_Boot.__instanceof(target,motion_actuators_IGenericActuator)) {
+		var actuator = target;
+		actuator.resume();
+	} else {
+		var library = motion_Actuate.getLibrary(target,false);
+		if(library != null) {
+			var _g = 0;
+			while(_g < library.length) {
+				var actuator1 = library[_g];
+				++_g;
+				actuator1.resume();
+			}
+		}
+	}
+};
+motion_Actuate.resumeAll = function() {
+	var $it0 = motion_Actuate.targetLibraries.iterator();
+	while( $it0.hasNext() ) {
+		var library = $it0.next();
+		var _g = 0;
+		while(_g < library.length) {
+			var actuator = library[_g];
+			++_g;
+			actuator.resume();
+		}
+	}
+};
+motion_Actuate.stop = function(target,properties,complete,sendEvent) {
+	if(sendEvent == null) sendEvent = true;
+	if(complete == null) complete = false;
+	if(target != null) {
+		if(js_Boot.__instanceof(target,motion_actuators_IGenericActuator)) {
+			var actuator = target;
+			actuator.stop(null,complete,sendEvent);
+		} else {
+			var library = motion_Actuate.getLibrary(target,false);
+			if(library != null) {
+				if(typeof(properties) == "string") {
+					var temp = { };
+					var field = properties;
+					temp[field] = null;
+					properties = temp;
+				} else if((properties instanceof Array) && properties.__enum__ == null) {
+					var temp1 = { };
+					var _g = 0;
+					var _g1 = js_Boot.__cast(properties , Array);
+					while(_g < _g1.length) {
+						var property = _g1[_g];
+						++_g;
+						var field1 = property;
+						temp1[field1] = null;
+					}
+					properties = temp1;
+				}
+				var i = library.length - 1;
+				while(i >= 0) {
+					library[i].stop(properties,complete,sendEvent);
+					i--;
+				}
+			}
+		}
+	}
+};
+motion_Actuate.timer = function(duration,customActuator) {
+	return motion_Actuate.tween(new motion__$Actuate_TweenTimer(0),duration,new motion__$Actuate_TweenTimer(1),false,customActuator);
+};
+motion_Actuate.tween = function(target,duration,properties,overwrite,customActuator) {
+	if(overwrite == null) overwrite = true;
+	if(target != null) {
+		if(duration > 0) {
+			if(customActuator == null) customActuator = motion_Actuate.defaultActuator;
+			var actuator = Type.createInstance(customActuator,[target,duration,properties]);
+			var library = motion_Actuate.getLibrary(actuator.target);
+			if(overwrite) {
+				var i = library.length - 1;
+				while(i >= 0) {
+					library[i].stop(actuator.properties,false,false);
+					i--;
+				}
+				library = motion_Actuate.getLibrary(actuator.target);
+			}
+			library.push(actuator);
+			actuator.move();
+			return actuator;
+		} else return motion_Actuate.apply(target,properties,customActuator);
+	}
+	return null;
+};
+motion_Actuate.unload = function(actuator) {
+	var target = actuator.target;
+	if(motion_Actuate.targetLibraries.h.__keys__[target.__id__] != null) {
+		HxOverrides.remove(motion_Actuate.targetLibraries.h[target.__id__],actuator);
+		if(motion_Actuate.targetLibraries.h[target.__id__].length == 0) motion_Actuate.targetLibraries.remove(target);
+	}
+};
+motion_Actuate.update = function(target,duration,start,end,overwrite) {
+	if(overwrite == null) overwrite = true;
+	var properties = { start : start, end : end};
+	return motion_Actuate.tween(target,duration,properties,overwrite,motion_actuators_MethodActuator);
+};
+var motion__$Actuate_TweenTimer = function(progress) {
+	this.progress = progress;
+};
+motion__$Actuate_TweenTimer.__name__ = ["motion","_Actuate","TweenTimer"];
+motion__$Actuate_TweenTimer.prototype = {
+	__class__: motion__$Actuate_TweenTimer
+};
+var motion_MotionPath = function() {
+	this._x = new motion_ComponentPath();
+	this._y = new motion_ComponentPath();
+	this._rotation = null;
+};
+motion_MotionPath.__name__ = ["motion","MotionPath"];
+motion_MotionPath.prototype = {
+	bezier: function(x,y,controlX,controlY,strength) {
+		if(strength == null) strength = 1;
+		this._x.addPath(new motion_BezierPath(x,controlX,strength));
+		this._y.addPath(new motion_BezierPath(y,controlY,strength));
+		return this;
+	}
+	,line: function(x,y,strength) {
+		if(strength == null) strength = 1;
+		this._x.addPath(new motion_LinearPath(x,strength));
+		this._y.addPath(new motion_LinearPath(y,strength));
+		return this;
+	}
+	,get_rotation: function() {
+		if(this._rotation == null) this._rotation = new motion_RotationPath(this._x,this._y);
+		return this._rotation;
+	}
+	,get_x: function() {
+		return this._x;
+	}
+	,get_y: function() {
+		return this._y;
+	}
+	,__class__: motion_MotionPath
+	,__properties__: {get_y:"get_y",get_x:"get_x",get_rotation:"get_rotation"}
+};
+var motion_IComponentPath = function() { };
+motion_IComponentPath.__name__ = ["motion","IComponentPath"];
+motion_IComponentPath.prototype = {
+	__class__: motion_IComponentPath
+	,__properties__: {get_end:"get_end"}
+};
+var motion_ComponentPath = function() {
+	this.paths = [];
+	this.start = 0;
+	this.totalStrength = 0;
+};
+motion_ComponentPath.__name__ = ["motion","ComponentPath"];
+motion_ComponentPath.__interfaces__ = [motion_IComponentPath];
+motion_ComponentPath.prototype = {
+	addPath: function(path) {
+		this.paths.push(path);
+		this.totalStrength += path.strength;
+	}
+	,calculate: function(k) {
+		if(this.paths.length == 1) return this.paths[0].calculate(this.start,k); else {
+			var ratio = k * this.totalStrength;
+			var lastEnd = this.start;
+			var _g = 0;
+			var _g1 = this.paths;
+			while(_g < _g1.length) {
+				var path = _g1[_g];
+				++_g;
+				if(ratio > path.strength) {
+					ratio -= path.strength;
+					lastEnd = path.end;
+				} else return path.calculate(lastEnd,ratio / path.strength);
+			}
+		}
+		return 0;
+	}
+	,get_end: function() {
+		if(this.paths.length > 0) {
+			var path = this.paths[this.paths.length - 1];
+			return path.end;
+		} else return this.start;
+	}
+	,__class__: motion_ComponentPath
+	,__properties__: {get_end:"get_end"}
+};
+var motion_BezierPath = function(end,control,strength) {
+	this.end = end;
+	this.control = control;
+	this.strength = strength;
+};
+motion_BezierPath.__name__ = ["motion","BezierPath"];
+motion_BezierPath.prototype = {
+	calculate: function(start,k) {
+		return (1 - k) * (1 - k) * start + 2 * (1 - k) * k * this.control + k * k * this.end;
+	}
+	,__class__: motion_BezierPath
+};
+var motion_LinearPath = function(end,strength) {
+	motion_BezierPath.call(this,end,0,strength);
+};
+motion_LinearPath.__name__ = ["motion","LinearPath"];
+motion_LinearPath.__super__ = motion_BezierPath;
+motion_LinearPath.prototype = $extend(motion_BezierPath.prototype,{
+	calculate: function(start,k) {
+		return start + k * (this.end - start);
+	}
+	,__class__: motion_LinearPath
+});
+var motion_RotationPath = function(x,y) {
+	this.step = 0.01;
+	this._x = x;
+	this._y = y;
+	this.offset = 0;
+	this.start = this.calculate(0.0);
+};
+motion_RotationPath.__name__ = ["motion","RotationPath"];
+motion_RotationPath.__interfaces__ = [motion_IComponentPath];
+motion_RotationPath.prototype = {
+	calculate: function(k) {
+		var dX = this._x.calculate(k) - this._x.calculate(k + this.step);
+		var dY = this._y.calculate(k) - this._y.calculate(k + this.step);
+		var angle = Math.atan2(dY,dX) * (180 / Math.PI);
+		angle = (angle + this.offset) % 360;
+		return angle;
+	}
+	,get_end: function() {
+		return this.calculate(1.0);
+	}
+	,__class__: motion_RotationPath
+	,__properties__: {get_end:"get_end"}
+};
+var motion_actuators_MethodActuator = function(target,duration,properties) {
+	this.currentParameters = [];
+	this.tweenProperties = { };
+	motion_actuators_SimpleActuator.call(this,target,duration,properties);
+	if(!Object.prototype.hasOwnProperty.call(properties,"start")) this.properties.start = [];
+	if(!Object.prototype.hasOwnProperty.call(properties,"end")) this.properties.end = this.properties.start;
+	var _g1 = 0;
+	var _g = this.properties.start.length;
+	while(_g1 < _g) {
+		var i = _g1++;
+		this.currentParameters.push(this.properties.start[i]);
+	}
+};
+motion_actuators_MethodActuator.__name__ = ["motion","actuators","MethodActuator"];
+motion_actuators_MethodActuator.__super__ = motion_actuators_SimpleActuator;
+motion_actuators_MethodActuator.prototype = $extend(motion_actuators_SimpleActuator.prototype,{
+	apply: function() {
+		var method = this.target;
+		var params = this.properties.end;
+		if(params == null) params = [];
+		var func = method;
+		func.apply(method,params);
+	}
+	,complete: function(sendEvent) {
+		if(sendEvent == null) sendEvent = true;
+		var _g1 = 0;
+		var _g = this.properties.start.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+		}
+		var method = this.target;
+		var params = this.currentParameters;
+		if(params == null) params = [];
+		var func = method;
+		func.apply(method,params);
+		motion_actuators_SimpleActuator.prototype.complete.call(this,sendEvent);
+	}
+	,initialize: function() {
+		var details;
+		var propertyName;
+		var start;
+		var _g1 = 0;
+		var _g = this.properties.start.length;
+		while(_g1 < _g) {
+			var i = _g1++;
+			propertyName = "param" + i;
+			start = this.properties.start[i];
+			this.tweenProperties[propertyName] = start;
+			if(typeof(start) == "number" || ((start | 0) === start)) {
+				details = new motion_actuators_PropertyDetails(this.tweenProperties,propertyName,start,this.properties.end[i] - start);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,update: function(currentTime) {
+		motion_actuators_SimpleActuator.prototype.update.call(this,currentTime);
+		if(this.active && !this.paused) {
+			var _g1 = 0;
+			var _g = this.properties.start.length;
+			while(_g1 < _g) {
+				var i = _g1++;
+				this.currentParameters[i] = Reflect.field(this.tweenProperties,"param" + i);
+			}
+			var method = this.target;
+			var params = this.currentParameters;
+			if(params == null) params = [];
+			var func = method;
+			func.apply(method,params);
+		}
+	}
+	,__class__: motion_actuators_MethodActuator
+});
+var motion_actuators_MotionPathActuator = function(target,duration,properties) {
+	motion_actuators_SimpleActuator.call(this,target,duration,properties);
+};
+motion_actuators_MotionPathActuator.__name__ = ["motion","actuators","MotionPathActuator"];
+motion_actuators_MotionPathActuator.__super__ = motion_actuators_SimpleActuator;
+motion_actuators_MotionPathActuator.prototype = $extend(motion_actuators_SimpleActuator.prototype,{
+	apply: function() {
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var propertyName = _g1[_g];
+			++_g;
+			if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) {
+				var value = (js_Boot.__cast(Reflect.field(this.properties,propertyName) , motion_IComponentPath)).get_end();
+				this.target[propertyName] = value;
+			} else {
+				var o = this.target;
+				var value1 = (js_Boot.__cast(Reflect.field(this.properties,propertyName) , motion_IComponentPath)).get_end();
+				var tmp;
+				if(o.__properties__ && (tmp = o.__properties__["set_" + propertyName])) o[tmp](value1); else o[propertyName] = value1;
+			}
+		}
+	}
+	,initialize: function() {
+		var details;
+		var path;
+		var _g = 0;
+		var _g1 = Reflect.fields(this.properties);
+		while(_g < _g1.length) {
+			var propertyName = _g1[_g];
+			++_g;
+			path = js_Boot.__cast(Reflect.field(this.properties,propertyName) , motion_IComponentPath);
+			if(path != null) {
+				var isField = true;
+				if(Object.prototype.hasOwnProperty.call(this.target,propertyName)) path.start = Reflect.field(this.target,propertyName); else {
+					isField = false;
+					var tmp;
+					var o = this.target;
+					var tmp1;
+					if(o == null) tmp = null; else if(o.__properties__ && (tmp1 = o.__properties__["get_" + propertyName])) tmp = o[tmp1](); else tmp = o[propertyName];
+					path.start = tmp;
+				}
+				details = new motion_actuators_PropertyPathDetails(this.target,propertyName,path,isField);
+				this.propertyDetails.push(details);
+			}
+		}
+		this.detailsLength = this.propertyDetails.length;
+		this.initialized = true;
+	}
+	,update: function(currentTime) {
+		if(!this.paused) {
+			var details;
+			var easing;
+			var tweenPosition = (currentTime - this.timeOffset) / this.duration;
+			if(tweenPosition > 1) tweenPosition = 1;
+			if(!this.initialized) this.initialize();
+			if(!this.special) {
+				easing = this._ease.calculate(tweenPosition);
+				var _g = 0;
+				var _g1 = this.propertyDetails;
+				while(_g < _g1.length) {
+					var details1 = _g1[_g];
+					++_g;
+					if(details1.isField) {
+						var value = (js_Boot.__cast(details1 , motion_actuators_PropertyPathDetails)).path.calculate(easing);
+						details1.target[details1.propertyName] = value;
+					} else {
+						var o = details1.target;
+						var field = details1.propertyName;
+						var value1 = (js_Boot.__cast(details1 , motion_actuators_PropertyPathDetails)).path.calculate(easing);
+						var tmp;
+						if(o.__properties__ && (tmp = o.__properties__["set_" + field])) o[tmp](value1); else o[field] = value1;
+					}
+				}
+			} else {
+				if(!this._reverse) easing = this._ease.calculate(tweenPosition); else easing = this._ease.calculate(1 - tweenPosition);
+				var endValue;
+				var _g2 = 0;
+				var _g11 = this.propertyDetails;
+				while(_g2 < _g11.length) {
+					var details2 = _g11[_g2];
+					++_g2;
+					if(!this._snapping) {
+						if(details2.isField) {
+							var value2 = (js_Boot.__cast(details2 , motion_actuators_PropertyPathDetails)).path.calculate(easing);
+							details2.target[details2.propertyName] = value2;
+						} else {
+							var o1 = details2.target;
+							var field1 = details2.propertyName;
+							var value3 = (js_Boot.__cast(details2 , motion_actuators_PropertyPathDetails)).path.calculate(easing);
+							var tmp1;
+							if(o1.__properties__ && (tmp1 = o1.__properties__["set_" + field1])) o1[tmp1](value3); else o1[field1] = value3;
+						}
+					} else if(details2.isField) {
+						var value4 = Math.round((js_Boot.__cast(details2 , motion_actuators_PropertyPathDetails)).path.calculate(easing));
+						details2.target[details2.propertyName] = value4;
+					} else {
+						var o2 = details2.target;
+						var field2 = details2.propertyName;
+						var value5 = Math.round((js_Boot.__cast(details2 , motion_actuators_PropertyPathDetails)).path.calculate(easing));
+						var tmp2;
+						if(o2.__properties__ && (tmp2 = o2.__properties__["set_" + field2])) o2[tmp2](value5); else o2[field2] = value5;
+					}
+				}
+			}
+			if(tweenPosition == 1) {
+				if(this._repeat == 0) {
+					this.active = false;
+					var tmp3;
+					if(this.toggleVisible) {
+						var tmp4;
+						var target = this.target;
+						var value6 = null;
+						if(Object.prototype.hasOwnProperty.call(target,"alpha")) value6 = Reflect.field(target,"alpha"); else {
+							var tmp5;
+							var tmp6;
+							if(target == null) tmp5 = null; else if(target.__properties__ && (tmp6 = target.__properties__["get_" + "alpha"])) tmp5 = target[tmp6](); else tmp5 = target.alpha;
+							value6 = tmp5;
+						}
+						tmp4 = value6;
+						tmp3 = tmp4 == 0;
+					} else tmp3 = false;
+					if(tmp3) {
+						var target1 = this.target;
+						if(Object.prototype.hasOwnProperty.call(target1,"visible")) target1.visible = false; else {
+							var tmp7;
+							if(target1.__properties__ && (tmp7 = target1.__properties__["set_" + "visible"])) target1[tmp7](false); else target1.visible = false;
+						}
+					}
+					this.complete(true);
+					return;
+				} else {
+					if(this._onRepeat != null) {
+						var method = this._onRepeat;
+						var params = this._onRepeatParams;
+						if(params == null) params = [];
+						var func = method;
+						func.apply(method,params);
+					}
+					if(this._reflect) this._reverse = !this._reverse;
+					this.startTime = currentTime;
+					this.timeOffset = this.startTime + this._delay;
+					if(this._repeat > 0) this._repeat--;
+				}
+			}
+			if(this.sendChange) this.change();
+		}
+	}
+	,__class__: motion_actuators_MotionPathActuator
+});
+var motion_actuators_PropertyDetails = function(target,propertyName,start,change,isField) {
+	if(isField == null) isField = true;
+	this.target = target;
+	this.propertyName = propertyName;
+	this.start = start;
+	this.change = change;
+	this.isField = isField;
+};
+motion_actuators_PropertyDetails.__name__ = ["motion","actuators","PropertyDetails"];
+motion_actuators_PropertyDetails.prototype = {
+	__class__: motion_actuators_PropertyDetails
+};
+var motion_actuators_PropertyPathDetails = function(target,propertyName,path,isField) {
+	if(isField == null) isField = true;
+	motion_actuators_PropertyDetails.call(this,target,propertyName,0,0,isField);
+	this.path = path;
+};
+motion_actuators_PropertyPathDetails.__name__ = ["motion","actuators","PropertyPathDetails"];
+motion_actuators_PropertyPathDetails.__super__ = motion_actuators_PropertyDetails;
+motion_actuators_PropertyPathDetails.prototype = $extend(motion_actuators_PropertyDetails.prototype,{
+	__class__: motion_actuators_PropertyPathDetails
+});
+var motion_easing_ExpoEaseIn = function() {
+};
+motion_easing_ExpoEaseIn.__name__ = ["motion","easing","ExpoEaseIn"];
+motion_easing_ExpoEaseIn.__interfaces__ = [motion_easing_IEasing];
+motion_easing_ExpoEaseIn.prototype = {
+	calculate: function(k) {
+		return k == 0?0:Math.pow(2,10 * (k - 1));
+	}
+	,ease: function(t,b,c,d) {
+		return t == 0?b:c * Math.pow(2,10 * (t / d - 1)) + b;
+	}
+	,__class__: motion_easing_ExpoEaseIn
+};
+var motion_easing_ExpoEaseInOut = function() {
+};
+motion_easing_ExpoEaseInOut.__name__ = ["motion","easing","ExpoEaseInOut"];
+motion_easing_ExpoEaseInOut.__interfaces__ = [motion_easing_IEasing];
+motion_easing_ExpoEaseInOut.prototype = {
+	calculate: function(k) {
+		if(k == 0) return 0;
+		if(k == 1) return 1;
+		if((k /= 0.5) < 1.0) return 0.5 * Math.pow(2,10 * (k - 1));
+		return 0.5 * (2 - Math.pow(2,-10 * --k));
+	}
+	,ease: function(t,b,c,d) {
+		if(t == 0) return b;
+		if(t == d) return b + c;
+		if((t /= d / 2.0) < 1.0) return c / 2 * Math.pow(2,10 * (t - 1)) + b;
+		return c / 2 * (2 - Math.pow(2,-10 * --t)) + b;
+	}
+	,__class__: motion_easing_ExpoEaseInOut
+};
 function $iterator(o) { if( o instanceof Array ) return function() { return HxOverrides.iter(o); }; return typeof(o.iterator) == 'function' ? $bind(o,o.iterator) : o.iterator; }
 var $_, $fid = 0;
 function $bind(o,m) { if( m == null ) return null; if( m.__id__ == null ) m.__id__ = $fid++; var f; if( o.hx__closures__ == null ) o.hx__closures__ = {}; else f = o.hx__closures__[m.__id__]; if( f == null ) { f = function(){ return f.method.apply(f.scope, arguments); }; f.scope = o; f.method = m; o.hx__closures__[m.__id__] = f; } return f; }
@@ -11963,6 +13240,8 @@ if(Array.prototype.indexOf) HxOverrides.indexOf = function(a,o,i) {
 String.prototype.__class__ = String;
 String.__name__ = ["String"];
 Array.__name__ = ["Array"];
+Date.prototype.__class__ = Date;
+Date.__name__ = ["Date"];
 var Int = { __name__ : ["Int"]};
 var Dynamic = { __name__ : ["Dynamic"]};
 var Float = Number;
@@ -12009,7 +13288,7 @@ exile_ExileFilters.SOLID_OBJECT_GROUP = 1;
 exile_components_Bee.NAME = "Bee";
 exile_components_Bee.ID = 33;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 22;
+exile_components_BeeHive.ID = 11;
 exile_components_Bird.NAME = "Bird";
 exile_components_Bird.ID = 40;
 exile_components_Chicken.NAME = "Chicken";
@@ -12027,14 +13306,14 @@ exile_components_Projectile.ID = 39;
 exile_components_Rabbit.NAME = "Rabbit";
 exile_components_Rabbit.ID = 9;
 exile_components_Teleporter.NAME = "Teleporter";
-exile_components_Teleporter.ID = 23;
+exile_components_Teleporter.ID = 35;
 exile_entities_weapon_HandGrenadeFactory.count = 0;
-exile_util_CharacterController2.BASE_FORCE = 500;
-exile_util_CharacterController2.WALK_FORCE = 1000.;
-exile_util_CharacterController2.AIR_CONTROL_FORCE = 500;
-exile_util_CharacterController2.JUMP_FORCE = 15000.;
-exile_util_CharacterController2.MAX_AIR_HORIZONTAL_VELOCITY = 250.;
-exile_util_CharacterController2.MAX_BURN = 2000.;
+exile_util_CharacterController2.BASE_FORCE = 10000;
+exile_util_CharacterController2.WALK_FORCE = 20000.;
+exile_util_CharacterController2.AIR_CONTROL_FORCE = 10000;
+exile_util_CharacterController2.JUMP_FORCE = 300000.;
+exile_util_CharacterController2.MAX_AIR_HORIZONTAL_VELOCITY = 5000.;
+exile_util_CharacterController2.MAX_BURN = 40000.;
 exile_util_CharacterController2.BOOST_FACTOR = 1.3;
 glaze_EngineConstants.TILE_SIZE = 16;
 glaze_ai_steering_SteeringBehavior.CALCULATE_SUM = 0;
@@ -12099,9 +13378,9 @@ glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
 glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
 glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
-glaze_ai_steering_components_Steering.ID = 19;
+glaze_ai_steering_components_Steering.ID = 10;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 8;
+glaze_animation_components_SpriteAnimation.ID = 12;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -12114,57 +13393,60 @@ glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_Active.NAME = "Active";
 glaze_engine_components_Active.ID = 29;
 glaze_engine_components_Age.NAME = "Age";
-glaze_engine_components_Age.ID = 18;
+glaze_engine_components_Age.ID = 28;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_CollidableSwitch.ID = 8;
 glaze_engine_components_Destroy.NAME = "Destroy";
 glaze_engine_components_Destroy.ID = 17;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 17;
+glaze_engine_components_Display.ID = 27;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
-glaze_engine_components_EnvironmentForce.ID = 25;
+glaze_engine_components_EnvironmentForce.ID = 1;
 glaze_engine_components_Extents.NAME = "Extents";
-glaze_engine_components_Extents.ID = 21;
+glaze_engine_components_Extents.ID = 32;
 glaze_engine_components_Fixed.NAME = "Fixed";
 glaze_engine_components_Fixed.ID = 6;
 glaze_engine_components_Health.NAME = "Health";
 glaze_engine_components_Health.ID = 26;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 24;
+glaze_engine_components_Held.ID = 12;
 glaze_engine_components_Holdable.NAME = "Holdable";
-glaze_engine_components_Holdable.ID = 4;
+glaze_engine_components_Holdable.ID = 5;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 7;
+glaze_engine_components_Holder.ID = 3;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 6;
+glaze_engine_components_Inventory.ID = 2;
 glaze_engine_components_Moveable.NAME = "Moveable";
 glaze_engine_components_Moveable.ID = 25;
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 16;
+glaze_engine_components_ParticleEmitters.ID = 9;
 glaze_engine_components_Position.NAME = "Position";
-glaze_engine_components_Position.ID = 20;
+glaze_engine_components_Position.ID = 31;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 15;
+glaze_engine_components_Script.ID = 8;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 9;
+glaze_engine_components_State.ID = 4;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 4;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 10;
+glaze_engine_components_TileDisplay.ID = 5;
 glaze_engine_components_Viewable.NAME = "Viewable";
-glaze_engine_components_Viewable.ID = 11;
+glaze_engine_components_Viewable.ID = 19;
 glaze_engine_components_Water.NAME = "Water";
 glaze_engine_components_Water.ID = 2;
 glaze_engine_components_Wind.NAME = "Wind";
 glaze_engine_components_Wind.ID = 3;
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
-glaze_lighting_components_Light.ID = 14;
+glaze_lighting_components_Light.ID = 22;
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_particle_PointSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_physics_Body.SLEEP_BIAS = 0.99332805041467;
 glaze_physics_Body.SLEEP_EPSILON = 0.0009;
 glaze_physics_Body.WAKE_MOTION = 10;
+glaze_physics_Material.NORMAL = new glaze_physics_Material(1,0.3,0.1);
+glaze_physics_Material.LIGHTMETAL = new glaze_physics_Material(1.6,0.3,0.1);
+glaze_physics_Material.ROCK = new glaze_physics_Material(2,0.2,0.1);
 glaze_physics_collision_BFProxy.nextID = 0;
 glaze_physics_collision_Intersect.epsilon = 1e-8;
 glaze_physics_collision_Map.SOLID = 1;
@@ -12180,9 +13462,9 @@ glaze_physics_collision_broadphase_uniformgrid_UniformGrid.DOWN = 2;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
 glaze_physics_components_ContactRouter.ID = 1;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
-glaze_physics_components_PhysicsBody.ID = 13;
+glaze_physics_components_PhysicsBody.ID = 7;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 12;
+glaze_physics_components_PhysicsCollision.ID = 6;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
 glaze_physics_components_PhysicsConstraints.ID = 0;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
@@ -12208,6 +13490,7 @@ glaze_util_Maths.SQRT2 = 1.414213562373095;
 glaze_util_Random.PseudoRandomSeed = 3489752;
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
+haxe_ds_ObjectMap.count = 0;
 haxe_io_FPHelper.i64tmp = (function($this) {
 	var $r;
 	var x = new haxe__$Int64__$_$_$Int64(0,0);
@@ -12232,5 +13515,11 @@ haxe_zip_InflateImpl.DIST_BASE_VAL_TBL = [1,2,3,4,5,7,9,13,17,25,33,49,65,97,129
 haxe_zip_InflateImpl.CODE_LENGTHS_POS = [16,17,18,0,8,7,9,6,10,5,11,4,12,3,13,2,14,1,15];
 js_Boot.__toStr = {}.toString;
 js_html_compat_Uint8Array.BYTES_PER_ELEMENT = 1;
+motion_actuators_SimpleActuator.actuators = [];
+motion_actuators_SimpleActuator.actuatorsLength = 0;
+motion_actuators_SimpleActuator.addedEvent = false;
+motion_Actuate.defaultActuator = motion_actuators_SimpleActuator;
+motion_Actuate.defaultEase = motion_easing_Expo.get_easeOut();
+motion_Actuate.targetLibraries = new haxe_ds_ObjectMap();
 GameTestA.main();
 })(typeof console != "undefined" ? console : {log:function(){}}, typeof window != "undefined" ? window : exports);

@@ -33,12 +33,17 @@ class ForceFactory extends TMXEntityFactory {
         components.push(new PhysicsCollision(true,null,[]));
         components.push(new Fixed());
        	components.push(new Active());
-		
-       	var config = BaseEntityFactory.getCSVParams(tmxObject.combined.get("config"));
-       	
-       	var forceData:ForceData = new ForceData(config[0],config[1],config[2],config[3],config[4]);
 
-		components.push(new EnvironmentForce([forceData]));
+       	var forceDataArray:Array<ForceData> = [];
+       	for (i in 0...10) {
+       		var raw = tmxObject.combined.get("config"+i);
+       		if (raw!=null) {
+		       	var config = BaseEntityFactory.getCSVParams(raw);
+		       	forceDataArray.push(new ForceData(config[0],config[1],config[2],config[3],config[4]));
+       		}
+       	}
+
+		components.push(new EnvironmentForce(forceDataArray));
         components.push(new Wind(1/1000));
 		
 		engine.createEntity(components,tmxObject.name);

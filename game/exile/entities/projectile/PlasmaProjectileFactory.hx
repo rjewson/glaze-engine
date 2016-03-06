@@ -27,7 +27,7 @@ class PlasmaProjectileFactory {
 
 	public static function create(engine:Engine,position:Position,filter:Filter,targetPosition:Vector2):Entity {
 
-        var bulletBody = new Body(new Material());
+        var bulletBody = new Body(Material.LIGHTMETAL);
         bulletBody.setMass(0.3);
         bulletBody.setBounces(0);     
         bulletBody.globalForceFactor = 0.1;
@@ -37,7 +37,7 @@ class PlasmaProjectileFactory {
             position,
             new Extents(3,3),
             new Display("projectiles","plasma"), 
-            new PhysicsBody(bulletBody),
+            new PhysicsBody(bulletBody,false),
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.FireballEmitter(0,10)]),

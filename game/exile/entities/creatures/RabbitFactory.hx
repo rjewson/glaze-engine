@@ -44,7 +44,7 @@ class RabbitFactory {
             new Extents((12),(16)),
             new Display("rabbit"), 
             new PhysicsCollision(false,new Filter(),[]),
-            new PhysicsBody(rabbitBody), 
+            new PhysicsBody(rabbitBody,true), 
             new Moveable(),
             new Holdable(),
             new SpriteAnimation("rabbit",["idle","blink","jump","eat","listen"],"jump"),

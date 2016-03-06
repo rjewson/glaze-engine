@@ -7,21 +7,6 @@
 		]
 	},
 
-	"door":{
-		"frames":[
-			{ "id":"closed",	"name":"door/closed.png",	"scale":{"x":4,"y":4} },
-			{ "id":"open",		"name":"door/open.png",		"scale":{"x":4,"y":4} }
-		]
-	},
-
-	"switch":{
-		"frames":[
-			{ "id":"on",		"name":"switch1.png",		"scale":{"x":2,"y":2} },
-			{ "id":"off",		"name":"switch2.png",		"scale":{"x":2,"y":2} }
-		]
-	},
-
-
 	"grenade":{
 		"frames":[
 			{ "id":"off",		"name":"grenade/basic1.png",		"scale":{"x":2,"y":2} },
@@ -32,12 +17,6 @@
 				"frames":[0,1],	"looped":true,	"fps":3
 			}
 		}
-	},
-
-	"enemies":{
-		"frames":[
-			{ "id":"turret",		"name":"turretA.png",		"scale":{"x":1,"y":1} }
-		]
 	},
 
 	"insects":{
@@ -75,7 +54,8 @@
 			{ "id":"blaster",		"name":"weapons/gun1.png",		"scale":{"x":1,"y":1} },
 			{ "id":"heavyblaster",	"name":"weapons/gun2.png",		"scale":{"x":2,"y":2} },
 			{ "id":"plasma",		"name":"weapons/gun3.png",		"scale":{"x":2,"y":2} },
-			{ "id":"gun4",			"name":"weapons/gun4.png",		"scale":{"x":2,"y":2} }
+			{ "id":"gun4",			"name":"weapons/gun4.png",		"scale":{"x":2,"y":2} },
+			{ "id":"water_container",			"name":"items/water_container.png",		"scale":{"x":2,"y":2} }
 		]
 	},
 

@@ -24,7 +24,6 @@ class PhysicsMoveableSystem extends System {
     override public function entityAdded(entity:Entity) {
         var collision = entity.getComponent(PhysicsCollision);
         var extents = entity.getComponent(Extents);
-        var body = entity.getComponent(PhysicsBody);
 
         collision.proxy.aabb.extents.copy(extents.halfWidths);
         collision.proxy.isStatic = false;

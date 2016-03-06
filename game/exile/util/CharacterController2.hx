@@ -15,7 +15,7 @@ class CharacterController2
 
     private var jumpUnit:Vector2 = new Vector2();
 
-    private static inline var BASE_FORCE:Float = 500;
+    private static inline var BASE_FORCE:Float = 10000;
 
     private static inline var WALK_FORCE:Float = 2 * BASE_FORCE;
     private static inline var AIR_CONTROL_FORCE:Float = 1 * BASE_FORCE;
@@ -38,6 +38,8 @@ class CharacterController2
 
     public var left:Int;
     public var right:Int;
+    public var up:Bool;
+    public var down:Int;
     public var boost:Int;
 
     public function new(input:DigitalInput,body:Body) {
@@ -55,7 +57,7 @@ class CharacterController2
         right = input.PressedDuration(68);  //d
         var up = input.JustPressed(87);         //w
         var upDuration = input.PressedDuration(87);         //w
-        var down = input.PressedDuration(83);   //s
+        down = input.PressedDuration(83);   //s
         boost = input.PressedDuration(16);
 
         //Just jumped?
@@ -94,7 +96,7 @@ class CharacterController2
             // if (jumping&&upDuration>1&&upDuration<d) controlForce.y -= 800/d;//(d-upDuration);
             // if (up) burn-=10000;
             if (up) burn = MAX_BURN;
-            if (upDuration>0) burn += 500;
+            if (upDuration>0) burn += BASE_FORCE;
         }
         if (boost>0) {
             burn = Math.min(burn,MAX_BURN*BOOST_FACTOR);     

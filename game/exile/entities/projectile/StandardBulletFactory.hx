@@ -27,8 +27,8 @@ class StandardBulletFactory {
 
 	public static function create(engine:Engine,position:Position,filter:Filter,targetPosition:Vector2):Entity {
 
-        var bulletBody = new Body(new Material());
-        bulletBody.setMass(10);
+        var bulletBody = new Body(Material.LIGHTMETAL);
+        bulletBody.setMass(16+8);
         bulletBody.setBounces(3);     
         bulletBody.globalForceFactor = 1;//0.5;
         bulletBody.isBullet = true;
@@ -65,9 +65,9 @@ class StandardBulletFactory {
 */
         var bullet = engine.createEntity([
             position,
-            new Extents(3,3),
+            new Extents(2,2),
             new Display("projectiles","standard"), 
-            new PhysicsBody(bulletBody),
+            new PhysicsBody(bulletBody,true),
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.InterpolatedEmitter(0,10)]),

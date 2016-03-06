@@ -1,6 +1,7 @@
 package exile.entities.creatures;
 
 import exile.components.Bird;
+import glaze.ai.steering.behaviors.Arrival;
 import glaze.ai.steering.behaviors.Seek;
 import glaze.ai.steering.behaviors.WallAvoidance;
 import glaze.ai.steering.behaviors.Wander;
@@ -33,10 +34,10 @@ class BirdFactory {
 	public function new() {
 	} 
 
-	public static function create(engine:Engine,position:Position):Entity {
+	public static function create(engine:Engine,position:Position,follow:Position):Entity {
 
         var birdBody = new Body(new Material());
-        birdBody.setMass(0.1);
+        birdBody.setMass(1);
         birdBody.setBounces(0);     
         birdBody.globalForceFactor = 0.0;
         birdBody.maxScalarVelocity = 200; 
@@ -48,15 +49,17 @@ class BirdFactory {
             new Bird(),
             new Extents((3)*1,(3)*1),
             new Display("bird"), 
-            new PhysicsBody(birdBody), 
+            new PhysicsBody(birdBody,true), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(100,10)]),
             new glaze.animation.components.SpriteAnimation("bird",["fly"],"fly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                new Wander()
-                // ,new Seek(position.coords.clone(),(256*246))
+                // new Wander(4,10,0.01),
+                // new Arrival(position.coords.clone(),64,8)
+                // new Seek(follow.coords,32)
+                new Arrival(follow.coords,64,16)
                 ,new WallAvoidance(map,40)
                 ]),
             new Age(10000),

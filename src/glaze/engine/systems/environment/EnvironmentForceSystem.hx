@@ -15,6 +15,7 @@ import glaze.physics.collision.Contact;
 import glaze.physics.components.PhysicsCollision;
 import glaze.geom.Vector2;
 import glaze.util.Random.RandomFloat;
+import motion.Actuate;
 
 class EnvironmentForceSystem extends System {
 
@@ -29,27 +30,63 @@ class EnvironmentForceSystem extends System {
     override public function entityAdded(entity:Entity) {
         entity.getComponent(PhysicsCollision).proxy.contactCallbacks.push(callback);
         var force = entity.getComponent(EnvironmentForce);
-        // js.Lib.debug();
-        force.direction.copy(force.data[0].direction);
-        force.power = force.data[0].maxForce;
+        setActiveForce(force,0);
     }
 
     override public function entityRemoved(entity:Entity) {
     }
 
     override public function update(timestamp:Float,delta:Float) {
+        for (entity in view.entities) {
+            var force = entity.getComponent(EnvironmentForce);
+            if (force.ttl>0) {
+                force.ttl-=delta;
+                if (force.ttl<=0) {
+                    Actuate.tween (force, 1, { power: 0 }).onComplete (onFinished,[force]);
+                }    
+            }
+        }
+    }
+
+    public function onFinished(force:EnvironmentForce) {
+        force.currentIndex++;
+        if (force.currentIndex>=force.data.length)
+            force.currentIndex = 0;
+        setActiveForce(force,force.currentIndex);
+    }
+
+    public function setActiveForce(envForce:EnvironmentForce,index:Int) {
+        envForce.currentIndex = index;
+        var item = envForce.data[index];
+        envForce.direction.copy(item.direction);
+        envForce.power = item.maxForce;    
+        envForce.ttl = item.minDuration==0 ? -1 : glaze.util.Random.RandomFloat(item.minDuration*1000,item.maxDuration*1000);    
     }
 
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {        
-        var areaOverlap = b.aabb.overlapArea(a.aabb);
-        var percent = areaOverlap/b.aabb.area();
-        //trace(areaOverlap,percent);
+
+        var area = a.aabb.overlapArea(b.aabb);
+        // b.body.addForce(new Vector2(0,-area*40));
+
+        // trace(percent);
         var force = a.entity.getComponent(EnvironmentForce);
-        //var f = a.entity.getComponent(EnvironmentForce).direction.clone();
+        //TODO SCALE FORCE BY ACTUAL AREA!!!!!!
         temp.copy(force.direction);
-        temp.multEquals(force.power);
-        temp.multEquals(percent);
+        // temp.multEquals(force.power/40);
+        temp.multEquals(40*area);
         b.body.addForce(temp);
     }
+
+    // public function callback(a:BFProxy,b:BFProxy,contact:Contact) {        
+    //     var areaOverlap = b.aabb.overlapArea(a.aabb);
+    //     var percent = areaOverlap/b.aabb.area();
+    //     // trace(percent);
+    //     var force = a.entity.getComponent(EnvironmentForce);
+    //     //TODO SCALE FORCE BY ACTUAL AREA!!!!!!
+    //     temp.copy(force.direction);
+    //     temp.multEquals(force.power/1000);
+    //     temp.multEquals(percent);
+    //     b.body.addProportionalForce(temp);
+    // }
 
 }

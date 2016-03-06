@@ -35,7 +35,7 @@ class BeeFactory {
 
 	public static function create(engine:Engine,position:Position):Entity {
 
-        var beeBody = new Body(new Material(1,0.3,0));
+        var beeBody = new Body(new Material(0.1,0.3,0));
         beeBody.setMass(0.1);
         beeBody.setBounces(0);     
         beeBody.globalForceFactor = 0.0;
@@ -46,7 +46,7 @@ class BeeFactory {
             new Bee(),
             new Extents((3/2)*1,(3/2)*1),
             new Display("insects"), 
-            new PhysicsBody(beeBody), 
+            new PhysicsBody(beeBody,true), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(100,10)]),
@@ -57,7 +57,7 @@ class BeeFactory {
                 // ,new Seek(position.coords.clone(),(256*246))
                 ,new WallAvoidance(map,40)
                 ]),
-            new Age(100000),
+            new Age(10000),
             new Health(10,10,0),
             new Active()
         ],"bee"); 

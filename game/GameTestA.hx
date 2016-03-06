@@ -119,6 +119,8 @@ class GameTestA extends GameEngine {
     public var killChickens:Bool = false;
     public var shakeIt:Float = 0;
  
+    public var rock:Entity;
+
     public var door:Entity;    
 
     public var TS:Int = glaze.EngineConstants.TILE_SIZE;
@@ -167,7 +169,7 @@ class GameTestA extends GameEngine {
                         
         var aiphase = engine.createPhase();//1000/30);  
         var corephase = engine.createPhase(); 
-        var physicsPhase = engine.createPhase();//1000/60);    
+        // var corephase = engine.createPhase();//1000/60);    
               
         messageBus = new MessageBus();  
         
@@ -229,8 +231,8 @@ class GameTestA extends GameEngine {
 
         var map = new Map(collisionData);  
         exile.entities.creatures.BeeFactory.map = map; 
-        physicsPhase.addSystem(new PhysicsUpdateSystem());
-        physicsPhase.addSystem(new SteeringSystem());
+        corephase.addSystem(new PhysicsUpdateSystem());
+        corephase.addSystem(new SteeringSystem());
     
         engine.config.map = map;
 
@@ -243,12 +245,16 @@ class GameTestA extends GameEngine {
 
         exile.util.CombatUtils.setBroadphase(broadphase);
  
-        physicsPhase.addSystem(new PhysicsStaticSystem(broadphase));
-        physicsPhase.addSystem(new PhysicsMoveableSystem(broadphase));
-        physicsPhase.addSystem(new PhysicsCollisionSystem(broadphase));
-        physicsPhase.addSystem(new PhysicsConstraintSystem());     
-        physicsPhase.addSystem(new PhysicsPositionSystem());
-        physicsPhase.addSystem(new ContactRouterSystem());
+        corephase.addSystem(new PhysicsStaticSystem(broadphase));
+        corephase.addSystem(new PhysicsMoveableSystem(broadphase));
+        corephase.addSystem(new PhysicsCollisionSystem(broadphase));
+        // corephase.addSystem(new PhysicsConstraintSystem());   
+        corephase.addSystem(new glaze.physics.systems.PhysicsMassSystem());   
+        corephase.addSystem(new PhysicsPositionSystem());
+        corephase.addSystem(new glaze.engine.systems.HeldSystem());  
+
+
+        corephase.addSystem(new ContactRouterSystem());
 
         corephase.addSystem(new glaze.engine.systems.WaterSystem(blockParticleEngine));
 
@@ -256,7 +262,6 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new glaze.engine.systems.environment.WindRenderSystem(blockParticleEngine));
 
         corephase.addSystem(new glaze.engine.systems.HolderSystem(exile.ExileFilters.HOLDABLE_CAT));
-        corephase.addSystem(new glaze.engine.systems.HeldSystem());
         corephase.addSystem(new glaze.engine.systems.HoldableSystem(exile.ExileFilters.HOLDABLE_CAT));
         corephase.addSystem(new glaze.engine.systems.HealthSystem());
         corephase.addSystem(new glaze.engine.systems.AgeSystem());
@@ -315,10 +320,10 @@ class GameTestA extends GameEngine {
         player = engine.createEntity([ 
             new Player(),
             new Position(300,180),  
-            new Extents(7,22), 
+            new Extents(10,21), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
-            new PhysicsBody(body),
+            new PhysicsBody(body,false),
             new PhysicsCollision(false,playerFilter,[]),
             new Moveable(),
             new Active()
@@ -336,14 +341,13 @@ class GameTestA extends GameEngine {
         tmxFactory.parseObjectGroup("Objects");
 
         createTurret();    
-        createWind();
         createDoor(); 
  
         // exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
         // exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
-        exile.entities.creatures.BirdFactory.create(engine,mapPosition(20,20));
+        exile.entities.creatures.BirdFactory.create(engine,mapPosition(20,20),player.getComponent(Position));
 
         loop.start();
     } 
@@ -361,33 +365,6 @@ class GameTestA extends GameEngine {
 
     function mapExtents(l:Int,t:Int,r:Int,b:Int):Extents {
         return new Extents( (r-l)*0.5*TS,(b-t)*0.5*TS);
-    }
-
-    public function createWind() { 
-
-
-        // engine.createEntity([
-        //     mapPosition(1.5,14.5),
-        //     new Extents(16,256), 
-        //     new PhysicsCollision(true,null,[]),
-        //     new Fixed(),
-        //     // new EnvironmentForce(new Vector2(0,-1600)), 
-        //     new EnvironmentForce([new ForceData(0,1600,1600,0,0)]), 
-        //     new Wind(1/100),
-        //     new Active()      
-        // ],"wind");           
-
-        // engine.createEntity([
-        //     mapPositionCenter(38,20,46,38),
-        //     mapExtents(38,16,46,28),
-        //     // new Extents(6*32,1.5*32), 
-        //     new PhysicsCollision(true,null,[]),
-        //     new Fixed(),
-        //     // new EnvironmentForce(new Vector2(0,-1600)),
-        //     new EnvironmentForce([new ForceData(0,1600,1600,0,0)]), 
-        //     new Wind(1/1000),
-        //     new Active()
-        // ],"wind2");         
     }
 
 
@@ -436,16 +413,27 @@ class GameTestA extends GameEngine {
             new exile.components.BeeHive(5)
         ],"BeeHive"); 
 
-        engine.createEntity([
+        rock = engine.createEntity([
             mapPosition(9,4),
-            new Extents(4,4),
+            new Extents(8,8),
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(), 
-            new PhysicsBody(new Body(null,15)),
+            new PhysicsBody(new Body(Material.ROCK),true),
             new Holdable(),
             new Active()
-        ],"rock");         
+        ],"rock");      
+
+        // engine.createEntity([
+        //     mapPosition(9,4),
+        //     new Extents(6,14),
+        //     new Display("items","water_container"), 
+        //     new PhysicsCollision(false,new Filter(),[]),
+        //     new Moveable(), 
+        //     new PhysicsBody(new Body(null,5)),
+        //     new Holdable(),
+        //     new Active()
+        // ],"water_container");         
 
         // engine.createEntity([
         //     mapPosition(40,4),
@@ -499,7 +487,7 @@ class GameTestA extends GameEngine {
         // var bee = exile.entities.creatures.BeeFactory.create(engine,new Position(6.1*32,4*32));
         // bee.getComponent(glaze.ai.steering.components.Steering).behaviors.push(new glaze.ai.steering.behaviors.FollowPath(route));
     }
-
+ 
     public function createTurret() { 
 
         var filter = new Filter();
@@ -644,7 +632,10 @@ class GameTestA extends GameEngine {
         });        
         Browser.document.getElementById("debug3button").addEventListener("click",function(event){
             // game.killChickens = true;
-            untyped game.broadphase.dump();
+            // untyped game.broadphase.dump();
+            var rockbody = game.rock.getComponent(PhysicsBody);
+            trace(rockbody.body.mass);
+            rockbody.body.addForce(new Vector2(0,512*-250));
         });    
         Browser.document.getElementById("debug4button").addEventListener("click",function(event){
             game.shakeIt = 15;

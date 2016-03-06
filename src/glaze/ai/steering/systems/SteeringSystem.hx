@@ -35,6 +35,7 @@ class SteeringSystem extends System {
                 steering.hasChanged = false;
             }
             runningSum(steering,body);
+            // body.addProportionalForce(totalForce);
             body.addForce(totalForce);
         }
     }

@@ -65,11 +65,13 @@ class HeldSystem extends System {
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
             var holder = entity.getComponent(Held).holder;
-            var holderPos = holder.getComponent(glaze.engine.components.Position).coords;
+            var holderPos = holder.getComponent(glaze.engine.components.Position);
 
-            entity.getComponent(Position).coords.copy(holderPos);
+            // entity.getComponent(Position).coords.copy(holderPos);
             // entity.getComponent(PhysicsBody).body.position.copy(holderPos);
-            entity.getComponent(PhysicsBody).body.setPosition(holderPos.x,holderPos.y-15); //position.copy(holderPos);
+            entity.getComponent(PhysicsBody).body.setPosition(holderPos.coords.x+(holderPos.direction.x*4),holderPos.coords.y); //position.copy(holderPos);
+            //entity.getComponent(PhysicsBody).body.position.copy(entity.getComponent(PhysicsBody).body.position);
+            entity.getComponent(Position).update(entity.getComponent(PhysicsBody).body.position);
         }
 
     }
