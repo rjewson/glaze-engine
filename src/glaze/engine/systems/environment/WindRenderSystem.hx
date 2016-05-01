@@ -39,8 +39,8 @@ class WindRenderSystem extends System {
             while (wind.particleCount>1) {
                 particleEngine.EmitParticle(
                     RandomFloat(proxy.aabb.l,proxy.aabb.r),RandomFloat(proxy.aabb.t,proxy.aabb.b),
-                    (envForce.direction.x*envForce.power)/5,
-                    (envForce.direction.y*envForce.power)/5,
+                    (envForce.direction.x*envForce.power)*50,
+                    (envForce.direction.y*envForce.power)*50,
                     0,1,glaze.util.Random.RandomInteger(200,400),1,true,true,null,4,255,255,255,255);
 
                 //particleEngine.EmitParticle(RandomFloat(proxy.aabb.l,proxy.aabb.r),RandomFloat(proxy.aabb.t,proxy.aabb.b),RandomFloat(-20,20),RandomFloat(-20,20),0,1,1000,1,true,true,null,4,255,255,255,255);

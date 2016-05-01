@@ -84,6 +84,7 @@ class RenderSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         camera.Focus(cameraTarget.x,cameraTarget.y);
+        // camera.Focus(200,200);
         renderer.Render(camera.viewPortAABB);
     }
 

@@ -11,6 +11,7 @@ class Body
     public static inline var SLEEP_BIAS : Float = 0.99332805041467;
     public static inline var SLEEP_EPSILON : Float = 0.0009;
     public static inline var WAKE_MOTION : Float = 10;
+    public static inline var MASS_SCALE : Float = 1/10;
 
     public var position:Vector2 = new Vector2();
     public var positionCorrection:Vector2 = new Vector2();
@@ -237,7 +238,7 @@ class Body
     }
 
     public function setMassFromVolumeMaterial(volume:Float) {
-        setMass(material.density*volume);
+        setMass(material.density*volume*MASS_SCALE);
     }
 
     public function setPosition(x:Float,y:Float) {

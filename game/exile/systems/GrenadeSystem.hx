@@ -79,7 +79,7 @@ class GrenadeSystem extends System {
     public function destroy(entity:Entity):Void {
         entity.addComponent(new ParticleEmitters([new glaze.particle.emitter.Explosion(30,100)]));
         entity.addComponent(new Destroy(1));
-        exile.util.CombatUtils.explode(entity.getComponent(Position).coords,64,100,entity);
+        glaze.util.CombatUtils.explode(entity.getComponent(Position).coords,64,100,entity);
     }
 
     public function on(state:State) {

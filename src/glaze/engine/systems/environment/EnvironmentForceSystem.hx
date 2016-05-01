@@ -73,7 +73,9 @@ class EnvironmentForceSystem extends System {
         //TODO SCALE FORCE BY ACTUAL AREA!!!!!!
         temp.copy(force.direction);
         // temp.multEquals(force.power/40);
-        temp.multEquals(40*area);
+        // temp.multEquals(40*area);
+        temp.multEquals(force.power*area);
+        //trace(force.power);
         b.body.addForce(temp);
     }
 

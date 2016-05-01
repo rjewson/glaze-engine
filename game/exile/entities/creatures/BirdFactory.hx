@@ -13,6 +13,7 @@ import glaze.engine.components.Age;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
+import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;

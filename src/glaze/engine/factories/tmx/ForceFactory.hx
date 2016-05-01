@@ -14,6 +14,8 @@ import glaze.physics.components.PhysicsCollision;
 
 class ForceFactory extends TMXEntityFactory {
 
+	public static var FORCE_SCALE:Float = 1/100;
+
 	public function new() {	
 		super();
 	}
@@ -39,7 +41,7 @@ class ForceFactory extends TMXEntityFactory {
        		var raw = tmxObject.combined.get("config"+i);
        		if (raw!=null) {
 		       	var config = BaseEntityFactory.getCSVParams(raw);
-		       	forceDataArray.push(new ForceData(config[0],config[1],config[2],config[3],config[4]));
+		       	forceDataArray.push(new ForceData(config[0],config[1]*FORCE_SCALE,config[2]*FORCE_SCALE,config[3],config[4]));
        		}
        	}
 

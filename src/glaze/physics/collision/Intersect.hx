@@ -1,6 +1,7 @@
 
 package glaze.physics.collision;
 
+import glaze.geom.Segment;
 import glaze.geom.Vector2;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
@@ -192,7 +193,36 @@ class Intersect
         return true;
     }
 
-    public static function StaticSegmentvsStaticAABB(aabb_position:Vector2,aabb_extents:Vector2,segment_position:Vector2,segment_delta:Vector2,paddingX:Float,paddingY:Float,contact:Contact):Bool {
+    public static function IsSegVsAABB(segment:Segment,aabb_position:Vector2,aabb_extents:Vector2,paddingX:Float,paddingY:Float) {
+        return IsStaticSegmentvsStaticAABB(aabb_position,aabb_extents,segment.start,segment.scale,segment.sign,paddingX,paddingY);
+    }
+
+    public static function IsStaticSegmentvsStaticAABB(aabb_position:Vector2,aabb_extents:Vector2,segment_position:Vector2,scale:Vector2,sign:Vector2,paddingX:Float,paddingY:Float):Bool {
+        // var scale.x = 1/segment_delta.x;
+        // var scale.y = 1/segment_delta.y;
+        
+        // var sign.x = scale.x<0 ? -1 : 1;
+        // var sign.y = scale.y<0 ? -1 : 1;
+
+        var nearTimeX = (aabb_position.x - sign.x * (aabb_extents.x + paddingX) - segment_position.x ) * scale.x;
+        var nearTimeY = (aabb_position.y - sign.y * (aabb_extents.y + paddingY) - segment_position.y ) * scale.y;
+
+        var farTimeX = (aabb_position.x + sign.x * (aabb_extents.x + paddingX) - segment_position.x ) * scale.x;
+        var farTimeY = (aabb_position.y + sign.y * (aabb_extents.y + paddingY) - segment_position.y ) * scale.y;
+
+        if (nearTimeX>farTimeY || nearTimeY>farTimeX)
+            return false;
+
+        var nearTime = Math.max(nearTimeX,nearTimeY);
+        var farTime = Math.min(farTimeX,farTimeY);
+
+        if (nearTime>=1 || farTime<=0)
+            return false;
+
+        return true;
+    }
+
+    public static function   StaticSegmentvsStaticAABB(aabb_position:Vector2,aabb_extents:Vector2,segment_position:Vector2,segment_delta:Vector2,paddingX:Float,paddingY:Float,contact:Contact):Bool {
         var scaleX = 1/segment_delta.x;
         var scaleY = 1/segment_delta.y;
         
@@ -302,6 +332,41 @@ class Intersect
         return true;
     }
 
+   // public static function Stairs(aabb_position_A:Vector2,aabb_extents_A:Vector2,aabb_position_B:Vector2,aabb_extents_B:Vector2,bias:Vector2,contact:Contact):Int {
+
+   //      //New overlap code, handle corners better
+   //      var dx = aabb_position_B.x - aabb_position_A.x;
+   //      var px = (aabb_extents_B.x + aabb_extents_A.x) - Math.abs(dx);
+
+   //      var dy = aabb_position_B.y - aabb_position_A.y;
+   //      var py = (aabb_extents_B.y + aabb_extents_A.y) - Math.abs(dy);
+
+   //      if (px<py) {
+   //          contact.normal.x = dx<0 ? 1 : -1;
+   //          contact.normal.y = 0;
+   //      } else {
+   //          contact.normal.x = 0;
+   //          contact.normal.y = dy<0 ? 1 : -1;
+   //      }
+
+   //      contact.normal.x = 0;
+   //      contact.normal.y = -1;
+
+   //      var pcx = (contact.normal.x * (aabb_extents_A.x+aabb_extents_B.x) ) + aabb_position_B.x;
+   //      var pcy = (contact.normal.y * (aabb_extents_A.y+aabb_extents_B.y) ) + aabb_position_B.y;
+
+   //      var pdx = aabb_position_A.x - pcx;
+   //      var pdy = aabb_position_A.y - pcy;
+
+   //      contact.distance = pdx*contact.normal.x + pdy*contact.normal.y;
+
+   //      if (px<py) {
+   //          return dx<0 ? 1 : -1;
+   //      } 
+   //      return 0;
+   //  }
+
+
     /*
     This is seperate to avoid overcomplicating the above function with too much branching
     */
@@ -313,6 +378,52 @@ class Intersect
         var pcy = (contact.normal.y * (aabb_extents_A.y+aabb_extents_B.y) ) + aabb_position_B.y;
 
         var pdx = aabb_position_A.x - pcx;
+        var pdy = aabb_position_A.y - pcy;
+
+        contact.distance = pdx*contact.normal.x + pdy*contact.normal.y;
+
+        return true;
+    }
+
+    public static function AABBvsStaticSolidAABBSlope(aabb_position_A:Vector2,aabb_extents_A:Vector2,aabb_position_B:Vector2,aabb_extents_B:Vector2,bias:Vector2,contact:Contact):Bool {
+
+var _sqr = 0.70710678118655;
+
+        //New overlap code, handle corners better
+        var dx = aabb_position_B.x - aabb_position_A.x;
+        var px = (aabb_extents_B.x + aabb_extents_A.x) - Math.abs(dx);
+
+        var dy = aabb_position_B.y - aabb_position_A.y;
+        var py = (aabb_extents_B.y + aabb_extents_A.y) - Math.abs(dy);
+
+        // if (px<py) {
+        //     contact.normal.x = dx<0 ? 1 : -1;
+        //     contact.normal.y = 0;
+        // } else {
+        //     contact.normal.x = 0;
+        //     contact.normal.y = dy<0 ? 1 : -1;
+        // }
+
+        // contact.normal.x *= bias.x;
+        // contact.normal.y *= bias.y;
+
+        contact.normal.x = -_sqr;
+        contact.normal.y = -_sqr;
+
+        // var dx = aabb_position_B.x - aabb_position_A.x;
+        // var dy = aabb_position_B.y - aabb_position_A.y;
+
+        // if (dx*dx>dy*dy) {
+        //     contact.normal.x = dx>=0 ? -1: 1;
+        //     contact.normal.y = 0;
+        // } else {
+        //     contact.normal.x = 0;
+        //     contact.normal.y = dy>=0 ? -1 : 1;
+        // }
+        var pcx = (contact.normal.x * (aabb_extents_A.x+aabb_extents_B.x) ) + aabb_position_B.x;
+        var pcy = (contact.normal.y * (aabb_extents_A.y+aabb_extents_B.y) ) + aabb_position_B.y;
+
+        var pdx = aabb_position_A.x - pcx - 8;
         var pdy = aabb_position_A.y - pcy;
 
         contact.distance = pdx*contact.normal.x + pdy*contact.normal.y;

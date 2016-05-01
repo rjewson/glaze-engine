@@ -38,7 +38,8 @@ class WaterSystem extends System {
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {        
         var area = a.aabb.overlapArea(b.aabb);
         b.body.damping = 0.90;
-        b.body.addForce(new Vector2(0,-area*40));
+        b.body.addForce(new Vector2(0,-area*5));
+        // trace(-area*0.05,b.body.mass);
         if (!b.body.inWaterPrev) {
                 particleEngine.EmitParticle(RandomFloat(b.aabb.l,b.aabb.r),a.aabb.t,RandomFloat(-20,20),RandomFloat(-5,-15),0,1,500,1,true,true,null,4,255,255,255,255);
                 particleEngine.EmitParticle(RandomFloat(b.aabb.l,b.aabb.r),a.aabb.t,RandomFloat(-20,20),RandomFloat(-5,-15),0,1,500,1,true,true,null,4,255,255,255,255);

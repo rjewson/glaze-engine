@@ -18,4 +18,8 @@ class Age implements IComponent {
 		return age>ttl;
 	}
 
+	public function reset() {
+		age = 0;
+	}
+
 }

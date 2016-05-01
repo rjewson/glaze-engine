@@ -37,10 +37,10 @@ class ChickenFactory {
         // filter.categoryBits |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
         // filter.maskBits |= exile.ExileFilters.PROJECTILE_CAT;
 
-        var chickenBody = new Body(new Material());
+        var chickenBody = new Body(Material.NORMAL);
         chickenBody.setBounces(3);     
         chickenBody.maxScalarVelocity = 1000; 
-        chickenBody.globalForceFactor = 0.5;
+        // chickenBody.globalForceFactor = 0.5;
 
         var chicken = engine.createEntity([
             position, 

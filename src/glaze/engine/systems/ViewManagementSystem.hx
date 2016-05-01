@@ -39,11 +39,11 @@ class ViewManagementSystem extends System {
     function setEntityStatus(entity:Entity,status:Bool) {
         if (status==true) {
             entity.addComponent(new Viewable());
-            trace(entity.name+" is viewable");
+            // trace(entity.name+" is viewable");
         }
         else {
             entity.removeComponent(entity.getComponent(Viewable));
-            trace(entity.name+" is not viewable now");
+            // trace(entity.name+" is not viewable now");
         }
     }
 

@@ -15,7 +15,7 @@ class CharacterController2
 
     private var jumpUnit:Vector2 = new Vector2();
 
-    private static inline var BASE_FORCE:Float = 10000;
+    private static inline var BASE_FORCE:Float = 600;
 
     private static inline var WALK_FORCE:Float = 2 * BASE_FORCE;
     private static inline var AIR_CONTROL_FORCE:Float = 1 * BASE_FORCE;
@@ -23,9 +23,9 @@ class CharacterController2
 
     private static inline var MAX_AIR_HORIZONTAL_VELOCITY:Float = 0.5 * BASE_FORCE;
 
-    private static inline var MAX_BURN:Float = 4 * BASE_FORCE;
+    private static inline var MAX_BURN:Float = 5 * BASE_FORCE;
 
-    private static inline var BOOST_FACTOR:Float = 1.3;
+    private static inline var BOOST_FACTOR:Float = 1.4;
 
     private var jumping:Bool = false;
 

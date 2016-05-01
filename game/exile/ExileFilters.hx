@@ -18,6 +18,7 @@ class ExileFilters {
 	public static inline var PLAYER_GROUP:Int = -1;
 	public static inline var ENEMY_GROUP:Int =  -2;
 	public static inline var TURRET_GROUP:Int =  -3;
+	public static inline var BIRD_GROUP:Int =  -3;
 
 	public static inline var SOLID_OBJECT_GROUP:Int = 1;  //e.g. Doors
 

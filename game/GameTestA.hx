@@ -1,18 +1,24 @@
 package;
  
 import exile.components.Door;
+import exile.components.GunTurret;
 import exile.components.Player;
 import exile.components.Teleporter;
 import exile.ExileFilters;
 import exile.systems.BeeHiveSystem;
 import exile.systems.BeeSystem;
+import exile.systems.BirdNestSystem;
 import exile.systems.ChickenSystem;
 import exile.systems.DoorSystem;
-import exile.systems.GrenadeSystem;  
+import exile.systems.GrenadeSystem;   
+import exile.systems.GunTurretSystem;
 import exile.systems.MaggotSystem;  
 import exile.systems.PlayerSystem;
-import exile.systems.RabbitSystem;
+import exile.systems.RabbitSystem;      
 import exile.systems.TeleporterSystem;        
+import glaze.ai.faction.components.Personality;
+import glaze.ai.faction.Faction;
+import glaze.ai.faction.FactionRelationship;
 import glaze.ai.navigation.AStar;
 import glaze.ai.steering.systems.SteeringSystem; 
 import glaze.animation.components.SpriteAnimation;
@@ -25,7 +31,7 @@ import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
 import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
-import glaze.engine.components.Fixed; 
+import glaze.engine.components.Fixed;      
 import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
@@ -112,9 +118,13 @@ class GameTestA extends GameEngine {
     var messageBus:MessageBus;
     var blockParticleEngine:BlockSpriteParticleEngine;
     var spriteParticleEngine:PointSpriteParticleEngine;
+    var playerFaction:Faction;
 
     public var nf:Intersect;
     public var broadphase:glaze.physics.collision.broadphase.IBroadphase;
+
+    public var chickenSystem:ChickenSystem;
+    public var rabbitSystem:RabbitSystem;
 
     public var killChickens:Bool = false;
     public var shakeIt:Float = 0;
@@ -184,7 +194,7 @@ class GameTestA extends GameEngine {
         // renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_1, assets.assets.get(TILE_SPRITE_SHEET_1) );
         // renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET_2, assets.assets.get(TILE_SPRITE_SHEET_2) );
         renderSystem.textureManager.AddTexture(TILE_SPRITE_SHEET, assets.assets.get(TILE_SPRITE_SHEET) );
-    
+         
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
           
@@ -243,7 +253,7 @@ class GameTestA extends GameEngine {
   
         broadphase = new BruteforceBroadphase(map,nf);
 
-        exile.util.CombatUtils.setBroadphase(broadphase);
+        glaze.util.CombatUtils.setBroadphase(broadphase);
  
         corephase.addSystem(new PhysicsStaticSystem(broadphase));
         corephase.addSystem(new PhysicsMoveableSystem(broadphase));
@@ -285,10 +295,16 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
         aiphase.addSystem(new BeeSystem(broadphase));  
-        var chickenSystem:ChickenSystem = new ChickenSystem(blockParticleEngine);
+
+        aiphase.addSystem(new BirdNestSystem());                                                 
+        aiphase.addSystem(new GunTurretSystem());                                                 
+
+
+        chickenSystem = new ChickenSystem(blockParticleEngine);
         aiphase.addSystem(chickenSystem); 
-        var rabbitSystem = new RabbitSystem();
+        rabbitSystem = new RabbitSystem();
         aiphase.addSystem(rabbitSystem);     
+        
         aiphase.addSystem(new MaggotSystem(broadphase,blockParticleEngine));                                              
         aiphase.addSystem(new GrenadeSystem(broadphase)); 
         aiphase.addSystem(new InventorySystem());                                                
@@ -308,52 +324,23 @@ class GameTestA extends GameEngine {
          
         filterSupport = new FilterSupport(engine);  
    
-        playerFilter = new Filter();
-        playerFilter.categoryBits = ExileFilters.PLAYER_CAT;
-        playerFilter.maskBits |= ExileFilters.PROJECTILE_CAT;
-        playerFilter.groupIndex = ExileFilters.PLAYER_GROUP; 
-  
-        var body = new glaze.physics.Body(new Material(1,0.3,0.1));
-        body.maxScalarVelocity = 0; 
-        body.maxVelocity.setTo(1600,1000);
-                         
-        player = engine.createEntity([ 
-            new Player(),
-            new Position(300,180),  
-            new Extents(10,21), 
-            new Display("player"),        
-            new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
-            new PhysicsBody(body,false),
-            new PhysicsCollision(false,playerFilter,[]),
-            new Moveable(),
-            new Active()
-        ],"player"); 
-        
-        chickenSystem.scaredOfPosition = player.getComponent(Position);
-        rabbitSystem.scaredOfPosition = player.getComponent(Position);
-
-        renderSystem.CameraTarget(player.getComponent(Position).coords);              
-
         var tmxFactory = new TMXFactory(engine,tmxMap);
         tmxFactory.registerFactory(LightFactory);
         tmxFactory.registerFactory(WaterFactory);
         tmxFactory.registerFactory(ForceFactory);
         tmxFactory.parseObjectGroup("Objects");
 
-        createTurret();    
-        createDoor(); 
+        createEntities(); 
  
         // exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
         // exile.entities.creatures.RabbitFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.FishFactory.create(engine,mapPosition(37,21));
-        exile.entities.creatures.BirdFactory.create(engine,mapPosition(20,20),player.getComponent(Position));
+        // exile.entities.creatures.BirdFactory.create(engine,mapPosition(20,20),player.getComponent(Position));
 
         loop.start();
     } 
 
-    function setupMap() {
-    } 
   
     function mapPosition(xTiles:Float,yTiles:Float):Position {
         return new Position(xTiles*TS,yTiles*TS);
@@ -368,7 +355,38 @@ class GameTestA extends GameEngine {
     }
 
 
-    public function createDoor() {
+    public function createEntities() {
+
+        playerFilter = new Filter();
+        playerFilter.categoryBits = ExileFilters.PLAYER_CAT;
+        playerFilter.maskBits |= ExileFilters.PROJECTILE_CAT;
+        playerFilter.groupIndex = ExileFilters.PLAYER_GROUP; 
+  
+        var body = new glaze.physics.Body(new Material(1,0.3,0.1));
+        body.maxScalarVelocity = 0; 
+        body.maxVelocity.setTo(1600,1000);
+                         
+        playerFaction = new Faction("player","player",0);
+
+        player = engine.createEntity([ 
+            new Player(),
+            new Position(300,180),  
+            new Extents(7,21), 
+            new Display("player"),        
+            new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
+            new PhysicsBody(body,true),
+            new PhysicsCollision(false,playerFilter,[]),
+            new Moveable(),
+            new Active(),
+            new Personality(playerFaction)
+        ],"player"); 
+        
+        chickenSystem.scaredOfPosition = player.getComponent(Position);
+        rabbitSystem.scaredOfPosition = player.getComponent(Position);
+
+        renderSystem.CameraTarget(player.getComponent(Position).coords);              
+
+        createTurret();    
 
         door = engine.createEntity([
             mapPosition(9.5,23.5),
@@ -423,6 +441,16 @@ class GameTestA extends GameEngine {
             new Holdable(),
             new Active()
         ],"rock");      
+
+        var nestFaction = new Faction("nest1","nest",0);
+        nestFaction.addRelation(new FactionRelationship(playerFaction,-10));
+
+        engine.createEntity([
+            mapPosition(34,30),
+            new exile.components.BirdNest(1),
+            new Active(),
+            new Personality(nestFaction)
+        ],"birdsnest");
 
         // engine.createEntity([
         //     mapPosition(9,4),
@@ -494,13 +522,17 @@ class GameTestA extends GameEngine {
         // filter.categoryBits = ExileFilters.PROJECTILE_CAT;
         filter.groupIndex = ExileFilters.TURRET_GROUP;
 
-        var behavior = new glaze.ai.behaviortree.Sequence();   
-        behavior.addChild(new glaze.engine.actions.Delay(600,100));
-        behavior.addChild(new glaze.engine.actions.InitEntityCollection());
-        behavior.addChild(new glaze.engine.actions.QueryEntitiesInArea(200));
-        behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
-        behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterStaticItems,filterSupport.FilterVisibleAgainstMap]));
-        behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
+        // var behavior = new glaze.ai.behaviortree.Sequence();   
+        // behavior.addChild(new glaze.engine.actions.Delay(600,100));
+        // behavior.addChild(new glaze.engine.actions.InitEntityCollection());
+        // behavior.addChild(new glaze.engine.actions.QueryEntitiesInArea(200));
+        // behavior.addChild(new glaze.engine.actions.SortEntities(glaze.ds.EntityCollectionItem.SortClosestFirst));
+        // behavior.addChild(new glaze.engine.actions.FilterEntities([filterSupport.FilterStaticItems,filterSupport.FilterVisibleAgainstMap]));
+        // behavior.addChild(new glaze.ai.behaviortree.Action("fireBulletAtEntity",this));
+
+        var turretFaction = new Faction("turret1","turret",0);
+        turretFaction.addRelation(new FactionRelationship(playerFaction,-10));
+
         var turret = engine.createEntity([
             mapPosition(25,1.5),
             // new Position(27*32,9.3*32),  
@@ -509,11 +541,14 @@ class GameTestA extends GameEngine {
             new Extents(12,12),  
             new PhysicsCollision(false,filter,[]),
             new Fixed(),
-            new Script(behavior), 
+            // new Script(behavior), 
+            new GunTurret(),
+            new Personality(turretFaction),
             new Active()  
         ],"turret");        
         // turret.getComponent(Display).displayObject.rotation=Math.PI;
     }
+
           
     public function fireBullet(pos:Vector2,target:Vector2):Void {
         var filter = new Filter();

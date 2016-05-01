@@ -115,7 +115,7 @@ class PlayerSystem extends System {
         position = entity.getComponent(Position);
         physicsBody = entity.getComponent(PhysicsBody);
 
-        physicsBody.body.setMass(880);
+        // physicsBody.body.setMass(880);
         physicsBody.body.usesStairs = true;
         
         characterController = new CharacterController2(input,physicsBody.body);
@@ -239,7 +239,7 @@ class PlayerSystem extends System {
             var ttl = 280;
             var offsetx = position.coords.x-(6*position.direction.x);
             var velocity =  200 + glaze.util.Random.RandomInteger(-150,150);// + physicsBody.body.velocity.y;
-            var count = Math.floor( (characterController.burn+500)/10000 );
+            var count = Math.floor( (characterController.burn+500)/1000);
             if (count>0)
                 particleEngine.EmitParticle(offsetx,position.coords.y+6,glaze.util.Random.RandomFloat(-10,10),velocity,0,0,40,0.9,false,false,null,4,255,255,0,0);
             for (i in 0 ... count) {

@@ -3,6 +3,7 @@ package glaze.physics.collision;
 
 import glaze.ds.Bytes2D;
 import glaze.geom.Plane;
+import glaze.geom.Segment;
 import glaze.geom.Vector2;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.Contact;
@@ -31,9 +32,15 @@ class Map
 
     public var tilePosition:Vector2 = new Vector2();
     public var tileExtents:Vector2 = new Vector2();
+
+    public var halftilePosition:Vector2 = new Vector2();
+    public var halftileExtents:Vector2 = new Vector2();
+    
     public var bias:Vector2 =  new Vector2(1,1);
     public var step:Vector2 =  new Vector2(0,-1);
+
     public var plane:Plane = new Plane();
+    public var segment:Segment = new Segment();
 
     public var contact:Contact;
     public var closestContact:Contact;
@@ -45,6 +52,7 @@ class Map
         tileSize = data.cellSize;
         tileHalfSize = tileSize/2;
         tileExtents.setTo(tileHalfSize,tileHalfSize);
+        halftileExtents.setTo(tileHalfSize/4,tileHalfSize/4);
         contact = new Contact();
         closestContact = new Contact();
     }
@@ -80,7 +88,7 @@ var c = 0;
                                     closestContact.setTo(contact);
                                 }
                             }                            
-                        }
+                        } 
                     }
                 }
             }
@@ -88,6 +96,8 @@ var c = 0;
                 proxy.collide(null,contact);
             }
         } else {
+            // plane.setFromSegment(body.predictedPosition,body.position);
+            segment.set(body.position,body.predictedPosition);
             for (x in startX...endX) {
                 for (y in startY...endY) { 
                     var cell = data.get(x,y,0);
@@ -95,9 +105,57 @@ var c = 0;
                         tilePosition.x = (x*tileSize)+tileHalfSize;
                         tilePosition.y = (y*tileSize)+tileHalfSize;
 
-                        // if (cell&STEP==STEP&&body.usesStairs) {
-                            // Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,tilePosition,tileExtents,step,contact);
-                        // } else {
+                        if (cell&STEP==STEP&&body.usesStairs) {
+                            // js.Lib.debug();
+                           
+                            //-4,+4
+                            //+4,-4
+                            //step 8
+                            // var stairSize = 4;
+                            // var startStair = -6;
+                            // for (stair in 0...4) {
+                            //     var p = startStair + (stair*stairSize);
+                            // }
+
+                            halftilePosition.copy(tilePosition);
+                            halftilePosition.x-=6;
+                            halftilePosition.y+=6;
+                            if (Intersect.IsSegVsAABB(segment,halftilePosition,halftileExtents,proxy.aabb.extents.x,proxy.aabb.extents.y)) {
+                                Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,halftilePosition,halftileExtents,step,contact);
+                                body.respondStaticCollision(contact);
+                                proxy.collide(null,contact);
+                            }
+
+                            halftilePosition.copy(tilePosition);
+                            halftilePosition.x-=2;
+                            halftilePosition.y+=2;
+                            if (Intersect.IsSegVsAABB(segment,halftilePosition,halftileExtents,proxy.aabb.extents.x,proxy.aabb.extents.y)) {
+                                Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,halftilePosition,halftileExtents,step,contact);
+                                body.respondStaticCollision(contact);
+                                proxy.collide(null,contact);
+                            }
+
+                            halftilePosition.copy(tilePosition);                            
+                            halftilePosition.x+=2;
+                            halftilePosition.y-=2; 
+                            if (Intersect.IsSegVsAABB(segment,halftilePosition,halftileExtents,proxy.aabb.extents.x,proxy.aabb.extents.y)) {
+                                Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,halftilePosition,halftileExtents,step,contact);
+                                body.respondStaticCollision(contact);
+                                proxy.collide(null,contact);
+                            }
+
+                            halftilePosition.copy(tilePosition);                            
+                            halftilePosition.x+=6;
+                            halftilePosition.y-=6; 
+                            if (Intersect.IsSegVsAABB(segment,halftilePosition,halftileExtents,proxy.aabb.extents.x,proxy.aabb.extents.y)) {
+                                Intersect.AABBvsStaticSolidAABBFixedNormal(body.position,proxy.aabb.extents,halftilePosition,halftileExtents,step,contact);
+                                body.respondStaticCollision(contact);
+                                proxy.collide(null,contact);
+                            }
+
+                            // Intersect.AABBvsStaticSolidAABBSlope(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact);
+
+                        } else {
                             Intersect.AABBvsStaticSolidAABB(body.position,proxy.aabb.extents,tilePosition,tileExtents,bias,contact);
                         // }
 
@@ -119,12 +177,12 @@ var c = 0;
                                 var nextX:Int = x + Std.int(contact.normal.x);
                                 var nextY:Int = y + Std.int(contact.normal.y);
                                 var nextCell = data.get(nextX,nextY,0);
-                                if (nextCell&SOLID==0) {
+                                if (nextCell&AABBCOLLIDABLE==0) {
                                     body.respondStaticCollision(contact);
                                     proxy.collide(null,contact);
                                 } 
                             }
-
+}
                             // if (cell&ONE_WAY==0 || ( contact.normal.y<0&&contact.distance>=-4 ) )
                             // {
                             // var nextX:Int = x + Std.int(contact.normal.x);

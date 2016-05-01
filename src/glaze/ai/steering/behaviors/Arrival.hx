@@ -44,14 +44,14 @@ class Arrival extends Behavior
 
 		var t = Math.sqrt(d);
 
-		var scale = 1000.0;
+		var scale = 100.0;
 		if (t<arrivalZone) {
 			// scale = (t+seekDist)/(arrivalZone+seekDist);
 			scale = (t)/(arrivalZone);
 			// scale = 1/scale;
 			// scale = 1-scale;
 			// trace(t,scale);
-			scale*=1000;
+			scale*=100;
 		}		
 
 		result.x = dX / t;

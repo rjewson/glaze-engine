@@ -38,14 +38,14 @@ class ChickenSystem extends System {
             }
             if (dist<64*64) {
                 if (Random.RandomBoolean(0.1)) {
-                    body.addForce(new Vector2(dir*50000,-50000));
+                    body.addForce(new Vector2(dir*5000,-8000));
                     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-10),-100,  0,5,  800,1,false,true,null,4,255,255,255,255);
                 }                
             } else {
                 if (Random.RandomBoolean(0.02)) {
                     var dir = Random.RandomSign(0.5);
                     entity.getComponent(Position).direction.x = -dir;
-                    body.addForce(new Vector2(dir*50000,-50000));
+                    body.addForce(new Vector2(dir*5000,-8000));
                     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-20),-100,  0,5,  800,1,false,true,null,4,255,255,255,255);
                 }
             }
