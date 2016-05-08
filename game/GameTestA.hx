@@ -168,7 +168,7 @@ class GameTestA extends GameEngine {
         // } 
    
         engine.config.tileSize = 16;
-
+ 
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
    
 
@@ -184,7 +184,7 @@ class GameTestA extends GameEngine {
         messageBus = new MessageBus();  
         
         var cameraRange = new glaze.geom.AABB2( 0 , TS*tmxMap.width , TS*tmxMap.height , 0 );
-        cameraRange.expand(-glaze.EngineConstants.TILE_SIZE*2);
+                          cameraRange.expand(-glaze.EngineConstants.TILE_SIZE*2);
 
         renderSystem = new RenderSystem(canvas,cameraRange);
         
@@ -197,7 +197,7 @@ class GameTestA extends GameEngine {
          
         renderSystem.textureManager.ParseTexturePackerJSON( assets.assets.get(TEXTURE_CONFIG) , TEXTURE_DATA );
         renderSystem.frameListManager.ParseFrameListJSON(assets.assets.get(FRAMES_CONFIG));
-          
+                        
 // js.Lib.debug(); 
         var background = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Background"));
         var foreground1 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground1"));
@@ -206,10 +206,16 @@ class GameTestA extends GameEngine {
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"),glaze.EngineConstants.TILE_SIZE);
         
         var tileMap = new TileMap();
+        tileMap.tileSize = Std.int(glaze.EngineConstants.TILE_SIZE/2);                 
+        //     tileMap.TileScale(2);             
+
         var tileLayerProxy = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[2,1]);
         renderSystem.renderer.AddRenderer(tileLayerProxy);    
-
+     
+                   
         var tileLayerProxy2 = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[0]);
+        renderSystem.renderer.AddRenderer(tileLayerProxy2);    
+   
         // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
   
         tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f2",1,1); 
@@ -218,15 +224,19 @@ class GameTestA extends GameEngine {
         // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
         // tileMap.SetTileLayerFromData(mapData,"base",1,1);
         // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
-        tileMap.tileSize = Std.int(glaze.EngineConstants.TILE_SIZE/2);                 
-        tileMap.TileScale(2);             
-      
+           
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
+   
         //Render the world top layer over the sprites
-        renderSystem.renderer.AddRenderer(tileLayerProxy2);    
+
+renderSystem.itemContainer.addChild(tileLayerProxy.sprite);
+renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
+                                                                                        
+      
+
 
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
@@ -244,7 +254,7 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new PhysicsUpdateSystem());
         corephase.addSystem(new SteeringSystem());
     
-        engine.config.map = map;
+        engine.config.map = map;                            
 
         nf = new glaze.physics.collision.Intersect(); 
 
@@ -316,11 +326,13 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new ParticleSystem(blockParticleEngine,spriteParticleEngine));
         corephase.addSystem(new AnimationSystem(renderSystem.frameListManager));
 
+              var tileRenderSystem = new TileRenderSystem(assets.assets.get(TILE_FRAMES_CONFIG),tileMap,map);
+        corephase.addSystem(tileRenderSystem);    
+
         // and this one
         // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);    
-        var tileRenderSystem = new TileRenderSystem(assets.assets.get(TILE_FRAMES_CONFIG),tileMap,map);
-        corephase.addSystem(tileRenderSystem);    
+        
          
         filterSupport = new FilterSupport(engine);  
    
@@ -607,8 +619,11 @@ class GameTestA extends GameEngine {
         } else {
             killChickens = false;         
         }    
-    }      
+    }          
     override public function preUpdate() {   
+        // if (Std.is(chickenSystem,ChickenSystem)) {
+        //     trace("it is");
+        // }
         // js.Lib.debug();  
         // if (false){     
             // if (input.JustPressed(65)) {

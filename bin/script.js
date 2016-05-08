@@ -2,7 +2,6 @@
 $hx_exports.glaze = $hx_exports.glaze || {};
 $hx_exports.glaze.debug = $hx_exports.glaze.debug || {};
 $hx_exports.glaze.debug.DebugEngine = $hx_exports.glaze.debug.DebugEngine || {};
-var $estr = function() { return js_Boot.__string_rec(this,''); };
 function $extend(from, fields) {
 	function Inherit() {} Inherit.prototype = from; var proto = new Inherit();
 	for (var name in fields) proto[name] = fields[name];
@@ -64,7 +63,7 @@ GameTestA.main = function() {
 	});
 	window.document.getElementById("debug3button").addEventListener("click",function(event4) {
 		var rockbody = game.rock.map.PhysicsBody;
-		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 672, className : "GameTestA", methodName : "main"});
+		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 687, className : "GameTestA", methodName : "main"});
 		var _this = rockbody.body;
 		var f_x = 0;
 		var f_y = -128000;
@@ -127,9 +126,11 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var foreground2 = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground2"));
 		var collisionData = glaze_tmx_TmxLayer.LayerToCollisionData(this.tmxMap.getLayer("Collision"),16);
 		var tileMap = new glaze_render_renderers_webgl_TileMap();
+		tileMap.tileSize = 8;
 		var tileLayerProxy = new glaze_render_renderers_webgl_TileLayerRenderProxy(tileMap,[2,1]);
 		this.renderSystem.renderer.AddRenderer(tileLayerProxy);
 		var tileLayerProxy2 = new glaze_render_renderers_webgl_TileLayerRenderProxy(tileMap,[0]);
+		this.renderSystem.renderer.AddRenderer(tileLayerProxy2);
 		var tmp6;
 		var _this6 = this.renderSystem.textureManager.baseTextures;
 		if(__map_reserved["data/superSet.png"] != null) tmp6 = _this6.getReserved("data/superSet.png"); else tmp6 = _this6.h["data/superSet.png"];
@@ -142,12 +143,11 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var _this8 = this.renderSystem.textureManager.baseTextures;
 		if(__map_reserved["data/superSet.png"] != null) tmp8 = _this8.getReserved("data/superSet.png"); else tmp8 = _this8.h["data/superSet.png"];
 		tileMap.SetTileLayerFromData(background,tmp8,"bg",1,1);
-		tileMap.tileSize = 8;
-		tileMap.TileScale(2);
 		var spriteRender = new glaze_render_renderers_webgl_SpriteRenderer();
 		spriteRender.AddStage(this.renderSystem.stage);
 		this.renderSystem.renderer.AddRenderer(spriteRender);
-		this.renderSystem.renderer.AddRenderer(tileLayerProxy2);
+		this.renderSystem.itemContainer.addChild(tileLayerProxy.sprite);
+		this.renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
 		this.blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679,collisionData);
 		this.renderSystem.renderer.AddRenderer(this.blockParticleEngine.renderer);
 		var spriteParticleManager = new glaze_particle_SpriteParticleManager();
@@ -209,12 +209,12 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		corephase.addSystem(new glaze_engine_systems_ViewManagementSystem(this.renderSystem.camera));
 		corephase.addSystem(new glaze_engine_systems_ParticleSystem(this.blockParticleEngine,this.spriteParticleEngine));
 		corephase.addSystem(new glaze_animation_systems_AnimationSystem(this.renderSystem.frameListManager));
-		corephase.addSystem(this.renderSystem);
 		var tmp12;
 		var _this12 = this.assets.assets;
 		if(__map_reserved["data/tileFrames.json"] != null) tmp12 = _this12.getReserved("data/tileFrames.json"); else tmp12 = _this12.h["data/tileFrames.json"];
 		var tileRenderSystem = new glaze_engine_systems_TileRenderSystem(tmp12,tileMap,map);
 		corephase.addSystem(tileRenderSystem);
+		corephase.addSystem(this.renderSystem);
 		this.filterSupport = new glaze_engine_actions_FilterSupport(this.engine);
 		var tmxFactory = new glaze_engine_factories_TMXFactory(this.engine,this.tmxMap);
 		tmxFactory.registerFactory(glaze_engine_factories_tmx_LightFactory);
@@ -333,7 +333,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 646, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 661, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -681,16 +681,12 @@ exile_components_Bird.prototype = {
 };
 var exile_components_NestState = { __ename__ : true, __constructs__ : ["SLEEPING","WANDERING","ATTACKING","RETURNING"] };
 exile_components_NestState.SLEEPING = ["SLEEPING",0];
-exile_components_NestState.SLEEPING.toString = $estr;
 exile_components_NestState.SLEEPING.__enum__ = exile_components_NestState;
 exile_components_NestState.WANDERING = ["WANDERING",1];
-exile_components_NestState.WANDERING.toString = $estr;
 exile_components_NestState.WANDERING.__enum__ = exile_components_NestState;
 exile_components_NestState.ATTACKING = ["ATTACKING",2];
-exile_components_NestState.ATTACKING.toString = $estr;
 exile_components_NestState.ATTACKING.__enum__ = exile_components_NestState;
 exile_components_NestState.RETURNING = ["RETURNING",3];
-exile_components_NestState.RETURNING.toString = $estr;
 exile_components_NestState.RETURNING.__enum__ = exile_components_NestState;
 var exile_components_BirdNest = function(maxBirds) {
 	this.radius = 100;
@@ -1670,19 +1666,14 @@ glaze_ai_behaviortree_BehaviorContext.prototype = {
 };
 var glaze_ai_behaviortree_BehaviorStatus = { __ename__ : true, __constructs__ : ["Invalid","Success","Running","Failure","Aborted"] };
 glaze_ai_behaviortree_BehaviorStatus.Invalid = ["Invalid",0];
-glaze_ai_behaviortree_BehaviorStatus.Invalid.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Invalid.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Success = ["Success",1];
-glaze_ai_behaviortree_BehaviorStatus.Success.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Success.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Running = ["Running",2];
-glaze_ai_behaviortree_BehaviorStatus.Running.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Running.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Failure = ["Failure",3];
-glaze_ai_behaviortree_BehaviorStatus.Failure.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Failure.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 glaze_ai_behaviortree_BehaviorStatus.Aborted = ["Aborted",4];
-glaze_ai_behaviortree_BehaviorStatus.Aborted.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Aborted.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
 var glaze_ai_faction_Faction = function(id,type,defaultRelationshipStatus) {
 	if(defaultRelationshipStatus == null) defaultRelationshipStatus = 0;
@@ -8227,7 +8218,7 @@ glaze_render_display_Camera.__name__ = ["glaze","render","display","Camera"];
 glaze_render_display_Camera.__super__ = glaze_render_display_DisplayObjectContainer;
 glaze_render_display_Camera.prototype = $extend(glaze_render_display_DisplayObjectContainer.prototype,{
 	rf: function(v) {
-		return Math.floor(v);
+		return v;
 	}
 	,Focus: function(x,y) {
 		this.realPosition.x = x;
@@ -8238,14 +8229,16 @@ glaze_render_display_Camera.prototype = $extend(glaze_render_display_DisplayObje
 		if(point.x > _this.r) point.x = _this.r;
 		if(point.y < _this.t) point.y = _this.t;
 		if(point.y > _this.b) point.y = _this.b;
-		var positionx = this.rf(-this.realPosition.x + this.halfViewportSize.x);
-		var positiony = this.rf(-this.realPosition.y + this.halfViewportSize.y);
-		this.position.x = this.position.x + (positionx - this.position.x) * 0.1;
-		this.position.y = this.position.y + (positiony - this.position.y) * 0.1;
+		var positionx = -this.realPosition.x + this.halfViewportSize.x;
+		var positiony = -this.realPosition.y + this.halfViewportSize.y;
+		if(Math.abs(positionx - this.position.x) > 2) this.position.x = this.position.x + (positionx - this.position.x) * 0.1;
+		if(Math.abs(positiony - this.position.y) > 2) this.position.y = this.position.y + (positiony - this.position.y) * 0.1;
 		var _this1 = this.position;
 		var v = this.shake;
 		_this1.x += v.x;
 		_this1.y += v.y;
+		this.position.x = this.rf(this.position.x);
+		this.position.y = this.rf(this.position.y);
 		var _this2 = this.shake;
 		_this2.x = 0;
 		_this2.y = 0;
@@ -8667,6 +8660,8 @@ glaze_render_renderers_webgl_SpriteRenderer.prototype = {
 		this.stage = stage;
 	}
 	,Render: function(clip) {
+		this.stage.updateTransform();
+		this.stage.PreRender();
 		this.gl.useProgram(this.spriteShader.program);
 		this.gl.uniform2f(this.spriteShader.uniform.projectionVector,this.projection.x,this.projection.y);
 		this.gl.enableVertexAttribArray(this.spriteShader.attribute.aVertexPosition);
@@ -8723,18 +8718,54 @@ glaze_render_renderers_webgl_TileLayer.prototype = {
 var glaze_render_renderers_webgl_TileLayerRenderProxy = function(tileMap,layers) {
 	this.tileMap = tileMap;
 	this.layers = layers;
+	this.lastSnap = new glaze_geom_Vector2(0,0);
+	this.thisSnap = new glaze_geom_Vector2(-1000,-1000);
+	this.snapChanged = false;
 };
 glaze_render_renderers_webgl_TileLayerRenderProxy.__name__ = ["glaze","render","renderers","webgl","TileLayerRenderProxy"];
 glaze_render_renderers_webgl_TileLayerRenderProxy.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
 glaze_render_renderers_webgl_TileLayerRenderProxy.prototype = {
 	Init: function(gl,camera) {
 		this.tileMap.Init(gl,camera);
+		this.surface = new glaze_render_texture_BaseTexture(gl,400,320);
+		this.texture = new glaze_render_texture_Texture(this.surface,new glaze_geom_Rectangle(0,0,400.,320.),new glaze_geom_Vector2(0,0));
+		this.sprite = new glaze_render_display_Sprite();
+		this.sprite.id = "renderTexture";
+		this.sprite.texture = this.texture;
+		var _this = this.sprite.scale;
+		_this.x = 2;
+		_this.y = -2;
+		var _this1 = this.sprite.pivot;
+		_this1.x = 200.;
+		_this1.y = 160.;
 	}
 	,Resize: function(width,height) {
 		this.tileMap.Resize(width,height);
 	}
+	,calcSnap: function(cameraPos) {
+		var _this = this.lastSnap;
+		var v = this.thisSnap;
+		_this.x = v.x;
+		_this.y = v.y;
+		this.thisSnap.x = Math.floor(cameraPos.x / -16);
+		this.thisSnap.x *= 16;
+		this.thisSnap.x -= 16;
+		this.thisSnap.y = Math.floor(cameraPos.y / -16);
+		this.thisSnap.y *= 16;
+		this.thisSnap.y -= 16;
+		this.snapChanged = this.lastSnap.x != this.thisSnap.x || this.lastSnap.y != this.thisSnap.y;
+		return this.snapChanged;
+	}
 	,Render: function(clip) {
-		this.tileMap.RenderLayers(clip,this.layers);
+		if(this.calcSnap(this.tileMap.camera.position)) {
+			var _this = this.sprite.position;
+			_this.x = 400 + this.thisSnap.x;
+			_this.y = 320 + this.thisSnap.y;
+			this.surface.drawTo($bind(this,this.renderSurface));
+		}
+	}
+	,renderSurface: function() {
+		this.tileMap.RenderLayers(null,this.layers,this.thisSnap);
 	}
 	,__class__: glaze_render_renderers_webgl_TileLayerRenderProxy
 };
@@ -8748,10 +8779,11 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.gl = gl;
 		this.camera = camera;
 		this.tileScale = 1.0;
-		this.tileSize = 16;
+		this.tileSize = 8;
 		this.filtered = false;
 		this.spriteSheet = gl.createTexture();
 		this.layers = [];
+		this.renderLayers = [];
 		this.viewportSize = new glaze_geom_Vector2();
 		this.scaledViewportSize = new Float32Array(2);
 		this.inverseTileTextureSize = new Float32Array(2);
@@ -8766,10 +8798,10 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.writebuffer2 = new glaze_ds_TypedArray2D(3,3);
 	}
 	,Resize: function(width,height) {
-		this.viewportSize.x = width;
-		this.viewportSize.y = height;
-		this.scaledViewportSize[0] = width / this.tileScale;
-		this.scaledViewportSize[1] = height / this.tileScale;
+		this.viewportSize.x = 400;
+		this.viewportSize.y = 320;
+		this.scaledViewportSize[0] = 400 / this.tileScale;
+		this.scaledViewportSize[1] = 320 / this.tileScale;
 	}
 	,TileScale: function(scale) {
 		this.tileScale = scale;
@@ -8805,8 +8837,9 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		layer.scrollScale.y = scrollScaleY;
 		this.layers.push(layer);
 	}
-	,RoundFunction: function(v) {
-		return v;
+	,SetTileRenderLayer: function(layers) {
+		var tileRenderLayer = new glaze_render_renderers_webgl_TileLayerRenderProxy(null,layers);
+		this.renderLayers.push(tileRenderLayer);
 	}
 	,updateMap: function(x,y,data) {
 		var startX = data[0];
@@ -8838,11 +8871,10 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 	}
 	,Render: function(clip) {
 	}
-	,RenderLayers: function(clip,layerIndexes) {
-		var x = -this.camera.position.x / (this.tileScale * 2);
-		var y = -this.camera.position.y / (this.tileScale * 2);
-		this.gl.enable(3042);
-		this.gl.blendFunc(770,771);
+	,RenderLayers: function(clip,layerIndexes,p) {
+		this.gl.colorMask(true,true,true,true);
+		this.gl.clearColor(0,0,0,0);
+		this.gl.clear(16384);
 		this.gl.useProgram(this.tilemapShader.program);
 		this.gl.bindBuffer(34962,this.quadVertBuffer);
 		this.gl.enableVertexAttribArray(this.tilemapShader.attribute.position);
@@ -8859,8 +8891,8 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 			var i = layerIndexes[_g];
 			++_g;
 			var layer = this.layers[i];
-			var pX = this.RoundFunction(x * this.tileScale * layer.scrollScale.x);
-			var pY = this.RoundFunction(y * this.tileScale * layer.scrollScale.y);
+			var pX = p.x / 2;
+			var pY = p.y / 2;
 			this.gl.uniform2f(this.tilemapShader.uniform.viewOffset,pX,pY);
 			this.gl.uniform2fv(this.tilemapShader.uniform.inverseSpriteTextureSize,layer.inverseSpriteTextureSize);
 			this.gl.uniform2fv(this.tilemapShader.uniform.inverseTileTextureSize,layer.inverseTileDataTextureSize);
@@ -9140,8 +9172,6 @@ glaze_render_renderers_webgl_WebGLRenderer.prototype = {
 	}
 	,Render: function(clip) {
 		if(this.contextLost) return;
-		this.stage.updateTransform();
-		this.stage.PreRender();
 		this.gl.colorMask(true,true,true,true);
 		this.gl.clearColor(0.623529411764705888,0.737254901960784359,0.772549019607843168,1.0);
 		this.gl.clear(16384);
@@ -9156,11 +9186,11 @@ glaze_render_renderers_webgl_WebGLRenderer.prototype = {
 	}
 	,onContextLost: function(event) {
 		this.contextLost = true;
-		haxe_Log.trace("webGL Context Lost",{ fileName : "WebGLRenderer.hx", lineNumber : 113, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextLost"});
+		haxe_Log.trace("webGL Context Lost",{ fileName : "WebGLRenderer.hx", lineNumber : 116, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextLost"});
 	}
 	,onContextRestored: function(event) {
 		this.contextLost = false;
-		haxe_Log.trace("webGL Context Restored",{ fileName : "WebGLRenderer.hx", lineNumber : 118, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextRestored"});
+		haxe_Log.trace("webGL Context Restored",{ fileName : "WebGLRenderer.hx", lineNumber : 121, className : "glaze.render.renderers.webgl.WebGLRenderer", methodName : "onContextRestored"});
 	}
 	,__class__: glaze_render_renderers_webgl_WebGLRenderer
 };
@@ -10303,13 +10333,10 @@ glaze_util_BroadphaseAreaQuery.prototype = {
 };
 var glaze_util_EntityFilterOptions = { __ename__ : true, __constructs__ : ["ALL","FRIENDLY","ENEMY"] };
 glaze_util_EntityFilterOptions.ALL = ["ALL",0];
-glaze_util_EntityFilterOptions.ALL.toString = $estr;
 glaze_util_EntityFilterOptions.ALL.__enum__ = glaze_util_EntityFilterOptions;
 glaze_util_EntityFilterOptions.FRIENDLY = ["FRIENDLY",1];
-glaze_util_EntityFilterOptions.FRIENDLY.toString = $estr;
 glaze_util_EntityFilterOptions.FRIENDLY.__enum__ = glaze_util_EntityFilterOptions;
 glaze_util_EntityFilterOptions.ENEMY = ["ENEMY",2];
-glaze_util_EntityFilterOptions.ENEMY.toString = $estr;
 glaze_util_EntityFilterOptions.ENEMY.__enum__ = glaze_util_EntityFilterOptions;
 var glaze_util_CombatUtils = function() {
 };
@@ -10950,15 +10977,12 @@ haxe_io_Eof.prototype = {
 };
 var haxe_io_Error = { __ename__ : true, __constructs__ : ["Blocked","Overflow","OutsideBounds","Custom"] };
 haxe_io_Error.Blocked = ["Blocked",0];
-haxe_io_Error.Blocked.toString = $estr;
 haxe_io_Error.Blocked.__enum__ = haxe_io_Error;
 haxe_io_Error.Overflow = ["Overflow",1];
-haxe_io_Error.Overflow.toString = $estr;
 haxe_io_Error.Overflow.__enum__ = haxe_io_Error;
 haxe_io_Error.OutsideBounds = ["OutsideBounds",2];
-haxe_io_Error.OutsideBounds.toString = $estr;
 haxe_io_Error.OutsideBounds.__enum__ = haxe_io_Error;
-haxe_io_Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe_io_Error; $x.toString = $estr; return $x; };
+haxe_io_Error.Custom = function(e) { var $x = ["Custom",3,e]; $x.__enum__ = haxe_io_Error; return $x; };
 var haxe_io_FPHelper = function() { };
 haxe_io_FPHelper.__name__ = ["haxe","io","FPHelper"];
 haxe_io_FPHelper.i32ToFloat = function(i) {
@@ -11490,9 +11514,9 @@ haxe_xml_Parser.doParse = function(str,strict,p,parent) {
 	throw new js__$Boot_HaxeError("Unexpected end");
 };
 var haxe_zip_Huffman = { __ename__ : true, __constructs__ : ["Found","NeedBit","NeedBits"] };
-haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
-haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
-haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; $x.toString = $estr; return $x; };
+haxe_zip_Huffman.Found = function(i) { var $x = ["Found",0,i]; $x.__enum__ = haxe_zip_Huffman; return $x; };
+haxe_zip_Huffman.NeedBit = function(left,right) { var $x = ["NeedBit",1,left,right]; $x.__enum__ = haxe_zip_Huffman; return $x; };
+haxe_zip_Huffman.NeedBits = function(n,table) { var $x = ["NeedBits",2,n,table]; $x.__enum__ = haxe_zip_Huffman; return $x; };
 var haxe_zip_HuffTools = function() {
 };
 haxe_zip_HuffTools.__name__ = ["haxe","zip","HuffTools"];
@@ -11636,28 +11660,20 @@ haxe_zip__$InflateImpl_Window.prototype = {
 };
 var haxe_zip__$InflateImpl_State = { __ename__ : true, __constructs__ : ["Head","Block","CData","Flat","Crc","Dist","DistOne","Done"] };
 haxe_zip__$InflateImpl_State.Head = ["Head",0];
-haxe_zip__$InflateImpl_State.Head.toString = $estr;
 haxe_zip__$InflateImpl_State.Head.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Block = ["Block",1];
-haxe_zip__$InflateImpl_State.Block.toString = $estr;
 haxe_zip__$InflateImpl_State.Block.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.CData = ["CData",2];
-haxe_zip__$InflateImpl_State.CData.toString = $estr;
 haxe_zip__$InflateImpl_State.CData.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Flat = ["Flat",3];
-haxe_zip__$InflateImpl_State.Flat.toString = $estr;
 haxe_zip__$InflateImpl_State.Flat.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Crc = ["Crc",4];
-haxe_zip__$InflateImpl_State.Crc.toString = $estr;
 haxe_zip__$InflateImpl_State.Crc.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Dist = ["Dist",5];
-haxe_zip__$InflateImpl_State.Dist.toString = $estr;
 haxe_zip__$InflateImpl_State.Dist.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.DistOne = ["DistOne",6];
-haxe_zip__$InflateImpl_State.DistOne.toString = $estr;
 haxe_zip__$InflateImpl_State.DistOne.__enum__ = haxe_zip__$InflateImpl_State;
 haxe_zip__$InflateImpl_State.Done = ["Done",7];
-haxe_zip__$InflateImpl_State.Done.toString = $estr;
 haxe_zip__$InflateImpl_State.Done.__enum__ = haxe_zip__$InflateImpl_State;
 var haxe_zip_InflateImpl = function(i,header,crc) {
 	if(crc == null) crc = true;
@@ -13550,7 +13566,7 @@ glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
 glaze_ai_steering_components_Steering.ID = 32;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 12;
+glaze_animation_components_SpriteAnimation.ID = 27;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -13599,7 +13615,7 @@ glaze_engine_components_State.ID = 14;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 4;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 15;
+glaze_engine_components_TileDisplay.ID = 28;
 glaze_engine_components_Viewable.NAME = "Viewable";
 glaze_engine_components_Viewable.ID = 21;
 glaze_engine_components_Water.NAME = "Water";
@@ -13646,7 +13662,7 @@ glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_FRAGMENT_SHADER = ["prec
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","attribute vec2 aVertexPosition;","attribute vec2 aTextureCoord;","attribute float aColor;","uniform vec2 projectionVector;","varying vec2 vTextureCoord;","varying float vColor;","void main(void) {","gl_Position = vec4( aVertexPosition.x / projectionVector.x -1.0, aVertexPosition.y / -projectionVector.y + 1.0 , 0.0, 1.0);","vTextureCoord = aTextureCoord;","vColor = aColor;","}"];
 glaze_render_renderers_webgl_SpriteRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 vTextureCoord;","varying float vColor;","uniform sampler2D uSampler;","void main(void) {","gl_FragColor = texture2D(uSampler,vTextureCoord) * vColor;","}"];
 glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER = ["precision mediump float;","attribute vec2 position;","attribute vec2 texture;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform vec2 viewOffset;","uniform vec2 viewportSize;","uniform vec2 inverseTileTextureSize;","uniform float inverseTileSize;","void main(void) {","   pixelCoord = (texture * viewportSize) + viewOffset;","   texCoord = pixelCoord * inverseTileTextureSize * inverseTileSize;","   gl_Position = vec4(position, 0.0, 1.0);","}"];
-glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform sampler2D tiles;","uniform sampler2D sprites;","uniform vec2 inverseTileTextureSize;","uniform vec2 inverseSpriteTextureSize;","uniform float tileSize;","void main(void) {","   vec4 tile = texture2D(tiles, texCoord);","   if(tile.x == 1.0 && tile.y == 1.0) { discard; }","   vec2 superSpriteOffset = floor(tile.zw * 256.0) * 256.0;","   vec2 spriteOffset = floor(tile.xy * 256.0) * tileSize;","   vec2 spriteCoord = mod(pixelCoord, tileSize);","   gl_FragColor = texture2D(sprites, (superSpriteOffset + spriteOffset + spriteCoord) * inverseSpriteTextureSize);","}"];
+glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER = ["precision mediump float;","varying vec2 pixelCoord;","varying vec2 texCoord;","uniform sampler2D tiles;","uniform sampler2D sprites;","uniform vec2 inverseTileTextureSize;","uniform vec2 inverseSpriteTextureSize;","uniform float tileSize;","void main(void) {","   vec4 tile = texture2D(tiles, texCoord);","   if(tile.x == 1.0 && tile.y == 1.0) { ","    discard;","   } else {","   vec2 superSpriteOffset = floor(tile.zw * 256.0) * 256.0;","   vec2 spriteOffset = floor(tile.xy * 256.0) * tileSize;","   vec2 spriteCoord = mod(pixelCoord, tileSize);","   gl_FragColor = texture2D(sprites, (superSpriteOffset + spriteOffset + spriteCoord) * inverseSpriteTextureSize);","   }","}"];
 glaze_tmx_TmxLayer.BASE64_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=";
 glaze_util_BroadphaseAreaQuery.RAYCAST_THRESHOLD = 10;
 glaze_util_Maths.ZERO_TOLERANCE = 1e-08;
