@@ -52,6 +52,7 @@ class HeldSystem extends System {
         holder.getComponent(Holder).drop();
         var body = entity.getComponent(PhysicsBody).body;
         body.skip = false;
+        body.velocity.setTo(0,0);
 
         if (entity.getComponent(Storeable)==null) {
             var holderBody = holder.parent.getComponent(PhysicsBody).body;
@@ -69,7 +70,7 @@ class HeldSystem extends System {
 
             // entity.getComponent(Position).coords.copy(holderPos);
             // entity.getComponent(PhysicsBody).body.position.copy(holderPos);
-            entity.getComponent(PhysicsBody).body.setPosition(holderPos.coords.x+(holderPos.direction.x*4),holderPos.coords.y); //position.copy(holderPos);
+            entity.getComponent(PhysicsBody).body.setStaticPosition(holderPos.coords.x+(holderPos.direction.x*4),holderPos.coords.y); //position.copy(holderPos);
             //entity.getComponent(PhysicsBody).body.position.copy(entity.getComponent(PhysicsBody).body.position);
             entity.getComponent(Position).update(entity.getComponent(PhysicsBody).body.position);
         }

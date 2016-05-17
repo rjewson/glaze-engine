@@ -30,13 +30,15 @@ class SteeringSystem extends System {
         for (entity in view.entities) {
             var body = entity.getComponent(PhysicsBody).body;
             var steering = entity.getComponent(Steering);
+
             if (steering.hasChanged) {
                 steering.behaviors.sort(behaviorsCompare);
                 steering.hasChanged = false;
             }
             runningSum(steering,body);
-            // body.addProportionalForce(totalForce);
-            body.addForce(totalForce);
+            // js.Lib.debug();
+            body.addProportionalForce(totalForce);
+            // body.addForce(totalForce);
         }
     }
 
@@ -44,7 +46,7 @@ class SteeringSystem extends System {
         totalForce.setTo(0,0);
         for (behavior in steering.behaviors) {
             behaviorForce.setTo(0,0);
-            behavior.calculate(agent,behaviorForce);
+            behavior.calculate(agent,steering.steeringParameters,behaviorForce);
             behaviorForce.multEquals(behavior.weight);
             totalForce.plusEquals(behaviorForce);
          }

@@ -37,6 +37,7 @@ class ChickenFactory {
         // filter.categoryBits |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
         // filter.maskBits |= exile.ExileFilters.PROJECTILE_CAT;
 
+        // var chickenBody = new Body(new Material(0.01,1.0,0.1));
         var chickenBody = new Body(Material.NORMAL);
         chickenBody.setBounces(3);     
         chickenBody.maxScalarVelocity = 1000; 

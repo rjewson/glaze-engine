@@ -103,7 +103,7 @@ class WallAvoidance extends Behavior {
 	// 	}		
 	// }
 	
-	override public function calculate(agent:Body,result:Vector2) {
+	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
 						
 		if (lastPos.distSqrd(agent.position) < 1)
 			return;

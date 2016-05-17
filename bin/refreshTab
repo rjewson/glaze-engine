@@ -1,4 +1,4 @@
-tell application "Google Chrome"
+tell application "Google Chrome Canary"
 	activate
 	set i to 0
 	repeat with t in (tabs of (first window))

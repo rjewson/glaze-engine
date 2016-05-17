@@ -48,20 +48,22 @@ class BirdFactory {
         var bird = engine.createEntity([
             position, 
             new Bird(),
-            new Extents((3)*1,(3)*1),
+            new Extents((4)*1,(4)*1),
             new Display("bird"), 
-            new PhysicsBody(birdBody,true), 
+            new PhysicsBody(birdBody,false), 
             new Moveable(),
             new PhysicsCollision(false,null,[]),  
             // new ParticleEmitters([new glaze.particle.emitter.RandomSpray(100,10)]),
             new glaze.animation.components.SpriteAnimation("bird",["fly"],"fly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                // new Wander(4,10,0.01),
+                // new Wander(30,10,1.5)
+                // new Wander(32,5,1.16) //ok
+                new Wander(640,100,1.16) //ok
                 // new Arrival(position.coords.clone(),64,8)
                 // new Seek(follow.coords,32)
-                new Arrival(follow.coords,64,16)
-                ,new WallAvoidance(map,40)
+                // new Arrival(follow.coords,128,32)
+                // new WallAvoidance(map,40)
                 ]),
             new Age(10000),
             new Health(10,10,0),

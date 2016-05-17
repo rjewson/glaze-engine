@@ -75,7 +75,8 @@ class SteeringBehavior
 				wtrsWithPriorization();
 		}
 
-		agent.addForce(force);
+		// agent.addForce(force);
+		agent.addProportionalForce(force);
 
 		return force;
 	}
@@ -102,7 +103,7 @@ class SteeringBehavior
 
 	private function runningSum(agent:Body) : Void {
 		for (behavior in behaviors) {
-			behavior.calculate(agent,behaviorForce);
+			behavior.calculate(agent,agentParameters,behaviorForce);
 			behaviorForce.multEquals(behavior.weight);
 			force.plusEquals(behaviorForce);
 			//force.plusEquals(behavior.calculate().mult(behavior.weight));

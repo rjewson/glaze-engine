@@ -1,5 +1,6 @@
 package glaze.ai.steering.behaviors;
 
+import glaze.ai.steering.SteeringAgentParameters;
 import glaze.ai.steering.SteeringBehavior;
 import glaze.physics.Body;
 import glaze.geom.Vector2;
@@ -25,7 +26,7 @@ class Behavior
 		this.probability = probability;
 	}
 	
-	public function calculate(agent:Body,result:Vector2) {
+	public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
 	}	
 	
 }

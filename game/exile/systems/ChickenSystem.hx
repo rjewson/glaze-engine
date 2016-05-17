@@ -27,7 +27,6 @@ class ChickenSystem extends System {
     }
 
     override public function update(timestamp:Float,delta:Float) {
-        // return;
         for (entity in view.entities) {
             var dist:Float = 1000*1000;
             var body = entity.getComponent(PhysicsBody).body;
@@ -42,20 +41,13 @@ class ChickenSystem extends System {
                     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-10),-100,  0,5,  800,1,false,true,null,4,255,255,255,255);
                 }                
             } else {
-                if (Random.RandomBoolean(0.02)) {
+                if (Random.RandomBoolean(0.005)) {
                     var dir = Random.RandomSign(0.5);
                     entity.getComponent(Position).direction.x = -dir;
                     body.addForce(new Vector2(dir*5000,-8000));
                     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-20),-100,  0,5,  800,1,false,true,null,4,255,255,255,255);
                 }
             }
-            // if (Random.RandomBoolean(0.05)) {
-            //     var chicken = entity.getComponent(Chicken);
-            //     var body = entity.getComponent(PhysicsBody).body;
-            //     var dir = Random.RandomSign(0.5);
-            //     body.addForce(new Vector2(dir*10,-10));
-            //     particleEngine.EmitParticle(body.position.x,body.position.y,  (dir*-10),-100,  0,5,  600,1,true,true,null,4,255,255,255,255);
-            // }
         }
     }
 

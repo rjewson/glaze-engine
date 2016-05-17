@@ -1,5 +1,6 @@
 package glaze.ai.steering.behaviors;
 
+import glaze.ai.steering.SteeringAgentParameters;
 import glaze.ai.steering.SteeringSettings;
 import glaze.geom.Vector2;
 import glaze.physics.Body;
@@ -20,12 +21,12 @@ class Seek extends Behavior
 		this.seekDistSq = seekDistSq;
 	}
 
-	override public function calculate(agent:Body,result:Vector2) {
-		calc(agent,result,target,seekDistSq);
+	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
+		calc(agent,params,result,target,seekDistSq);
 	}
 
 	//Hand optimized as called so often
-	public static inline function calc(agent : Body, result:Vector2, target : Vector2, seekDistSq : Float = 0):Bool {
+	public static inline function calc(agent : Body, params:SteeringAgentParameters, result:Vector2, target : Vector2, seekDistSq : Float = 0):Bool {
 		// js.Lib.debug();		
 		var dX:Float = target.x - agent.position.x +0.000001;
 		var dY:Float = target.y - agent.position.y +0.000001;
@@ -39,13 +40,14 @@ class Seek extends Behavior
 		var t = Math.sqrt(d);
 
 		result.x = dX / t;
-		result.x *= 100;
-		result.x -= agent.velocity.x*(16/1000);
+		result.x *= params.maxSteeringForcePerStep;
+		result.x -= agent.velocity.x;//*(16/1000);
 		
 		result.y = dY / t;
-		result.y *= 100;//agent.maxSteeringForcePerStep;
-		result.y -= agent.velocity.y*(16/1000);
-
+		result.y *= params.maxSteeringForcePerStep;
+		result.y -= agent.velocity.y;//*(16/1000);
+// trace(result);
+// trace(agent.velocity);
 		return true;
 	}
 	

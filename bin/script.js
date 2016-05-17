@@ -63,7 +63,7 @@ GameTestA.main = function() {
 	});
 	window.document.getElementById("debug3button").addEventListener("click",function(event4) {
 		var rockbody = game.rock.map.PhysicsBody;
-		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 687, className : "GameTestA", methodName : "main"});
+		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 676, className : "GameTestA", methodName : "main"});
 		var _this = rockbody.body;
 		var f_x = 0;
 		var f_y = -128000;
@@ -73,6 +73,7 @@ GameTestA.main = function() {
 		_this1.y += f_y * s;
 		_this.canSleep = false;
 		_this.motion = 10;
+		_this.bounceCount = 0;
 	});
 	window.document.getElementById("debug4button").addEventListener("click",function(event5) {
 		game.shakeIt = 15;
@@ -125,12 +126,10 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var foreground1 = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground1"));
 		var foreground2 = glaze_tmx_TmxLayer.LayerToCoordTexture(this.tmxMap.getLayer("Foreground2"));
 		var collisionData = glaze_tmx_TmxLayer.LayerToCollisionData(this.tmxMap.getLayer("Collision"),16);
-		var tileMap = new glaze_render_renderers_webgl_TileMap();
-		tileMap.tileSize = 8;
-		var tileLayerProxy = new glaze_render_renderers_webgl_TileLayerRenderProxy(tileMap,[2,1]);
-		this.renderSystem.renderer.AddRenderer(tileLayerProxy);
-		var tileLayerProxy2 = new glaze_render_renderers_webgl_TileLayerRenderProxy(tileMap,[0]);
-		this.renderSystem.renderer.AddRenderer(tileLayerProxy2);
+		var tileMap = new glaze_render_renderers_webgl_TileMap(8,2);
+		tileMap.SetTileRenderLayer([2,1]);
+		tileMap.SetTileRenderLayer([0]);
+		this.renderSystem.renderer.AddRenderer(tileMap);
 		var tmp6;
 		var _this6 = this.renderSystem.textureManager.baseTextures;
 		if(__map_reserved["data/superSet.png"] != null) tmp6 = _this6.getReserved("data/superSet.png"); else tmp6 = _this6.h["data/superSet.png"];
@@ -146,8 +145,8 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var spriteRender = new glaze_render_renderers_webgl_SpriteRenderer();
 		spriteRender.AddStage(this.renderSystem.stage);
 		this.renderSystem.renderer.AddRenderer(spriteRender);
-		this.renderSystem.itemContainer.addChild(tileLayerProxy.sprite);
-		this.renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
+		this.renderSystem.itemContainer.addChild(tileMap.renderLayers[0].sprite);
+		this.renderSystem.camera.addChild(tileMap.renderLayers[1].sprite);
 		this.blockParticleEngine = new glaze_particle_BlockSpriteParticleEngine(4000,16.6666666666666679,collisionData);
 		this.renderSystem.renderer.AddRenderer(this.blockParticleEngine.renderer);
 		var spriteParticleManager = new glaze_particle_SpriteParticleManager();
@@ -244,7 +243,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		_this.x = 1600;
 		_this.y = 1000;
 		this.playerFaction = new glaze_ai_faction_Faction("player","player",0);
-		this.player = this.engine.createEntity([new exile_components_Player(),new glaze_engine_components_Position(300,180),new glaze_engine_components_Extents(7,21),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body,true),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active(),new glaze_ai_faction_components_Personality(this.playerFaction)],"player");
+		this.player = this.engine.createEntity([new exile_components_Player(),this.mapPosition(22.5,37.5),new glaze_engine_components_Extents(7,21),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body,true),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active(),new glaze_ai_faction_components_Personality(this.playerFaction)],"player");
 		this.chickenSystem.scaredOfPosition = this.player.map.Position;
 		this.rabbitSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
@@ -253,10 +252,11 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.engine.createEntity([this.mapPosition(10.5,18.5),new glaze_engine_components_Extents(8,8),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_CollidableSwitch(false,1000,["doorA"]),new glaze_engine_components_Active(),new glaze_engine_components_TileDisplay("switchOff")],"turret");
 		this.engine.createEntity([this.mapPosition(3,23),new glaze_engine_components_Extents(16,32),new glaze_physics_components_PhysicsCollision(true,null,[]),new glaze_engine_components_Fixed(),new exile_components_Teleporter(new glaze_geom_Vector2(192,576)),new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_ScanLineEmitter(200,100,600,10)]),new glaze_engine_components_State(["on","off"],0,[]),new glaze_engine_components_Active()],"teleporter");
 		this.engine.createEntity([this.mapPosition(20.5,17),new glaze_engine_components_Extents(16,16),new glaze_engine_components_Display("insects","hive"),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_engine_components_Fixed(),new glaze_engine_components_Active(),new exile_components_BeeHive(5)],"BeeHive");
-		this.rock = this.engine.createEntity([this.mapPosition(9,4),new glaze_engine_components_Extents(8,8),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(glaze_physics_Material.ROCK),true),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
+		this.rock = this.engine.createEntity([this.mapPosition(13,4),new glaze_engine_components_Extents(7,7),new glaze_engine_components_Display("items","rock"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(glaze_physics_Material.ROCK),true),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"rock");
 		var nestFaction = new glaze_ai_faction_Faction("nest1","nest",0);
 		nestFaction.addRelation(new glaze_ai_faction_FactionRelationship(this.playerFaction,-10));
 		this.engine.createEntity([this.mapPosition(34,30),new exile_components_BirdNest(1),new glaze_engine_components_Active(),new glaze_ai_faction_components_Personality(nestFaction)],"birdsnest");
+		this.engine.createEntity([this.mapPosition(9,4),new glaze_engine_components_Extents(6,14),new glaze_engine_components_Display("items","water_container"),new glaze_physics_components_PhysicsCollision(false,new glaze_physics_collision_Filter(),[]),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsBody(new glaze_physics_Body(glaze_physics_Material.NORMAL),false),new glaze_engine_components_Holdable(),new glaze_engine_components_Active()],"water_container");
 	}
 	,createTurret: function() {
 		var filter = new glaze_physics_collision_Filter();
@@ -302,6 +302,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			_this1.y += f.y * s;
 			_this.canSleep = false;
 			_this.motion = 10;
+			_this.bounceCount = 0;
 		}
 	}
 	,throwWabbits: function() {
@@ -318,6 +319,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			_this1.y += f.y * s;
 			_this.canSleep = false;
 			_this.motion = 10;
+			_this.bounceCount = 0;
 		}
 	}
 	,destroyChickens: function() {
@@ -333,7 +335,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.input.Update(-this.renderSystem.camera.position.x,-this.renderSystem.camera.position.y);
 		if(this.killChickens) this.destroyChickens();
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 661, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 650, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var tmp;
 			var min = -this.shakeIt;
@@ -796,8 +798,7 @@ exile_entities_creatures_BirdFactory.create = function(engine,position,follow) {
 	birdBody.setBounces(0);
 	birdBody.globalForceFactor = 0.0;
 	birdBody.maxScalarVelocity = 200;
-	var map = engine.config.map;
-	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(3,3),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Arrival(follow.coords,64,16),new glaze_ai_steering_behaviors_WallAvoidance(map,40)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
+	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(640,100,1.16)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
 	return bird;
 };
 exile_entities_creatures_BirdFactory.prototype = {
@@ -821,8 +822,7 @@ var exile_entities_creatures_RabbitFactory = function() {
 };
 exile_entities_creatures_RabbitFactory.__name__ = ["exile","entities","creatures","RabbitFactory"];
 exile_entities_creatures_RabbitFactory.create = function(engine,position) {
-	var rabbitBody = new glaze_physics_Body(new glaze_physics_Material(1,0.5,0.7));
-	rabbitBody.setMass(1);
+	var rabbitBody = new glaze_physics_Body(glaze_physics_Material.NORMAL);
 	rabbitBody.setBounces(3);
 	rabbitBody.maxScalarVelocity = 1000;
 	rabbitBody.globalForceFactor = 1;
@@ -917,21 +917,7 @@ exile_systems_BeeHiveSystem.prototype = $extend(glaze_eco_core_System.prototype,
 		}
 	}
 	,update: function(timestamp,delta) {
-		var _g = 0;
-		var _g1 = this.view.entities;
-		while(_g < _g1.length) {
-			var entity = _g1[_g];
-			++_g;
-			var beehive = entity.map.BeeHive;
-			if(beehive.bees.length < beehive.maxBees) {
-				if(Math.random() < 0.01) {
-					var newBee = exile_entities_creatures_BeeFactory.create(this.engine,entity.map.Position.clone());
-					newBee.parent = entity;
-					newBee.messages.add($bind(this,this.beeDestroyed));
-					beehive.bees.push(newBee);
-				}
-			}
-		}
+		return;
 	}
 	,beeDestroyed: function(entity,channel,data) {
 		if(channel == "destroy") {
@@ -994,7 +980,7 @@ exile_systems_BirdNestSystem.prototype = $extend(glaze_eco_core_System.prototype
 			var nest = entity.map.BirdNest;
 			if(nest.intervalDelay.tick(delta)) {
 				var target = this.evaluateTargets(entity);
-				if(target != null) this.releaseBird(entity);
+				if(target != null) this.releaseBird(entity,target);
 			}
 			if(nest.triggered) nest.triggered = false; else {
 			}
@@ -1006,22 +992,17 @@ exile_systems_BirdNestSystem.prototype = $extend(glaze_eco_core_System.prototype
 	,evaluateTargets: function(entity) {
 		var entities = glaze_util_CombatUtils.searchSortAndFilter(entity.map.Position.coords,200,entity,glaze_util_EntityFilterOptions.ALL).entities;
 		var target = entities.head;
-		var $it0 = entities.iterator();
-		while( $it0.hasNext() ) {
-			var i = $it0.next();
-			haxe_Log.trace("evel tagets = " + i.entity.name,{ fileName : "BirdNestSystem.hx", lineNumber : 97, className : "exile.systems.BirdNestSystem", methodName : "evaluateTargets"});
-		}
 		while(target != null) {
-			haxe_Log.trace(target.entity.name,{ fileName : "BirdNestSystem.hx", lineNumber : 101, className : "exile.systems.BirdNestSystem", methodName : "evaluateTargets"});
+			haxe_Log.trace(target.entity.name,{ fileName : "BirdNestSystem.hx", lineNumber : 79, className : "exile.systems.BirdNestSystem", methodName : "evaluateTargets"});
 			if(target != null) return target.entity;
 			target = target.next;
 		}
 		return null;
 	}
-	,releaseBird: function(entity) {
+	,releaseBird: function(entity,target) {
 		var nest = entity.map.BirdNest;
 		if(nest.birds.length == 0) {
-			var bird = exile_entities_creatures_BirdFactory.create(this.engine,entity.map.Position.clone(),new glaze_engine_components_Position(480,640));
+			var bird = exile_entities_creatures_BirdFactory.create(this.engine,entity.map.Position.clone(),target.map.Position);
 			nest.birds.push(bird);
 		}
 	}
@@ -1073,9 +1054,10 @@ exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,
 					_this1.y += f_y * s;
 					body.canSleep = false;
 					body.motion = 10;
+					body.bounceCount = 0;
 					this.particleEngine.EmitParticle(body.position.x,body.position.y,dir * -10,-100,0,5,800,1,false,true,null,4,255,255,255,255);
 				}
-			} else if(Math.random() < 0.02) {
+			} else if(Math.random() < 0.005) {
 				var dir1 = Math.random() < 0.5?1:-1;
 				entity.map.Position.direction.x = -dir1;
 				var f_x1 = dir1 * 5000;
@@ -1086,6 +1068,7 @@ exile_systems_ChickenSystem.prototype = $extend(glaze_eco_core_System.prototype,
 				_this2.y += f_y1 * s1;
 				body.canSleep = false;
 				body.motion = 10;
+				body.bounceCount = 0;
 				this.particleEngine.EmitParticle(body.position.x,body.position.y,dir1 * -20,-100,0,5,800,1,false,true,null,4,255,255,255,255);
 			}
 		}
@@ -1264,6 +1247,7 @@ exile_systems_MaggotSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 				_this.y += f_y * s;
 				body.canSleep = false;
 				body.motion = 10;
+				body.bounceCount = 0;
 			} else if(Math.random() < 0.01) entity.map.SpriteAnimation.animationController.play("blink"); else if(maggot.sleep < 0 && Math.random() < 0.02) {
 				maggot.sleep = 2000;
 				var body1 = entity.map.PhysicsBody.body;
@@ -1468,14 +1452,15 @@ exile_systems_RabbitSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 			}
 			if(dist < 4096) {
 				if(Math.random() < 0.1) {
-					var f_x = dir * 10;
-					var f_y = -10;
+					var f_x = dir * 5000;
+					var f_y = -8000;
 					var _this1 = body.forces;
 					var s = body.invMass;
 					_this1.x += f_x * s;
 					_this1.y += f_y * s;
 					body.canSleep = false;
 					body.motion = 10;
+					body.bounceCount = 0;
 					entity.map.Position.direction.x = dir;
 					entity.map.SpriteAnimation.animationController.play("jump");
 				}
@@ -1484,14 +1469,15 @@ exile_systems_RabbitSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 					rabbit.sleep += 2000;
 					var dir1 = Math.random() < 0.5?1:-1;
 					entity.map.Position.direction.x = dir1;
-					var f_x1 = dir1 * 10;
-					var f_y1 = -10;
+					var f_x1 = dir1 * 5000;
+					var f_y1 = -8000;
 					var _this2 = body.forces;
 					var s1 = body.invMass;
 					_this2.x += f_x1 * s1;
 					_this2.y += f_y1 * s1;
 					body.canSleep = false;
 					body.motion = 10;
+					body.bounceCount = 0;
 					entity.map.SpriteAnimation.animationController.play("jump");
 				} else if(Math.random() < 0.005) {
 					rabbit.sleep += 1500;
@@ -1591,7 +1577,7 @@ exile_util_CharacterController2.prototype = {
 			this.jumping = true;
 			this.controlForce.y -= 18000. / 5;
 		}
-		if(this.jumping && this.input.keyMap[87] == 0 || this.body.lastNormal.y > 0) this.jumping = false;
+		if(this.jumping && this.input.keyMap[87] == 0 || this.body.contactNormal.y > 0) this.jumping = false;
 		if(this.body.onGround && !this.body.onGroundPrev) this.burn = 0;
 		if(this.body.onGround) {
 			if(this.left > 0) this.controlForce.x -= 1200.;
@@ -1615,6 +1601,7 @@ exile_util_CharacterController2.prototype = {
 		_this8.y += f.y * s;
 		_this7.canSleep = false;
 		_this7.motion = 10;
+		_this7.bounceCount = 0;
 	}
 	,__class__: exile_util_CharacterController2
 };
@@ -1821,7 +1808,8 @@ glaze_ai_navigation_Node.prototype = {
 	,__class__: glaze_ai_navigation_Node
 };
 var glaze_ai_steering_SteeringAgentParameters = function() {
-	this.maxAcceleration = 800;
+	this.maxSteeringForcePerStep = 100.;
+	this.maxAcceleration = 400.;
 };
 glaze_ai_steering_SteeringAgentParameters.__name__ = ["glaze","ai","steering","SteeringAgentParameters"];
 glaze_ai_steering_SteeringAgentParameters.prototype = {
@@ -1866,11 +1854,12 @@ glaze_ai_steering_SteeringBehavior.prototype = {
 		}
 		var f = this.force;
 		var _this = agent.forces;
-		var s = agent.invMass;
+		var s = agent.mass;
 		_this.x += f.x * s;
 		_this.y += f.y * s;
 		agent.canSleep = false;
 		agent.motion = 10;
+		agent.bounceCount = 0;
 		return this.force;
 	}
 	,prioritizedDithering: function() {
@@ -1883,7 +1872,7 @@ glaze_ai_steering_SteeringBehavior.prototype = {
 		while(_g < _g1.length) {
 			var behavior = _g1[_g];
 			++_g;
-			behavior.calculate(agent,this.behaviorForce);
+			behavior.calculate(agent,this.agentParameters,this.behaviorForce);
 			var _this = this.behaviorForce;
 			var s = behavior.weight;
 			_this.x *= s;
@@ -1927,7 +1916,7 @@ var glaze_ai_steering_behaviors_Behavior = function(weight,priority,probability)
 };
 glaze_ai_steering_behaviors_Behavior.__name__ = ["glaze","ai","steering","behaviors","Behavior"];
 glaze_ai_steering_behaviors_Behavior.prototype = {
-	calculate: function(agent,result) {
+	calculate: function(agent,params,result) {
 	}
 	,__class__: glaze_ai_steering_behaviors_Behavior
 };
@@ -1948,10 +1937,10 @@ glaze_ai_steering_behaviors_Arrival.calc = function(agent,result,target,arrivalZ
 	var d = dX * dX + dY * dY;
 	if(seekDist > 0 && d < seekDist * seekDist) return false;
 	var t = Math.sqrt(d);
-	var scale = 100.0;
+	var scale = 1000.0;
 	if(t < arrivalZone) {
 		scale = t / arrivalZone;
-		scale *= 100;
+		scale *= 1000;
 	}
 	result.x = dX / t;
 	result.x *= scale;
@@ -1959,11 +1948,12 @@ glaze_ai_steering_behaviors_Arrival.calc = function(agent,result,target,arrivalZ
 	result.y = dY / t;
 	result.y *= scale;
 	result.y -= agent.velocity.y * 0.016;
+	haxe_Log.trace(result.x,{ fileName : "Arrival.hx", lineNumber : 62, className : "glaze.ai.steering.behaviors.Arrival", methodName : "calc", customParams : [result.y]});
 	return true;
 };
 glaze_ai_steering_behaviors_Arrival.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Arrival.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
-	calculate: function(agent,result) {
+	calculate: function(agent,params,result) {
 		var target = this.target;
 		var arrivalZone = this.arrivalZone;
 		var seekDist = this.seekDist;
@@ -1973,10 +1963,10 @@ glaze_ai_steering_behaviors_Arrival.prototype = $extend(glaze_ai_steering_behavi
 		if(seekDist > 0 && d < seekDist * seekDist) {
 		} else {
 			var t = Math.sqrt(d);
-			var scale = 100.0;
+			var scale = 1000.0;
 			if(t < arrivalZone) {
 				scale = t / arrivalZone;
-				scale *= 100;
+				scale *= 1000;
 			}
 			result.x = dX / t;
 			result.x *= scale;
@@ -1984,6 +1974,7 @@ glaze_ai_steering_behaviors_Arrival.prototype = $extend(glaze_ai_steering_behavi
 			result.y = dY / t;
 			result.y *= scale;
 			result.y -= agent.velocity.y * 0.016;
+			haxe_Log.trace(result.x,{ fileName : "Arrival.hx", lineNumber : 62, className : "glaze.ai.steering.behaviors.Arrival", methodName : "calc", customParams : [result.y]});
 		}
 	}
 	,__class__: glaze_ai_steering_behaviors_Arrival
@@ -2063,7 +2054,7 @@ var glaze_ai_steering_behaviors_Seek = function(target,seekDistSq) {
 	this.seekDistSq = seekDistSq;
 };
 glaze_ai_steering_behaviors_Seek.__name__ = ["glaze","ai","steering","behaviors","Seek"];
-glaze_ai_steering_behaviors_Seek.calc = function(agent,result,target,seekDistSq) {
+glaze_ai_steering_behaviors_Seek.calc = function(agent,params,result,target,seekDistSq) {
 	if(seekDistSq == null) seekDistSq = 0;
 	var dX = target.x - agent.position.x + 0.000001;
 	var dY = target.y - agent.position.y + 0.000001;
@@ -2071,16 +2062,16 @@ glaze_ai_steering_behaviors_Seek.calc = function(agent,result,target,seekDistSq)
 	if(seekDistSq > 0 && d < seekDistSq) return false;
 	var t = Math.sqrt(d);
 	result.x = dX / t;
-	result.x *= 100;
-	result.x -= agent.velocity.x * 0.016;
+	result.x *= params.maxSteeringForcePerStep;
+	result.x -= agent.velocity.x;
 	result.y = dY / t;
-	result.y *= 100;
-	result.y -= agent.velocity.y * 0.016;
+	result.y *= params.maxSteeringForcePerStep;
+	result.y -= agent.velocity.y;
 	return true;
 };
 glaze_ai_steering_behaviors_Seek.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
-	calculate: function(agent,result) {
+	calculate: function(agent,params,result) {
 		var target = this.target;
 		var seekDistSq = this.seekDistSq;
 		var dX = target.x - agent.position.x + 0.000001;
@@ -2090,11 +2081,11 @@ glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors
 		} else {
 			var t = Math.sqrt(d);
 			result.x = dX / t;
-			result.x *= 100;
-			result.x -= agent.velocity.x * 0.016;
+			result.x *= params.maxSteeringForcePerStep;
+			result.x -= agent.velocity.x;
 			result.y = dY / t;
-			result.y *= 100;
-			result.y -= agent.velocity.y * 0.016;
+			result.y *= params.maxSteeringForcePerStep;
+			result.y -= agent.velocity.y;
 		}
 	}
 	,__class__: glaze_ai_steering_behaviors_Seek
@@ -2154,7 +2145,7 @@ glaze_ai_steering_behaviors_WallAvoidance.prototype = $extend(glaze_ai_steering_
 			}
 		}
 	}
-	,calculate: function(agent,result) {
+	,calculate: function(agent,params,result) {
 		var tmp;
 		var _this = this.lastPos;
 		var v = agent.position;
@@ -2220,38 +2211,54 @@ var glaze_ai_steering_behaviors_Wander = function(circleRadius,circleDistance,wa
 glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behaviors","Wander"];
 glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Wander.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
-	calculate: function(agent,result) {
-		var _this = this.circleCenter;
-		var v = agent.velocity;
-		_this.x = v.x;
-		_this.y = v.y;
+	calculate: function(agent,params,result) {
 		var _this1 = this.circleCenter;
-		var t = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y) + 1e-08;
-		_this1.x /= t;
-		_this1.y /= t;
+		var v = agent.velocity;
+		_this1.x = v.x;
+		_this1.y = v.y;
 		var _this2 = this.circleCenter;
+		var t = Math.sqrt(_this2.x * _this2.x + _this2.y * _this2.y) + 1e-08;
+		_this2.x /= t;
+		_this2.y /= t;
+		var _this3 = this.circleCenter;
 		var s = this.circleDistance;
-		_this2.x *= s;
-		_this2.y *= s;
-		var _this3 = this.displacement;
-		_this3.x = 0;
-		_this3.y = -1;
+		_this3.x *= s;
+		_this3.y *= s;
 		var _this4 = this.displacement;
-		var s1 = this.circleRadius;
-		_this4.x *= s1;
-		_this4.y *= s1;
+		_this4.x = -1;
+		_this4.y = 0;
 		var _this5 = this.displacement;
+		var s1 = this.circleRadius;
+		_this5.x *= s1;
+		_this5.y *= s1;
+		var _this6 = this.displacement;
 		var angle = this.wanderAngle;
-		var len = Math.sqrt(_this5.x * _this5.x + _this5.y * _this5.y);
-		_this5.x = Math.cos(angle) * len;
-		_this5.y = Math.sin(angle) * len;
-		this.wanderAngle += Math.random() * this.wanderChange - this.wanderChange * .5;
+		var len = Math.sqrt(_this6.x * _this6.x + _this6.y * _this6.y);
+		_this6.x = Math.cos(angle) * len;
+		_this6.y = Math.sin(angle) * len;
+		var tmp;
+		var min = -this.wanderChange;
+		tmp = Math.random() * (this.wanderChange - min) + min;
+		this.wanderAngle += tmp;
+		var _this = agent.position;
+		var x_x = _this.x;
+		var x_y = _this.y;
 		var v1 = this.circleCenter;
-		result.x += v1.x;
-		result.y += v1.y;
+		x_x += v1.x;
+		x_y += v1.y;
 		var v2 = this.displacement;
-		result.x += v2.x;
-		result.y += v2.y;
+		x_x += v2.x;
+		x_y += v2.y;
+		var dX = x_x - agent.position.x + 0.000001;
+		var dY = x_y - agent.position.y + 0.000001;
+		var d = dX * dX + dY * dY;
+		var t1 = Math.sqrt(d);
+		result.x = dX / t1;
+		result.x *= params.maxSteeringForcePerStep;
+		result.x -= agent.velocity.x;
+		result.y = dY / t1;
+		result.y *= params.maxSteeringForcePerStep;
+		result.y -= agent.velocity.y;
 	}
 	,__class__: glaze_ai_steering_behaviors_Wander
 });
@@ -2300,11 +2307,12 @@ glaze_ai_steering_systems_SteeringSystem.prototype = $extend(glaze_eco_core_Syst
 			this.runningSum(steering,body);
 			var f = this.totalForce;
 			var _this = body.forces;
-			var s = body.invMass;
+			var s = body.mass;
 			_this.x += f.x * s;
 			_this.y += f.y * s;
 			body.canSleep = false;
 			body.motion = 10;
+			body.bounceCount = 0;
 		}
 	}
 	,runningSum: function(steering,agent) {
@@ -2319,7 +2327,7 @@ glaze_ai_steering_systems_SteeringSystem.prototype = $extend(glaze_eco_core_Syst
 			var _this1 = this.behaviorForce;
 			_this1.x = 0;
 			_this1.y = 0;
-			behavior.calculate(agent,this.behaviorForce);
+			behavior.calculate(agent,steering.steeringParameters,this.behaviorForce);
 			var _this2 = this.behaviorForce;
 			var s = behavior.weight;
 			_this2.x *= s;
@@ -2477,7 +2485,7 @@ glaze_core_GameLoop.prototype = {
 	update: function(timestamp) {
 		this.delta = this.prevAnimationTime == 0?16.6666666766666687:timestamp - this.prevAnimationTime;
 		this.prevAnimationTime = timestamp;
-		if(this.updateFunc != null) this.updateFunc(Math.max(this.delta,16.6666666766666687),Math.floor(timestamp));
+		if(this.updateFunc != null) this.updateFunc(16.6666666766666687,Math.floor(timestamp));
 		this.rafID = window.requestAnimationFrame($bind(this,this.update));
 		return false;
 	}
@@ -2890,12 +2898,12 @@ glaze_ds_EntityCollection.prototype = {
 					node1.prev = item;
 				}
 			} else {
-				var node2 = _this1.tail;
+				var node11 = _this1.tail;
 				_this1.length++;
-				item.prev = node2;
-				item.next = node2.next;
-				if(node2.next == null) _this1.tail = item; else node2.next.prev = item;
-				node2.next = item;
+				item.prev = node11;
+				item.next = node11.next;
+				if(node11.next == null) _this1.tail = item; else node11.next.prev = item;
+				node11.next = item;
 			}
 		}
 	}
@@ -4163,6 +4171,9 @@ glaze_engine_systems_HeldSystem.prototype = $extend(glaze_eco_core_System.protot
 		holder.map.Holder.drop();
 		var body = entity.map.PhysicsBody.body;
 		body.skip = false;
+		var _this = body.velocity;
+		_this.x = 0;
+		_this.y = 0;
 		if(entity.map.Storeable == null) {
 			var holderBody = holder.parent.map.PhysicsBody.body;
 			if(holderBody != null) holderBody.setMass(holderBody.mass - body.mass);
@@ -4176,16 +4187,16 @@ glaze_engine_systems_HeldSystem.prototype = $extend(glaze_eco_core_System.protot
 			++_g;
 			var holder = entity.map.Held.holder;
 			var holderPos = holder.map.Position;
-			entity.map.PhysicsBody.body.setPosition(holderPos.coords.x + holderPos.direction.x * 4,holderPos.coords.y);
+			entity.map.PhysicsBody.body.setStaticPosition(holderPos.coords.x + holderPos.direction.x * 4,holderPos.coords.y);
 			var _this = entity.map.Position;
 			var position = entity.map.PhysicsBody.body.position;
 			var _this1 = _this.prevCoords;
 			var v = _this.coords;
 			_this1.x = v.x;
 			_this1.y = v.y;
-			var _this2 = _this.coords;
-			_this2.x = position.x;
-			_this2.y = position.y;
+			var _this11 = _this.coords;
+			_this11.x = position.x;
+			_this11.y = position.y;
 		}
 	}
 	,callback: function(a,b,contact) {
@@ -4540,6 +4551,7 @@ glaze_engine_systems_WaterSystem.prototype = $extend(glaze_eco_core_System.proto
 		_this1.y += f_y * s;
 		_this.canSleep = false;
 		_this.motion = 10;
+		_this.bounceCount = 0;
 		if(!b.body.inWaterPrev) {
 			var tmp;
 			var tmp6;
@@ -4675,6 +4687,7 @@ glaze_engine_systems_environment_EnvironmentForceSystem.prototype = $extend(glaz
 		_this3.y += f.y * s1;
 		_this2.canSleep = false;
 		_this2.motion = 10;
+		_this2.bounceCount = 0;
 	}
 	,__class__: glaze_engine_systems_environment_EnvironmentForceSystem
 });
@@ -5849,7 +5862,8 @@ var glaze_physics_Body = function(material,mass) {
 	this.maxScalarVelocity = 1000;
 	this.stepContactCount = 0;
 	this.tangent = new glaze_geom_Vector2();
-	this.lastNormal = new glaze_geom_Vector2();
+	this.prevContactNormal = new glaze_geom_Vector2();
+	this.contactNormal = new glaze_geom_Vector2();
 	this.originalVelocity = new glaze_geom_Vector2();
 	this.velocity = new glaze_geom_Vector2();
 	this.previousPosition = new glaze_geom_Vector2();
@@ -5934,14 +5948,22 @@ glaze_physics_Body.prototype = {
 		var v7 = this.position;
 		_this11.x -= v7.x;
 		_this11.y -= v7.y;
-		var _this12 = this.forces;
-		_this12.x = 0;
-		_this12.y = 0;
+		var _this12 = this.prevContactNormal;
+		var v8 = this.contactNormal;
+		_this12.x = v8.x;
+		_this12.y = v8.y;
+		var _this13 = this.contactNormal;
+		_this13.x = 0;
+		_this13.y = 0;
+		var _this14 = this.forces;
+		_this14.x = 0;
+		_this14.y = 0;
 		this.damping = 1;
 		this.stepContactCount = 0;
 		this.toi = Infinity;
 	}
 	,respondStaticCollision: function(contact) {
+		if(this.skip) return false;
 		var seperation = Math.max(contact.distance,0);
 		var penetration = Math.min(contact.distance,0);
 		var _this = this.positionCorrection;
@@ -5960,8 +5982,8 @@ glaze_physics_Body.prototype = {
 			var v2 = contact.normal;
 			_this2.x -= v2.x * nv;
 			_this2.y -= v2.y * nv;
-			if(!(this.bounceCount != this.totalBounceCount) && contact.normal.y < 0) this.onGround = true;
-			var _this3 = this.lastNormal;
+			if(!(this.totalBounceCount != 0 && this.bounceCount < this.totalBounceCount) && contact.normal.y < 0) this.onGround = true;
+			var _this3 = this.contactNormal;
 			var v3 = contact.normal;
 			_this3.x = v3.x;
 			_this3.y = v3.y;
@@ -5971,7 +5993,7 @@ glaze_physics_Body.prototype = {
 	}
 	,t: function(msg) {
 		if(this.debug > 0) {
-			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 157, className : "glaze.physics.Body", methodName : "t"});
+			haxe_Log.trace(msg,{ fileName : "Body.hx", lineNumber : 173, className : "glaze.physics.Body", methodName : "t"});
 			this.debug--;
 		}
 	}
@@ -5982,7 +6004,7 @@ glaze_physics_Body.prototype = {
 			var v = contact.sweepPosition;
 			_this.x = v.x;
 			_this.y = v.y;
-			var _this1 = this.lastNormal;
+			var _this1 = this.contactNormal;
 			var v1 = contact.normal;
 			_this1.x = v1.x;
 			_this1.y = v1.y;
@@ -5999,7 +6021,7 @@ glaze_physics_Body.prototype = {
 				_this.x = v.x;
 				_this.y = v.y;
 				var _this1 = this.originalVelocity;
-				var normal = this.lastNormal;
+				var normal = this.contactNormal;
 				var d = _this1.x * normal.x + _this1.y * normal.y;
 				_this1.x -= 2 * d * normal.x;
 				_this1.y -= 2 * d * normal.y;
@@ -6019,20 +6041,26 @@ glaze_physics_Body.prototype = {
 			}
 			return;
 		}
-		if(this.stepContactCount > 0 && !(this.bounceCount != this.totalBounceCount) && this.lastNormal.y < 0) {
+		var tmp;
+		if(this.stepContactCount > 0) {
+			var tmp1;
+			if(this.totalBounceCount != 0) tmp1 = this.bounceCount < this.totalBounceCount; else tmp1 = false;
+			tmp = !tmp1;
+		} else tmp = false;
+		if(tmp && this.contactNormal.y < 0) {
 			var _this5 = this.tangent;
-			var v3 = this.lastNormal;
+			var v3 = this.contactNormal;
 			_this5.x = v3.x;
 			_this5.y = v3.y;
 			var _this6 = this.tangent;
 			var t = _this6.x;
 			_this6.x = -_this6.y;
 			_this6.y = t;
-			var tmp;
+			var tmp2;
 			var _this7 = this.originalVelocity;
 			var v4 = this.tangent;
-			tmp = _this7.x * v4.x + _this7.y * v4.y;
-			var tv = tmp * this.material.friction;
+			tmp2 = _this7.x * v4.x + _this7.y * v4.y;
+			var tv = tmp2 * this.material.friction;
 			this.velocity.x -= this.tangent.x * tv;
 			this.velocity.y -= this.tangent.y * tv;
 		}
@@ -6051,9 +6079,9 @@ glaze_physics_Body.prototype = {
 		var _this11 = this.positionCorrection;
 		_this11.x = 0;
 		_this11.y = 0;
-		if(this.stepContactCount > 0 && this.bounceCount != this.totalBounceCount) {
+		if(this.stepContactCount > 0 && (this.totalBounceCount != 0 && this.bounceCount < this.totalBounceCount)) {
 			var _this12 = this.originalVelocity;
-			var normal1 = this.lastNormal;
+			var normal1 = this.contactNormal;
 			var d1 = _this12.x * normal1.x + _this12.y * normal1.y;
 			_this12.x -= 2 * d1 * normal1.x;
 			_this12.y -= 2 * d1 * normal1.y;
@@ -6075,6 +6103,7 @@ glaze_physics_Body.prototype = {
 		_this.y += f.y * s;
 		this.canSleep = false;
 		this.motion = 10;
+		this.bounceCount = 0;
 	}
 	,addMasslessForce: function(f) {
 		var _this = this.forces;
@@ -6082,6 +6111,7 @@ glaze_physics_Body.prototype = {
 		_this.y += f.y;
 		this.canSleep = false;
 		this.motion = 10;
+		this.bounceCount = 0;
 	}
 	,addProportionalForce: function(f) {
 		var _this = this.forces;
@@ -6090,6 +6120,7 @@ glaze_physics_Body.prototype = {
 		_this.y += f.y * s;
 		this.canSleep = false;
 		this.motion = 10;
+		this.bounceCount = 0;
 	}
 	,setMass: function(mass) {
 		this.mass = mass;
@@ -6098,26 +6129,73 @@ glaze_physics_Body.prototype = {
 	,setMassFromVolumeMaterial: function(volume) {
 		this.setMass(this.material.density * volume * 0.1);
 	}
-	,setPosition: function(x,y) {
+	,setStaticPosition: function(x,y) {
 		var _this = this.position;
 		_this.x = x;
 		_this.y = y;
+		var _this1 = this.positionCorrection;
+		_this1.x = 0;
+		_this1.y = 0;
+		var _this2 = this.predictedPosition;
+		_this2.x = 0;
+		_this2.y = 0;
+		var _this3 = this.forces;
+		_this3.x = 0;
+		_this3.y = 0;
+		var _this4 = this.accumulatedForces;
+		_this4.x = 0;
+		_this4.y = 0;
+		var _this5 = this.velocity;
+		_this5.x = 0;
+		_this5.y = 0;
+		var _this6 = this.originalVelocity;
+		_this6.x = 0;
+		_this6.y = 0;
+		var _this7 = this.delta;
+		_this7.x = 0;
+		_this7.y = 0;
 		this.canSleep = false;
 		this.motion = 10;
+		this.bounceCount = 0;
 	}
 	,setBounces: function(count) {
 		this.totalBounceCount = count;
 		this.bounceCount = 0;
 	}
 	,get_canBounce: function() {
-		return this.bounceCount != this.totalBounceCount;
+		return this.totalBounceCount != 0 && this.bounceCount < this.totalBounceCount;
 	}
 	,wake: function() {
 		this.canSleep = false;
 		this.motion = 10;
+		this.bounceCount = 0;
+	}
+	,get_down: function() {
+		return this.contactNormal.y < 0;
+	}
+	,get_downPrev: function() {
+		return this.prevContactNormal.y < 0;
+	}
+	,get_up: function() {
+		return this.contactNormal.y > 0;
+	}
+	,get_upPrev: function() {
+		return this.prevContactNormal.y > 0;
+	}
+	,get_left: function() {
+		return this.contactNormal.x < 0;
+	}
+	,get_leftPrev: function() {
+		return this.prevContactNormal.x < 0;
+	}
+	,get_right: function() {
+		return this.contactNormal.x > 0;
+	}
+	,get_rightPrev: function() {
+		return this.prevContactNormal.x > 0;
 	}
 	,__class__: glaze_physics_Body
-	,__properties__: {get_canBounce:"get_canBounce"}
+	,__properties__: {get_rightPrev:"get_rightPrev",get_right:"get_right",get_leftPrev:"get_leftPrev",get_left:"get_left",get_upPrev:"get_upPrev",get_up:"get_up",get_downPrev:"get_downPrev",get_down:"get_down",get_canBounce:"get_canBounce"}
 };
 var glaze_physics_Material = function(density,elasticity,friction) {
 	if(friction == null) friction = 0.1;
@@ -6439,6 +6517,7 @@ glaze_physics_collision_Intersect.prototype = {
 		_this.y += fy * s;
 		bodyA.canSleep = false;
 		bodyA.motion = 10;
+		bodyA.bounceCount = 0;
 		var f_x = -fx;
 		var f_y = -fy;
 		var _this1 = bodyB.forces;
@@ -6447,6 +6526,7 @@ glaze_physics_collision_Intersect.prototype = {
 		_this1.y += f_y * s1;
 		bodyB.canSleep = false;
 		bodyB.motion = 10;
+		bodyB.bounceCount = 0;
 	}
 	,__class__: glaze_physics_collision_Intersect
 };
@@ -8721,55 +8801,61 @@ var glaze_render_renderers_webgl_TileLayerRenderProxy = function(tileMap,layers)
 	this.lastSnap = new glaze_geom_Vector2(0,0);
 	this.thisSnap = new glaze_geom_Vector2(-1000,-1000);
 	this.snapChanged = false;
+	this.size = new glaze_geom_Vector2();
 };
 glaze_render_renderers_webgl_TileLayerRenderProxy.__name__ = ["glaze","render","renderers","webgl","TileLayerRenderProxy"];
 glaze_render_renderers_webgl_TileLayerRenderProxy.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
 glaze_render_renderers_webgl_TileLayerRenderProxy.prototype = {
 	Init: function(gl,camera) {
-		this.tileMap.Init(gl,camera);
-		this.surface = new glaze_render_texture_BaseTexture(gl,400,320);
-		this.texture = new glaze_render_texture_Texture(this.surface,new glaze_geom_Rectangle(0,0,400.,320.),new glaze_geom_Vector2(0,0));
 		this.sprite = new glaze_render_display_Sprite();
 		this.sprite.id = "renderTexture";
-		this.sprite.texture = this.texture;
-		var _this = this.sprite.scale;
-		_this.x = 2;
-		_this.y = -2;
-		var _this1 = this.sprite.pivot;
-		_this1.x = 200.;
-		_this1.y = 160.;
 	}
 	,Resize: function(width,height) {
-		this.tileMap.Resize(width,height);
+		var _this = this.size;
+		_this.x = width;
+		_this.y = height;
+		this.surface = new glaze_render_texture_BaseTexture(this.tileMap.gl,width | 0,height | 0);
+		this.texture = new glaze_render_texture_Texture(this.surface,new glaze_geom_Rectangle(0,0,width,height),new glaze_geom_Vector2(0,0));
+		this.sprite.texture = this.texture;
+		var _this1 = this.sprite.scale;
+		_this1.x = 2;
+		_this1.y = -2;
+		var _this2 = this.sprite.pivot;
+		_this2.x = width / 2;
+		_this2.y = height / 2;
 	}
 	,calcSnap: function(cameraPos) {
 		var _this = this.lastSnap;
 		var v = this.thisSnap;
 		_this.x = v.x;
 		_this.y = v.y;
-		this.thisSnap.x = Math.floor(cameraPos.x / -16);
-		this.thisSnap.x *= 16;
-		this.thisSnap.x -= 16;
-		this.thisSnap.y = Math.floor(cameraPos.y / -16);
-		this.thisSnap.y *= 16;
-		this.thisSnap.y -= 16;
+		this.thisSnap.x = (Math.floor(cameraPos.x / -16) - 1) * 16;
+		this.thisSnap.y = (Math.floor(cameraPos.y / -16) - 1) * 16;
 		this.snapChanged = this.lastSnap.x != this.thisSnap.x || this.lastSnap.y != this.thisSnap.y;
 		return this.snapChanged;
 	}
 	,Render: function(clip) {
-		if(this.calcSnap(this.tileMap.camera.position)) {
-			var _this = this.sprite.position;
-			_this.x = 400 + this.thisSnap.x;
-			_this.y = 320 + this.thisSnap.y;
-			this.surface.drawTo($bind(this,this.renderSurface));
-		}
+		this.calcSnap(this.tileMap.camera.position);
+		var _this = this.sprite.position;
+		var v = this.size;
+		_this.x = v.x;
+		_this.y = v.y;
+		var _this1 = this.sprite.position;
+		var v1 = this.thisSnap;
+		_this1.x += v1.x;
+		_this1.y += v1.y;
+		this.surface.drawTo($bind(this,this.renderSurface));
 	}
 	,renderSurface: function() {
-		this.tileMap.RenderLayers(null,this.layers,this.thisSnap);
+		this.tileMap.RenderLayers(this);
 	}
 	,__class__: glaze_render_renderers_webgl_TileLayerRenderProxy
 };
-var glaze_render_renderers_webgl_TileMap = function() {
+var glaze_render_renderers_webgl_TileMap = function(tileSize,tileScale) {
+	this.tileSize = tileSize;
+	this.tileScale = tileScale;
+	this.layers = [];
+	this.renderLayers = [];
 };
 glaze_render_renderers_webgl_TileMap.__name__ = ["glaze","render","renderers","webgl","TileMap"];
 glaze_render_renderers_webgl_TileMap.__interfaces__ = [glaze_render_renderers_webgl_IRenderer];
@@ -8778,12 +8864,8 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		if(this.gl != null) return;
 		this.gl = gl;
 		this.camera = camera;
-		this.tileScale = 1.0;
-		this.tileSize = 8;
 		this.filtered = false;
 		this.spriteSheet = gl.createTexture();
-		this.layers = [];
-		this.renderLayers = [];
 		this.viewportSize = new glaze_geom_Vector2();
 		this.scaledViewportSize = new Float32Array(2);
 		this.inverseTileTextureSize = new Float32Array(2);
@@ -8793,20 +8875,30 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		var quadVerts = new Float32Array([-1,-1,0,1,1,-1,1,1,1,1,1,0,-1,-1,0,1,1,1,1,0,-1,1,0,0]);
 		gl.bufferData(34962,quadVerts,35044);
 		this.tilemapShader = new glaze_render_renderers_webgl_ShaderWrapper(gl,glaze_render_renderers_webgl_WebGLShaders.CompileProgram(gl,glaze_render_renderers_webgl_TileMap.TILEMAP_VERTEX_SHADER,glaze_render_renderers_webgl_TileMap.TILEMAP_FRAGMENT_SHADER));
-		this.writebuffer = new Uint8Array(16);
 		this.flip = false;
 		this.writebuffer2 = new glaze_ds_TypedArray2D(3,3);
+		var _g = 0;
+		var _g1 = this.renderLayers;
+		while(_g < _g1.length) {
+			var renderLayer = _g1[_g];
+			++_g;
+			renderLayer.Init(gl,camera);
+		}
 	}
 	,Resize: function(width,height) {
-		this.viewportSize.x = 400;
-		this.viewportSize.y = 320;
-		this.scaledViewportSize[0] = 400 / this.tileScale;
-		this.scaledViewportSize[1] = 320 / this.tileScale;
-	}
-	,TileScale: function(scale) {
-		this.tileScale = scale;
-		this.scaledViewportSize[0] = this.viewportSize.x / scale;
-		this.scaledViewportSize[1] = this.viewportSize.y / scale;
+		var expandedWidth = (Math.floor(width / (this.tileSize * this.tileScale)) + 2) * this.tileSize;
+		var expandedHeight = (Math.floor(height / (this.tileSize * this.tileScale)) + 2) * this.tileSize;
+		this.viewportSize.x = expandedWidth * this.tileScale;
+		this.viewportSize.y = expandedHeight * this.tileScale;
+		this.scaledViewportSize[0] = this.viewportSize.x / this.tileScale;
+		this.scaledViewportSize[1] = this.viewportSize.y / this.tileScale;
+		var _g = 0;
+		var _g1 = this.renderLayers;
+		while(_g < _g1.length) {
+			var renderLayer = _g1[_g];
+			++_g;
+			renderLayer.Resize(Math.floor(expandedWidth),Math.floor(expandedHeight));
+		}
 	}
 	,SetSpriteSheet: function(image) {
 		this.gl.bindTexture(3553,this.spriteSheet);
@@ -8838,7 +8930,7 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.layers.push(layer);
 	}
 	,SetTileRenderLayer: function(layers) {
-		var tileRenderLayer = new glaze_render_renderers_webgl_TileLayerRenderProxy(null,layers);
+		var tileRenderLayer = new glaze_render_renderers_webgl_TileLayerRenderProxy(this,layers);
 		this.renderLayers.push(tileRenderLayer);
 	}
 	,updateMap: function(x,y,data) {
@@ -8870,8 +8962,15 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.gl.texSubImage2D(3553,0,x - centerX,y - centerY,width,height,6408,5121,this.writebuffer2.data8);
 	}
 	,Render: function(clip) {
+		var _g = 0;
+		var _g1 = this.renderLayers;
+		while(_g < _g1.length) {
+			var renderLayer = _g1[_g];
+			++_g;
+			renderLayer.Render(clip);
+		}
 	}
-	,RenderLayers: function(clip,layerIndexes,p) {
+	,RenderLayers: function(renderLayer) {
 		this.gl.colorMask(true,true,true,true);
 		this.gl.clearColor(0,0,0,0);
 		this.gl.clear(16384);
@@ -8887,12 +8986,13 @@ glaze_render_renderers_webgl_TileMap.prototype = {
 		this.gl.uniform1i(this.tilemapShader.uniform.sprites,0);
 		this.gl.uniform1i(this.tilemapShader.uniform.tiles,1);
 		var _g = 0;
-		while(_g < layerIndexes.length) {
-			var i = layerIndexes[_g];
+		var _g1 = renderLayer.layers;
+		while(_g < _g1.length) {
+			var i = _g1[_g];
 			++_g;
 			var layer = this.layers[i];
-			var pX = p.x / 2;
-			var pY = p.y / 2;
+			var pX = renderLayer.thisSnap.x / 2;
+			var pY = renderLayer.thisSnap.y / 2;
 			this.gl.uniform2f(this.tilemapShader.uniform.viewOffset,pX,pY);
 			this.gl.uniform2fv(this.tilemapShader.uniform.inverseSpriteTextureSize,layer.inverseSpriteTextureSize);
 			this.gl.uniform2fv(this.tilemapShader.uniform.inverseTileTextureSize,layer.inverseTileDataTextureSize);
@@ -10290,6 +10390,7 @@ glaze_util_Ballistics.calcProjectileForce = function(body,target,force) {
 	_this.y += newforce_y * s;
 	body.canSleep = false;
 	body.motion = 10;
+	body.bounceCount = 0;
 };
 var glaze_util_BroadphaseAreaQuery = function(broadphase) {
 	this.broadphase = broadphase;
@@ -10393,6 +10494,7 @@ glaze_util_CombatUtils.explode = function(position,radius,power,sourceEntity) {
 					_this2.y += delta_y * s;
 					_this1.canSleep = false;
 					_this1.motion = 10;
+					_this1.bounceCount = 0;
 				}
 			}
 		}
@@ -13468,11 +13570,11 @@ exile_ExileFilters.SOLID_OBJECT_GROUP = 1;
 exile_components_Bee.NAME = "Bee";
 exile_components_Bee.ID = 35;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 36;
+exile_components_BeeHive.ID = 43;
 exile_components_Bird.NAME = "Bird";
 exile_components_Bird.ID = 41;
 exile_components_BirdNest.NAME = "BirdNest";
-exile_components_BirdNest.ID = 18;
+exile_components_BirdNest.ID = 37;
 exile_components_Chicken.NAME = "Chicken";
 exile_components_Chicken.ID = 16;
 exile_components_Door.NAME = "Door";
@@ -13501,7 +13603,7 @@ exile_util_CharacterController2.MAX_BURN = 3000.;
 exile_util_CharacterController2.BOOST_FACTOR = 1.4;
 glaze_EngineConstants.TILE_SIZE = 16;
 glaze_ai_faction_components_Personality.NAME = "Personality";
-glaze_ai_faction_components_Personality.ID = 8;
+glaze_ai_faction_components_Personality.ID = 32;
 glaze_ai_steering_SteeringBehavior.CALCULATE_SUM = 0;
 glaze_ai_steering_SteeringBehavior.CALCULATE_SPEED = 1;
 glaze_ai_steering_SteeringBehavior.CALCULATE_ACCURACY = 2;
@@ -13564,7 +13666,7 @@ glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
 glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
 glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
-glaze_ai_steering_components_Steering.ID = 32;
+glaze_ai_steering_components_Steering.ID = 3;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
 glaze_animation_components_SpriteAnimation.ID = 27;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
@@ -13595,27 +13697,27 @@ glaze_engine_components_Fixed.ID = 17;
 glaze_engine_components_Health.NAME = "Health";
 glaze_engine_components_Health.ID = 28;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 43;
+glaze_engine_components_Held.ID = 44;
 glaze_engine_components_Holdable.NAME = "Holdable";
 glaze_engine_components_Holdable.ID = 5;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 11;
+glaze_engine_components_Holder.ID = 34;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 10;
+glaze_engine_components_Inventory.ID = 33;
 glaze_engine_components_Moveable.NAME = "Moveable";
 glaze_engine_components_Moveable.ID = 27;
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 26;
+glaze_engine_components_ParticleEmitters.ID = 41;
 glaze_engine_components_Position.NAME = "Position";
 glaze_engine_components_Position.ID = 33;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 25;
+glaze_engine_components_Script.ID = 40;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 14;
+glaze_engine_components_State.ID = 35;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 4;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 28;
+glaze_engine_components_TileDisplay.ID = 36;
 glaze_engine_components_Viewable.NAME = "Viewable";
 glaze_engine_components_Viewable.ID = 21;
 glaze_engine_components_Water.NAME = "Water";
@@ -13634,7 +13736,7 @@ glaze_physics_Body.WAKE_MOTION = 10;
 glaze_physics_Body.MASS_SCALE = 0.1;
 glaze_physics_Material.NORMAL = new glaze_physics_Material(1,0.3,0.1);
 glaze_physics_Material.LIGHTMETAL = new glaze_physics_Material(1.4,0.3,0.1);
-glaze_physics_Material.ROCK = new glaze_physics_Material(1.6,0.2,0.1);
+glaze_physics_Material.ROCK = new glaze_physics_Material(2.0,0.2,0.1);
 glaze_physics_collision_BFProxy.nextID = 0;
 glaze_physics_collision_Intersect.epsilon = 1e-8;
 glaze_physics_collision_Map.SOLID = 1;
@@ -13648,13 +13750,13 @@ glaze_physics_collision_Map.ROUNDUP = .5;
 glaze_physics_collision_broadphase_uniformgrid_UniformGrid.RIGHT = 1;
 glaze_physics_collision_broadphase_uniformgrid_UniformGrid.DOWN = 2;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
-glaze_physics_components_ContactRouter.ID = 1;
+glaze_physics_components_ContactRouter.ID = 31;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
-glaze_physics_components_PhysicsBody.ID = 23;
+glaze_physics_components_PhysicsBody.ID = 39;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 22;
+glaze_physics_components_PhysicsCollision.ID = 38;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
-glaze_physics_components_PhysicsConstraints.ID = 0;
+glaze_physics_components_PhysicsConstraints.ID = 30;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
 glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","attribute vec2 position;","attribute float size;","attribute vec2 tilePosition;","attribute vec2 tileDimension;","attribute vec2 colour;","varying vec2 vTilePos;","varying vec2 tileDim;","void main() {","vTilePos = tilePosition;","tileDim = tileDimension;","gl_PointSize = size;","gl_Position = vec4( position.x / projectionVector.x -1.0, position.y / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];

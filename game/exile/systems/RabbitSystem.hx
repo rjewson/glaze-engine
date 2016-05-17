@@ -41,7 +41,7 @@ class RabbitSystem extends System {
             }
             if (dist<64*64) {
                 if (Random.RandomBoolean(0.1)) {
-                    body.addForce(new Vector2(dir*10,-10));
+                    body.addForce(new Vector2(dir*5000,-8000));
                     entity.getComponent(Position).direction.x = dir;
                     entity.getComponent(SpriteAnimation).animationController.play("jump");
                 }                
@@ -50,7 +50,7 @@ class RabbitSystem extends System {
                     rabbit.sleep+=2000;
                     var dir = Random.RandomSign(0.5);
                     entity.getComponent(Position).direction.x = dir;
-                    body.addForce(new Vector2(dir*10,-10));
+                    body.addForce(new Vector2(dir*5000,-8000));
                     entity.getComponent(SpriteAnimation).animationController.play("jump");
                 } else if (Random.RandomBoolean(0.005)) {
                     rabbit.sleep+=1500;

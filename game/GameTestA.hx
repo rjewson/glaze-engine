@@ -205,38 +205,25 @@ class GameTestA extends GameEngine {
       
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"),glaze.EngineConstants.TILE_SIZE);
         
-        var tileMap = new TileMap();
-        tileMap.tileSize = Std.int(glaze.EngineConstants.TILE_SIZE/2);                 
-        //     tileMap.TileScale(2);             
-
-        var tileLayerProxy = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[2,1]);
-        renderSystem.renderer.AddRenderer(tileLayerProxy);    
-     
-                   
-        var tileLayerProxy2 = new glaze.render.renderers.webgl.TileLayerRenderProxy(tileMap,[0]);
-        renderSystem.renderer.AddRenderer(tileLayerProxy2);    
-   
-        // tileMap.SetSpriteSheet(assets.assets.get(TILE_SPRITE_SHEET));  
-  
+        var tileMap = new TileMap(Std.int(glaze.EngineConstants.TILE_SIZE/2    ),2);
+        tileMap.SetTileRenderLayer([2,1]);
+        tileMap.SetTileRenderLayer([0]);
+        renderSystem.renderer.AddRenderer(tileMap);
+         
         tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f2",1,1); 
         tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f1",1,1);
         tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"bg",1,1);
-        // tileMap.SetTileLayerFromData(mapData,"base",0.5,0.5);
-        // tileMap.SetTileLayerFromData(mapData,"base",1,1);
-        // tileMap.SetTileLayer(assets.assets.get(TILE_MAP_DATA_2),"bg",0.6,0.6);
            
         var spriteRender = new SpriteRenderer(); 
         spriteRender.AddStage(renderSystem.stage);
         renderSystem.renderer.AddRenderer(spriteRender);
  
-   
         //Render the world top layer over the sprites
 
-renderSystem.itemContainer.addChild(tileLayerProxy.sprite);
-renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
-                                                                                        
-      
-
+        renderSystem.itemContainer.addChild(tileMap.renderLayers[0].sprite);
+        // renderSystem.itemContainer.addChild(tileMap.renderLayers[1].sprite);
+        renderSystem.camera.addChild(tileMap.renderLayers[1].sprite);
+                                                                                             
 
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
@@ -382,7 +369,9 @@ renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
 
         player = engine.createEntity([ 
             new Player(),
-            new Position(300,180),  
+            // new Position(300,180), 
+            mapPosition(22.5,37.5),
+ 
             new Extents(7,21), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
@@ -441,11 +430,11 @@ renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
             new Fixed(),
             new Active(),
             new exile.components.BeeHive(5)
-        ],"BeeHive"); 
+        ],"BeeHive");    
 
-        rock = engine.createEntity([
-            mapPosition(9,4),
-            new Extents(8,8),
+        rock = engine.createEntity([            
+            mapPosition(13,4),
+            new Extents(7,7),
             new Display("items","rock"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(), 
@@ -464,16 +453,16 @@ renderSystem.itemContainer.addChild(tileLayerProxy2.sprite);
             new Personality(nestFaction)
         ],"birdsnest");
 
-        // engine.createEntity([
-        //     mapPosition(9,4),
-        //     new Extents(6,14),
-        //     new Display("items","water_container"), 
-        //     new PhysicsCollision(false,new Filter(),[]),
-        //     new Moveable(), 
-        //     new PhysicsBody(new Body(null,5)),
-        //     new Holdable(),
-        //     new Active()
-        // ],"water_container");         
+        engine.createEntity([
+            mapPosition(9,4),
+            new Extents(6,14),
+            new Display("items","water_container"), 
+            new PhysicsCollision(false,new Filter(),[]),
+            new Moveable(), 
+            new PhysicsBody(new Body(Material.NORMAL),false),
+            new Holdable(),
+            new Active()
+        ],"water_container");         
 
         // engine.createEntity([
         //     mapPosition(40,4),

@@ -27,6 +27,7 @@ class BeeHiveSystem extends System {
 	}
 
 	override public function update(timestamp:Float,delta:Float) {
+		return;
 		for (entity in view.entities) {
 			var beehive = entity.getComponent(BeeHive);
 			if (beehive.bees.length<beehive.maxBees) {

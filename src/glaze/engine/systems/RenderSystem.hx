@@ -43,8 +43,6 @@ class RenderSystem extends System {
  
     function initalizeWebGlRenderer() {
 
-        
-
         // camera.worldExtentsAABB.expand(-16);
 
         stage.addChild(camera);
@@ -84,11 +82,9 @@ class RenderSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         camera.Focus(cameraTarget.x,cameraTarget.y);
-        // camera.Focus(200,200);
         renderer.Render(camera.viewPortAABB);
     }
 
-    //Fixme
     public function CameraTarget(target:Vector2) {
         cameraTarget = target;
     }

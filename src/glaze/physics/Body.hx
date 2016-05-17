@@ -22,7 +22,9 @@ class Body
     public var velocity:Vector2 = new Vector2();
     public var originalVelocity:Vector2 = new Vector2();
 
-    public var lastNormal:Vector2 = new Vector2();
+    public var contactNormal:Vector2 = new Vector2();
+    public var prevContactNormal:Vector2 = new Vector2();
+
     public var tangent:Vector2 = new Vector2();
     public var toi:Float;
 
@@ -52,6 +54,7 @@ class Body
 
     public var onGround:Bool = false;
     public var onGroundPrev:Bool = false;
+   
     public var inWater:Bool = false;
     public var inWaterPrev:Bool = false;
     public var usesStairs:Bool = false;
@@ -64,6 +67,15 @@ class Body
     public var debug:Int = 0;    
 
     public var skip:Bool = false;
+
+    public var down(get, null):Bool;
+    public var downPrev(get, null):Bool;
+    public var up(get, null):Bool;
+    public var upPrev(get, null):Bool;
+    public var left(get, null):Bool;
+    public var leftPrev(get, null):Bool;
+    public var right(get, null):Bool;
+    public var rightPrev(get, null):Bool;
 
     // public var sweep:AABB2 = new glaze.geom.AABB2();
 
@@ -108,6 +120,9 @@ class Body
         delta.copy(predictedPosition);                  
         delta.minusEquals(position);
 
+        prevContactNormal.copy(contactNormal);
+        contactNormal.setTo(0,0);
+
         forces.setTo(0,0);
         damping = 1;
 
@@ -117,6 +132,7 @@ class Body
     }
 
     public function respondStaticCollision(contact:Contact):Bool {
+        if (skip) return false;
         var seperation = Math.max(contact.distance,0);
         var penetration = Math.min(contact.distance,0);
         
@@ -145,7 +161,7 @@ class Body
             }
 
             //store contact normal for later reflection
-            lastNormal.copy(contact.normal);
+            contactNormal.copy(contact.normal);
 
             return true;
         } 
@@ -164,7 +180,7 @@ class Body
         if (contact.time<=toi) {
             toi = contact.time;
             positionCorrection.copy(contact.sweepPosition);
-            lastNormal.copy(contact.normal);
+            contactNormal.copy(contact.normal);
             return true;
         }
         return false;
@@ -176,7 +192,7 @@ class Body
         if (isBullet) {
             if (toi<Math.POSITIVE_INFINITY) {
                 position.copy(positionCorrection);
-                originalVelocity.reflectEquals(lastNormal);
+                originalVelocity.reflectEquals(contactNormal);
                 //Fixme
                 originalVelocity.multEquals(material.elasticity);
                 velocity.copy(originalVelocity);
@@ -188,11 +204,12 @@ class Body
 
         //This body isnt a bullet so...
 
-        //or apply Friction here?
-        if (stepContactCount>0 && !canBounce && lastNormal.y < 0) {
+        //apply Friction here
+        if (stepContactCount>0 && !canBounce && contactNormal.y < 0) {
+        // if (stepContactCount>0 && contactNormal.y < 0) {
             //onGround = true;
-            // var tangent:Vector2 = lastNormal.rightHandNormal();
-            tangent.copy(lastNormal);
+            // var tangent:Vector2 = contactNormal.rightHandNormal();
+            tangent.copy(contactNormal);
             tangent.rightHandNormalEquals();
             var tv:Float = originalVelocity.dot(tangent) * material.friction;
             velocity.x -= tangent.x * tv;
@@ -207,7 +224,7 @@ class Body
         //Anything hit? Any bounces left?
         if (stepContactCount>0 && canBounce) {
             //Reflect it...
-            originalVelocity.reflectEquals(lastNormal);
+            originalVelocity.reflectEquals(contactNormal);
             //Remove velocity
             originalVelocity.multEquals(material.elasticity);
             //Set the new velocity
@@ -238,11 +255,18 @@ class Body
     }
 
     public function setMassFromVolumeMaterial(volume:Float) {
-        setMass(material.density*volume*MASS_SCALE);
+        setMass(material.density*volume*MASS_SCALE); 
     }
 
-    public function setPosition(x:Float,y:Float) {
+    public function setStaticPosition(x:Float,y:Float) {
         position.setTo(x,y);
+        positionCorrection.setTo(0,0);
+        predictedPosition.setTo(0,0);
+        forces.setTo(0,0);
+        accumulatedForces.setTo(0,0);
+        velocity.setTo(0,0);
+        originalVelocity.setTo(0,0);
+        delta.setTo(0,0);
         wake();
     }
 
@@ -252,13 +276,24 @@ class Body
     }
 
     inline function get_canBounce():Bool {
-        return bounceCount!=totalBounceCount;
+        return totalBounceCount!=0 && bounceCount<totalBounceCount;
     }
 
     inline function wake() {
         canSleep = false;
         motion = WAKE_MOTION;
+        bounceCount = 0;
     }
+
+    inline function get_down():Bool     { return contactNormal.y<0; };
+    inline function get_downPrev():Bool { return prevContactNormal.y<0; };
+    inline function get_up():Bool       { return contactNormal.y>0; };
+    inline function get_upPrev():Bool   { return prevContactNormal.y>0; };
+    inline function get_left():Bool     { return contactNormal.x<0; };
+    inline function get_leftPrev():Bool { return prevContactNormal.x<0; };
+    inline function get_right():Bool    { return contactNormal.x>0; };
+    inline function get_rightPrev():Bool{ return prevContactNormal.x>0; };
+
 
     public static function Create(material:Material,mass:Float,bounces:Int,globalForceFactor:Float,maxScalarVelocity:Float):Body {
         var body = new Body(material);

@@ -22,7 +22,7 @@ class Arrival extends Behavior
 		this.seekDist = seekDist;
 	}
 
-	override public function calculate(agent:Body,result:Vector2) {
+	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
 		calc(agent,result,target,arrivalZone,seekDist);
 	}
 
@@ -44,16 +44,14 @@ class Arrival extends Behavior
 
 		var t = Math.sqrt(d);
 
-		var scale = 100.0;
+		var scale = 1000.0;
 		if (t<arrivalZone) {
 			// scale = (t+seekDist)/(arrivalZone+seekDist);
 			scale = (t)/(arrivalZone);
 			// scale = 1/scale;
 			// scale = 1-scale;
-			// trace(t,scale);
-			scale*=100;
+			scale*=1000;
 		}		
-
 		result.x = dX / t;
 		result.x *= scale;
 		result.x -= agent.velocity.x*(16/1000);
@@ -61,7 +59,7 @@ class Arrival extends Behavior
 		result.y = dY / t;
 		result.y *= scale;//agent.maxSteeringForcePerStep;
 		result.y -= agent.velocity.y*(16/1000);
-
+trace (result.x,result.y);
 		return true;
 	}
 	

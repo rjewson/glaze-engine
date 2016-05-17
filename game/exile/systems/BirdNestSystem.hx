@@ -47,40 +47,18 @@ class BirdNestSystem extends System {
 			if (nest.intervalDelay.tick(delta)) {
 				var target = evaluateTargets(entity);
 				if (target!=null) {
-					releaseBird(entity);
+					releaseBird(entity,target);
 				}
-			// 	var e = exile.util.CombatUtils.searchSortAndFilter(entity.getComponent(Position).coords,200,entity).entities.head;
-			// 	while (e!=null) {
-			// 		trace(e.entity.name);
-			// 		if (nest.birds.length==0) {
-			// 			var bird = exile.entities.creatures.BirdFactory.create(engine,entity.getComponent(Position).clone(),new Position(30*16,40*16));
-			// 			nest.birds.push(bird);
-			// 		}				
-			// 		e = e.next;
-			// 	}
 			}
 
 			if (nest.triggered) {
-				// trace("in");
-				nest.triggered = false;
-				
-
+				nest.triggered = false;				
 			} else {
-				// trace("out");
 			}
-			// if (beehive.bees.length<beehive.maxBees) {
-			// 	if (glaze.util.Random.RandomBoolean(0.01)) {
-			// 		var newBee = BeeFactory.create(engine,entity.getComponent(Position).clone());
-			// 		newBee.parent = entity;
-			// 		newBee.messages.add(beeDestroyed);
-			// 		beehive.bees.push(newBee);
-			// 	}
-			// }
 		}
 	}
 
     public function triggerCallback(a:BFProxy,b:BFProxy,contact:Contact) {        
-    	// trace("hit");
     	a.entity.parent.getComponent(BirdNest).triggered = true;
 	}
 
@@ -92,10 +70,10 @@ class BirdNestSystem extends System {
 		// if (entities.length>0)
 		// 	js.Lib.debug();
 
-		for (i in entities) { 
+		// for (i in entities) { 
 			// js.Lib.debug(); 
-			trace('evel tagets = ${i.entity.name}');
-		}
+			// trace('evel tagets = ${i.entity.name}');
+		// }
 
 		while (target!=null) {
 			trace(target.entity.name);
@@ -106,10 +84,14 @@ class BirdNestSystem extends System {
 		return null;
 	}
 
-	public function releaseBird(entity:Entity) {
+	public function releaseBird(entity:Entity,target:Entity) {
 		var nest = entity.getComponent(BirdNest);
 		if (nest.birds.length==0) {
-			var bird = exile.entities.creatures.BirdFactory.create(engine,entity.getComponent(Position).clone(),new Position(30*16,40*16));
+			var bird = exile.entities.creatures.BirdFactory.create(
+				engine,
+				entity.getComponent(Position).clone(),
+				target.getComponent(Position)
+			);
 			nest.birds.push(bird);
 		}				
 	}
