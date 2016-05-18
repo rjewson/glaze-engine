@@ -7,7 +7,7 @@ class SteeringAgentParameters {
 	    
 	}
 
-	public var maxAcceleration:Float = 800/2;
-	public var maxSteeringForcePerStep:Float = 400/4;
+	public var maxAcceleration:Float = 100/1;
+	public var maxSteeringForcePerStep:Float = 100/1;
 
 }

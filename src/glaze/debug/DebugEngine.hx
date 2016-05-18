@@ -1,10 +1,12 @@
 package glaze.debug;
 
 import glaze.engine.core.GameEngine;
+import glaze.particle.IParticleEngine;
 
 class DebugEngine {
 
 	public static var gameEngine:GameEngine;
+	public static var particleEngine:IParticleEngine;
 
 	public static function GetAllEntities():Dynamic {
 		var result = "<table width='100%'>";
@@ -63,6 +65,10 @@ class DebugEngine {
 	public static function DumpSystem(className:String) {
 		js.Lib.debug();
 		untyped window.console.dir(gameEngine.engine.systemMap.get(className));
+	}
+
+	public static function DrawParticle(x:Float,y:Float,size:Int,r:Int,g:Int,b:Int) {
+		particleEngine.EmitParticle(x,y,0,0,0,0,17,1,false,true,null,size,255,r,g,b);
 	}
 
 }

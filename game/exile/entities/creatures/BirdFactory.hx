@@ -41,7 +41,7 @@ class BirdFactory {
         birdBody.setMass(1);
         birdBody.setBounces(0);     
         birdBody.globalForceFactor = 0.0;
-        birdBody.maxScalarVelocity = 200; 
+        // birdBody.maxScalarVelocity = 200; 
 
         var map:Map = cast engine.config.map;
 
@@ -57,13 +57,11 @@ class BirdFactory {
             new glaze.animation.components.SpriteAnimation("bird",["fly"],"fly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                // new Wander(30,10,1.5)
-                // new Wander(32,5,1.16) //ok
-                new Wander(640,100,1.16) //ok
+                new Wander(30,30,57) //ok
                 // new Arrival(position.coords.clone(),64,8)
-                // new Seek(follow.coords,32)
+                //,new Seek(follow.coords,32)
                 // new Arrival(follow.coords,128,32)
-                // new WallAvoidance(map,40)
+                // ,new WallAvoidance(map,40)
                 ]),
             new Age(10000),
             new Health(10,10,0),

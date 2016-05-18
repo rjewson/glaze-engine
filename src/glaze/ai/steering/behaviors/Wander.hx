@@ -37,22 +37,24 @@ class Wander extends Behavior
 		circleCenter.copy(agent.velocity);
 		circleCenter.normalize();
 		circleCenter.multEquals(circleDistance);
+glaze.debug.DebugEngine.DrawParticle(agent.position.x+circleCenter.x,agent.position.y+circleCenter.y,4,0,0,255);
 
 		// var displacement = new Vector2(0,-1);
-		displacement.setTo(-1,0);
-		displacement.multEquals(circleRadius);
-		displacement.setAngle(wanderAngle); 
+			//displacement.setTo(wanderAngle,0);
+				// displacement.multEquals(circleRadius);
+			//displacement.setAngle(wanderAngle); 
+
+
+displacement.setUnitRotation(wanderAngle);
+displacement.multEquals(circleRadius);
 
 		wanderAngle += Random.RandomFloat( -wanderChange, wanderChange);
-		// wanderAngle += 0.08;//wanderChange;
-		// wanderAngle += (Math.random() * wanderChange) - (wanderChange * .5);
-// trace(wanderAngle);
 
 		var x:Vector2 = agent.position.clone();
 		//x.setTo(0,0);
 		x.plusEquals(circleCenter);
 		x.plusEquals(displacement);
-
+glaze.debug.DebugEngine.DrawParticle(x.x,x.y,4,255,0,0);
 		//x.multEquals(params.maxSteeringForcePerStep);
 
 		// result.copy(x);

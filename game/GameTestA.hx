@@ -233,10 +233,11 @@ class GameTestA extends GameEngine {
         spriteParticleManager.ParseTexturePackerJSON(assets.assets.get(PARTICLE_TEXTURE_CONFIG));
         spriteParticleManager.ParseSequenceJSON(assets.assets.get(PARTICLE_FRAMES_CONFIG));
         spriteParticleEngine = new PointSpriteParticleEngine(4000,1000/60,spriteParticleManager,collisionData);
+        glaze.debug.DebugEngine.particleEngine = blockParticleEngine;
         renderSystem.renderer.AddRenderer(spriteParticleEngine.renderer);
         spriteParticleEngine.renderer.SetSpriteSheet(renderSystem.textureManager.baseTextures.get(PARTICLE_TEXTURE_DATA).texture,16,16,16);
 
-        var map = new Map(collisionData);  
+        var map = new Map(collisionData);   
         exile.entities.creatures.BeeFactory.map = map; 
         corephase.addSystem(new PhysicsUpdateSystem());
         corephase.addSystem(new SteeringSystem());
@@ -375,7 +376,7 @@ class GameTestA extends GameEngine {
             new Extents(7,21), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
-            new PhysicsBody(body,true),
+            new PhysicsBody(body,true), 
             new PhysicsCollision(false,playerFilter,[]),
             new Moveable(),
             new Active(),
