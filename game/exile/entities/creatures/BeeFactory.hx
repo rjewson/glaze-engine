@@ -5,6 +5,7 @@ import glaze.ai.steering.behaviors.Seek;
 import glaze.ai.steering.behaviors.WallAvoidance;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
+import glaze.ai.steering.SteeringAgentParameters;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Active;
@@ -53,10 +54,10 @@ class BeeFactory {
             new glaze.animation.components.SpriteAnimation("insects",["firefly"],"firefly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                new Wander()
-                // ,new Seek(position.coords.clone(),(256*246))
-                ,new WallAvoidance(map,40)
-                ]),
+                new Wander(80,40,143.5)
+                ,new Seek(position.coords.clone(),32)
+                // ,new WallAvoidance(map,40)
+                ],SteeringAgentParameters.HEAVY_STEERING_PARAMS),
             new Age(10000),
             new Health(10,10,0),
             new Active()

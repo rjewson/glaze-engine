@@ -122,6 +122,8 @@ class WallAvoidance extends Behavior {
 		searchAABB.reset();
 		searchAABB.addPoint(agent.position.x,agent.position.y);
 		searchAABB.addPoint(feelers[0].tip.x,feelers[0].tip.y);
+		searchAABB.addPoint(feelers[1].tip.x,feelers[1].tip.y);
+		searchAABB.addPoint(feelers[2].tip.x,feelers[2].tip.y);
 		// searchAABB.expand(20);
 		map.iterateCells(searchAABB,checkAABB);
 

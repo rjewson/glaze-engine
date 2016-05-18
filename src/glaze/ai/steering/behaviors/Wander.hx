@@ -1,5 +1,6 @@
 package glaze.ai.steering.behaviors;
 
+import glaze.ai.steering.behaviors.Seek;
 import glaze.ai.steering.SteeringSettings;
 import glaze.geom.Vector2;
 import glaze.physics.Body;
@@ -23,63 +24,32 @@ class Wander extends Behavior
 	public function new(circleRadius:Int = 8,circleDistance:Int = 1,wanderChange:Float = 4) {
 		super(SteeringSettings.wanderWeight, SteeringSettings.wanderPriority);
 		this.circleRadius = circleRadius;
-		this.circleDistance = circleRadius;
+		this.circleDistance = circleDistance;
 		wanderAngle = Random.RandomFloat(0, Math.PI * 2);
 		this.wanderChange = wanderChange;
 	}
 
 	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
 
-// js.Lib.debug();
-		// var circleCenter = agent.delta.clone();
-		
-		// var circleCenter = agent.velocity.clone();
+		wanderAngle += Random.RandomFloat( -wanderChange, wanderChange);
+
 		circleCenter.copy(agent.velocity);
 		circleCenter.normalize();
 		circleCenter.multEquals(circleDistance);
-glaze.debug.DebugEngine.DrawParticle(agent.position.x+circleCenter.x,agent.position.y+circleCenter.y,4,0,0,255);
+		circleCenter.plusEquals(agent.position);
 
-		// var displacement = new Vector2(0,-1);
-			//displacement.setTo(wanderAngle,0);
-				// displacement.multEquals(circleRadius);
-			//displacement.setAngle(wanderAngle); 
+// glaze.debug.DebugEngine.DrawParticle(circleCenter.x,circleCenter.y,4,0,0,255);
 
+		var h:Float = Math.atan2(agent.velocity.y, agent.velocity.x);
+		h+=Math.PI/2;
+		displacement.setTo(circleRadius * Math.cos(wanderAngle + h), circleRadius * Math.sin(wanderAngle + h));
 
-displacement.setUnitRotation(wanderAngle);
-displacement.multEquals(circleRadius);
+		circleCenter.plusEquals(displacement);
 
-		wanderAngle += Random.RandomFloat( -wanderChange, wanderChange);
+// glaze.debug.DebugEngine.DrawParticle(circleCenter.x,circleCenter.y,4,255,0,0);
 
-		var x:Vector2 = agent.position.clone();
-		//x.setTo(0,0);
-		x.plusEquals(circleCenter);
-		x.plusEquals(displacement);
-glaze.debug.DebugEngine.DrawParticle(x.x,x.y,4,255,0,0);
-		//x.multEquals(params.maxSteeringForcePerStep);
-
-		// result.copy(x);
-		// trace(result.x,result.y);
-		glaze.ai.steering.behaviors.Seek.calc(agent,params,result,x,0);
-		// trace(result.x,result.y);
-
+		Seek.calc(agent,params,result,circleCenter,0);
 	}
 
-
-	// public override function calculate2() : Vector2 {
-		
-	// 	wanderAngle += Random.RandomFloat( -wanderChange, wanderChange);
-	// 	var v:Vector2 = agent.GetVelocity();
-	// 	var circleLoc:Vector2 = v.clone();
-	// 	circleLoc.unitEquals();
-	// 	circleLoc.multEquals(circleDistance);
-	// 	circleLoc.plusEquals(agent.position);
-				
-	// 	var h:Float = -Math.atan2(-v.y, v.x);
-		
-	// 	var circleOffset:Vector2 = new Vector2(circleRadius * Math.cos(wanderAngle + h), circleRadius * Math.sin(wanderAngle + h));
-	// 	var target = circleLoc.plus(circleOffset);
-
-	// 	return Seek.calc(agent, target);
-	// }
 	
 }

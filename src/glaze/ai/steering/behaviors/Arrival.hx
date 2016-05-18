@@ -23,43 +23,37 @@ class Arrival extends Behavior
 	}
 
 	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
-		calc(agent,result,target,arrivalZone,seekDist);
+		calc(agent,params,result,target,arrivalZone,seekDist);
 	}
 
 	//Hand optimized as called so often
-	public static inline function calc(agent : Body, result:Vector2, target : Vector2, arrivalZone:Float = 0, seekDist : Float = 0):Bool {
-		// js.Lib.debug();		
-		var dX:Float = target.x - agent.position.x +0.000001;
-		var dY:Float = target.y - agent.position.y +0.000001;
+	public static inline function calc(agent : Body,params:SteeringAgentParameters, result:Vector2, target : Vector2, arrivalZone:Float = 0, seekDist : Float = 0):Bool {
+		var dX:Float = target.x - agent.position.x + 0.000001;
+		var dY:Float = target.y - agent.position.y + 0.000001;
 		var d:Float = dX * dX + dY * dY;
-		// trace(seekDistSq);
-		// if ((seekDistSq < 0 && d < -seekDistSq) || (seekDistSq > 0 && d > seekDistSq)) {
-		// if (seekDistSq > 0 && d < seekDistSq) {
-		// 	return false;
-		// }
 
-		if (seekDist > 0 && d < (seekDist*seekDist)) {
+		if (seekDist > 0 && d < seekDist*seekDist) {
 			return false;
 		}
 
 		var t = Math.sqrt(d);
 
-		var scale = 1000.0;
+		var scale:Float = 1.0;
+
 		if (t<arrivalZone) {
-			// scale = (t+seekDist)/(arrivalZone+seekDist);
-			scale = (t)/(arrivalZone);
-			// scale = 1/scale;
-			// scale = 1-scale;
-			scale*=1000;
-		}		
+			scale = (t/arrivalZone);
+		}
+
 		result.x = dX / t;
+		result.x *= params.maxSteeringForcePerStep;
+		result.x -= agent.velocity.x*(60/1000);
 		result.x *= scale;
-		result.x -= agent.velocity.x*(16/1000);
 		
 		result.y = dY / t;
-		result.y *= scale;//agent.maxSteeringForcePerStep;
-		result.y -= agent.velocity.y*(16/1000);
-trace (result.x,result.y);
+		result.y *= params.maxSteeringForcePerStep;
+		result.y -= agent.velocity.y*(60/1000);
+		result.x *= scale;
+
 		return true;
 	}
 	

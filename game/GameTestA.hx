@@ -371,7 +371,7 @@ class GameTestA extends GameEngine {
         player = engine.createEntity([ 
             new Player(),
             // new Position(300,180), 
-            mapPosition(22.5,37.5),
+            mapPosition(33.5,38.5),
  
             new Extents(7,21), 
             new Display("player"),        

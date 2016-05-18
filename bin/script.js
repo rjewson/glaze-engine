@@ -244,7 +244,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		_this.x = 1600;
 		_this.y = 1000;
 		this.playerFaction = new glaze_ai_faction_Faction("player","player",0);
-		this.player = this.engine.createEntity([new exile_components_Player(),this.mapPosition(22.5,37.5),new glaze_engine_components_Extents(7,21),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body,true),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active(),new glaze_ai_faction_components_Personality(this.playerFaction)],"player");
+		this.player = this.engine.createEntity([new exile_components_Player(),this.mapPosition(33.5,38.5),new glaze_engine_components_Extents(7,21),new glaze_engine_components_Display("player"),new glaze_animation_components_SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),new glaze_physics_components_PhysicsBody(body,true),new glaze_physics_components_PhysicsCollision(false,this.playerFilter,[]),new glaze_engine_components_Moveable(),new glaze_engine_components_Active(),new glaze_ai_faction_components_Personality(this.playerFaction)],"player");
 		this.chickenSystem.scaredOfPosition = this.player.map.Position;
 		this.rabbitSystem.scaredOfPosition = this.player.map.Position;
 		this.renderSystem.CameraTarget(this.player.map.Position.coords);
@@ -784,7 +784,10 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	beeBody.setBounces(0);
 	beeBody.globalForceFactor = 0.0;
 	beeBody.maxScalarVelocity = 200;
-	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(),new glaze_ai_steering_behaviors_WallAvoidance(exile_entities_creatures_BeeFactory.map,40)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	var tmp;
+	var _this = position.coords;
+	tmp = new glaze_geom_Vector2(_this.x,_this.y);
+	var bee = engine.createEntity([position,new exile_components_Bee(),new glaze_engine_components_Extents(1.5,1.5),new glaze_engine_components_Display("insects"),new glaze_physics_components_PhysicsBody(beeBody,true),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(80,40,143.5),new glaze_ai_steering_behaviors_Seek(tmp,32)],glaze_ai_steering_SteeringAgentParameters.HEAVY_STEERING_PARAMS),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
 	return bee;
 };
 exile_entities_creatures_BeeFactory.prototype = {
@@ -798,7 +801,8 @@ exile_entities_creatures_BirdFactory.create = function(engine,position,follow) {
 	birdBody.setMass(1);
 	birdBody.setBounces(0);
 	birdBody.globalForceFactor = 0.0;
-	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(30,30,57)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
+	birdBody.maxScalarVelocity = 200;
+	var bird = engine.createEntity([position,new exile_components_Bird(),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Arrival(follow.coords,128)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
 	return bird;
 };
 exile_entities_creatures_BirdFactory.prototype = {
@@ -917,7 +921,21 @@ exile_systems_BeeHiveSystem.prototype = $extend(glaze_eco_core_System.prototype,
 		}
 	}
 	,update: function(timestamp,delta) {
-		return;
+		var _g = 0;
+		var _g1 = this.view.entities;
+		while(_g < _g1.length) {
+			var entity = _g1[_g];
+			++_g;
+			var beehive = entity.map.BeeHive;
+			if(beehive.bees.length < beehive.maxBees) {
+				if(Math.random() < 0.01) {
+					var newBee = exile_entities_creatures_BeeFactory.create(this.engine,entity.map.Position.clone());
+					newBee.parent = entity;
+					newBee.messages.add($bind(this,this.beeDestroyed));
+					beehive.bees.push(newBee);
+				}
+			}
+		}
 	}
 	,beeDestroyed: function(entity,channel,data) {
 		if(channel == "destroy") {
@@ -1807,9 +1825,9 @@ glaze_ai_navigation_Node.prototype = {
 	}
 	,__class__: glaze_ai_navigation_Node
 };
-var glaze_ai_steering_SteeringAgentParameters = function() {
-	this.maxSteeringForcePerStep = 100.;
-	this.maxAcceleration = 100.;
+var glaze_ai_steering_SteeringAgentParameters = function(maxAcceleration,maxSteeringForcePerStep) {
+	this.maxAcceleration = maxAcceleration;
+	this.maxSteeringForcePerStep = maxSteeringForcePerStep;
 };
 glaze_ai_steering_SteeringAgentParameters.__name__ = ["glaze","ai","steering","SteeringAgentParameters"];
 glaze_ai_steering_SteeringAgentParameters.prototype = {
@@ -1929,7 +1947,7 @@ var glaze_ai_steering_behaviors_Arrival = function(target,arrivalZone,seekDist) 
 	this.seekDist = seekDist;
 };
 glaze_ai_steering_behaviors_Arrival.__name__ = ["glaze","ai","steering","behaviors","Arrival"];
-glaze_ai_steering_behaviors_Arrival.calc = function(agent,result,target,arrivalZone,seekDist) {
+glaze_ai_steering_behaviors_Arrival.calc = function(agent,params,result,target,arrivalZone,seekDist) {
 	if(seekDist == null) seekDist = 0;
 	if(arrivalZone == null) arrivalZone = 0;
 	var dX = target.x - agent.position.x + 0.000001;
@@ -1937,18 +1955,16 @@ glaze_ai_steering_behaviors_Arrival.calc = function(agent,result,target,arrivalZ
 	var d = dX * dX + dY * dY;
 	if(seekDist > 0 && d < seekDist * seekDist) return false;
 	var t = Math.sqrt(d);
-	var scale = 1000.0;
-	if(t < arrivalZone) {
-		scale = t / arrivalZone;
-		scale *= 1000;
-	}
+	var scale = 1.0;
+	if(t < arrivalZone) scale = t / arrivalZone;
 	result.x = dX / t;
+	result.x *= params.maxSteeringForcePerStep;
+	result.x -= agent.velocity.x * 0.06;
 	result.x *= scale;
-	result.x -= agent.velocity.x * 0.016;
 	result.y = dY / t;
-	result.y *= scale;
-	result.y -= agent.velocity.y * 0.016;
-	haxe_Log.trace(result.x,{ fileName : "Arrival.hx", lineNumber : 62, className : "glaze.ai.steering.behaviors.Arrival", methodName : "calc", customParams : [result.y]});
+	result.y *= params.maxSteeringForcePerStep;
+	result.y -= agent.velocity.y * 0.06;
+	result.x *= scale;
 	return true;
 };
 glaze_ai_steering_behaviors_Arrival.__super__ = glaze_ai_steering_behaviors_Behavior;
@@ -1963,18 +1979,16 @@ glaze_ai_steering_behaviors_Arrival.prototype = $extend(glaze_ai_steering_behavi
 		if(seekDist > 0 && d < seekDist * seekDist) {
 		} else {
 			var t = Math.sqrt(d);
-			var scale = 1000.0;
-			if(t < arrivalZone) {
-				scale = t / arrivalZone;
-				scale *= 1000;
-			}
+			var scale = 1.0;
+			if(t < arrivalZone) scale = t / arrivalZone;
 			result.x = dX / t;
+			result.x *= params.maxSteeringForcePerStep;
+			result.x -= agent.velocity.x * 0.06;
 			result.x *= scale;
-			result.x -= agent.velocity.x * 0.016;
 			result.y = dY / t;
-			result.y *= scale;
-			result.y -= agent.velocity.y * 0.016;
-			haxe_Log.trace(result.x,{ fileName : "Arrival.hx", lineNumber : 62, className : "glaze.ai.steering.behaviors.Arrival", methodName : "calc", customParams : [result.y]});
+			result.y *= params.maxSteeringForcePerStep;
+			result.y -= agent.velocity.y * 0.06;
+			result.x *= scale;
 		}
 	}
 	,__class__: glaze_ai_steering_behaviors_Arrival
@@ -1999,21 +2013,20 @@ glaze_ai_steering_behaviors_Feeler.prototype = {
 		_this1.x = position.x;
 		_this1.y = position.y;
 		if(this.angle != 0) {
-			var _this2 = this.tip;
-			var a = this.angle * (Math.PI / 180);
-			var cos = Math.cos(a);
-			var sin = Math.sin(a);
-			_this2.x = cos * _this2.x - sin * _this2.y;
-			_this2.y = cos * _this2.y + sin * _this2.x;
+			var a = Math.atan2(unitDirection.y,unitDirection.x);
+			a += this.angle;
+			this.tip.x = Math.cos(a);
+			this.tip.y = Math.sin(a);
 		}
-		var _this3 = this.tip;
+		var _this2 = this.tip;
 		var s = this.length;
-		_this3.x *= s;
-		_this3.y *= s;
-		var _this4 = this.tip;
+		_this2.x *= s;
+		_this2.y *= s;
+		var _this3 = this.tip;
 		var v = this.base;
-		_this4.x += v.x;
-		_this4.y += v.y;
+		_this3.x += v.x;
+		_this3.y += v.y;
+		glaze_debug_DebugEngine.DrawParticle(this.tip.x,this.tip.y,4,255,0,0);
 	}
 	,TestSegment: function(a,b,normal) {
 		var distToThisIP = glaze_util_Geometry.lineIntersection(this.base,this.tip,a,b,this.ip);
@@ -2030,6 +2043,7 @@ glaze_ai_steering_behaviors_Feeler.prototype = {
 	}
 	,CalculateForce: function(force) {
 		if(this.distToClosestIP != Infinity) {
+			glaze_debug_DebugEngine.DrawParticle(this.closestIP.x,this.closestIP.y,4,255,255,255);
 			var _this = this.tip;
 			var sf_x = _this.x;
 			var sf_y = _this.y;
@@ -2047,45 +2061,45 @@ glaze_ai_steering_behaviors_Feeler.prototype = {
 	}
 	,__class__: glaze_ai_steering_behaviors_Feeler
 };
-var glaze_ai_steering_behaviors_Seek = function(target,seekDistSq) {
-	if(seekDistSq == null) seekDistSq = 0;
+var glaze_ai_steering_behaviors_Seek = function(target,seekDist) {
+	if(seekDist == null) seekDist = 0;
 	glaze_ai_steering_behaviors_Behavior.call(this,1,70);
 	this.target = target;
-	this.seekDistSq = seekDistSq;
+	this.seekDist = seekDist;
 };
 glaze_ai_steering_behaviors_Seek.__name__ = ["glaze","ai","steering","behaviors","Seek"];
-glaze_ai_steering_behaviors_Seek.calc = function(agent,params,result,target,seekDistSq) {
-	if(seekDistSq == null) seekDistSq = 0;
+glaze_ai_steering_behaviors_Seek.calc = function(agent,params,result,target,seekDist) {
+	if(seekDist == null) seekDist = 0;
 	var dX = target.x - agent.position.x + 0.000001;
 	var dY = target.y - agent.position.y + 0.000001;
 	var d = dX * dX + dY * dY;
-	if(seekDistSq > 0 && d < seekDistSq) return false;
+	if(seekDist > 0 && d < seekDist * seekDist) return false;
 	var t = Math.sqrt(d);
 	result.x = dX / t;
 	result.x *= params.maxSteeringForcePerStep;
-	result.x -= agent.velocity.x;
+	result.x -= agent.velocity.x * 0.06;
 	result.y = dY / t;
 	result.y *= params.maxSteeringForcePerStep;
-	result.y -= agent.velocity.y;
+	result.y -= agent.velocity.y * 0.06;
 	return true;
 };
 glaze_ai_steering_behaviors_Seek.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Seek.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
 	calculate: function(agent,params,result) {
 		var target = this.target;
-		var seekDistSq = this.seekDistSq;
+		var seekDist = this.seekDist;
 		var dX = target.x - agent.position.x + 0.000001;
 		var dY = target.y - agent.position.y + 0.000001;
 		var d = dX * dX + dY * dY;
-		if(seekDistSq > 0 && d < seekDistSq) {
+		if(seekDist > 0 && d < seekDist * seekDist) {
 		} else {
 			var t = Math.sqrt(d);
 			result.x = dX / t;
 			result.x *= params.maxSteeringForcePerStep;
-			result.x -= agent.velocity.x;
+			result.x -= agent.velocity.x * 0.06;
 			result.y = dY / t;
 			result.y *= params.maxSteeringForcePerStep;
-			result.y -= agent.velocity.y;
+			result.y -= agent.velocity.y * 0.06;
 		}
 	}
 	,__class__: glaze_ai_steering_behaviors_Seek
@@ -2191,6 +2205,20 @@ glaze_ai_steering_behaviors_WallAvoidance.prototype = $extend(glaze_ai_steering_
 		if(x1 > _this5.r) _this5.r = x1;
 		if(y1 < _this5.t) _this5.t = y1;
 		if(y1 > _this5.b) _this5.b = y1;
+		var _this6 = this.searchAABB;
+		var x2 = this.feelers[1].tip.x;
+		var y2 = this.feelers[1].tip.y;
+		if(x2 < _this6.l) _this6.l = x2;
+		if(x2 > _this6.r) _this6.r = x2;
+		if(y2 < _this6.t) _this6.t = y2;
+		if(y2 > _this6.b) _this6.b = y2;
+		var _this7 = this.searchAABB;
+		var x3 = this.feelers[2].tip.x;
+		var y3 = this.feelers[2].tip.y;
+		if(x3 < _this7.l) _this7.l = x3;
+		if(x3 > _this7.r) _this7.r = x3;
+		if(y3 < _this7.t) _this7.t = y3;
+		if(y3 > _this7.b) _this7.b = y3;
 		this.map.iterateCells(this.searchAABB,$bind(this,this.checkAABB));
 		if(this.closestFeeler != null) this.closestFeeler.CalculateForce(result);
 	}
@@ -2204,7 +2232,7 @@ var glaze_ai_steering_behaviors_Wander = function(circleRadius,circleDistance,wa
 	this.circleCenter = new glaze_geom_Vector2();
 	glaze_ai_steering_behaviors_Behavior.call(this,1,140);
 	this.circleRadius = circleRadius;
-	this.circleDistance = circleRadius;
+	this.circleDistance = circleDistance;
 	this.wanderAngle = Math.random() * (Math.PI * 2);
 	this.wanderChange = wanderChange;
 };
@@ -2212,55 +2240,55 @@ glaze_ai_steering_behaviors_Wander.__name__ = ["glaze","ai","steering","behavior
 glaze_ai_steering_behaviors_Wander.__super__ = glaze_ai_steering_behaviors_Behavior;
 glaze_ai_steering_behaviors_Wander.prototype = $extend(glaze_ai_steering_behaviors_Behavior.prototype,{
 	calculate: function(agent,params,result) {
-		var _this1 = this.circleCenter;
-		var v = agent.velocity;
-		_this1.x = v.x;
-		_this1.y = v.y;
-		var _this2 = this.circleCenter;
-		var t = Math.sqrt(_this2.x * _this2.x + _this2.y * _this2.y) + 1e-08;
-		_this2.x /= t;
-		_this2.y /= t;
-		var _this3 = this.circleCenter;
-		var s = this.circleDistance;
-		_this3.x *= s;
-		_this3.y *= s;
-		glaze_debug_DebugEngine.DrawParticle(agent.position.x + this.circleCenter.x,agent.position.y + this.circleCenter.y,4,0,0,255);
-		this.displacement.setUnitRotation(this.wanderAngle);
-		var _this4 = this.displacement;
-		var s1 = this.circleRadius;
-		_this4.x *= s1;
-		_this4.y *= s1;
 		var tmp;
 		var min = -this.wanderChange;
 		tmp = Math.random() * (this.wanderChange - min) + min;
 		this.wanderAngle += tmp;
-		var _this = agent.position;
-		var x_x = _this.x;
-		var x_y = _this.y;
-		var v1 = this.circleCenter;
-		x_x += v1.x;
-		x_y += v1.y;
+		var _this = this.circleCenter;
+		var v = agent.velocity;
+		_this.x = v.x;
+		_this.y = v.y;
+		var _this1 = this.circleCenter;
+		var t = Math.sqrt(_this1.x * _this1.x + _this1.y * _this1.y) + 1e-08;
+		_this1.x /= t;
+		_this1.y /= t;
+		var _this2 = this.circleCenter;
+		var s = this.circleDistance;
+		_this2.x *= s;
+		_this2.y *= s;
+		var _this3 = this.circleCenter;
+		var v1 = agent.position;
+		_this3.x += v1.x;
+		_this3.y += v1.y;
+		var h = Math.atan2(agent.velocity.y,agent.velocity.x);
+		h += Math.PI / 2;
+		var _this4 = this.displacement;
+		var x = this.circleRadius * Math.cos(this.wanderAngle + h);
+		var y = this.circleRadius * Math.sin(this.wanderAngle + h);
+		_this4.x = x;
+		_this4.y = y;
+		var _this5 = this.circleCenter;
 		var v2 = this.displacement;
-		x_x += v2.x;
-		x_y += v2.y;
-		glaze_debug_DebugEngine.DrawParticle(x_x,x_y,4,255,0,0);
-		var dX = x_x - agent.position.x + 0.000001;
-		var dY = x_y - agent.position.y + 0.000001;
+		_this5.x += v2.x;
+		_this5.y += v2.y;
+		var target = this.circleCenter;
+		var dX = target.x - agent.position.x + 0.000001;
+		var dY = target.y - agent.position.y + 0.000001;
 		var d = dX * dX + dY * dY;
 		var t1 = Math.sqrt(d);
 		result.x = dX / t1;
 		result.x *= params.maxSteeringForcePerStep;
-		result.x -= agent.velocity.x;
+		result.x -= agent.velocity.x * 0.06;
 		result.y = dY / t1;
 		result.y *= params.maxSteeringForcePerStep;
-		result.y -= agent.velocity.y;
+		result.y -= agent.velocity.y * 0.06;
 	}
 	,__class__: glaze_ai_steering_behaviors_Wander
 });
-var glaze_ai_steering_components_Steering = function(behaviors,calculationMethod) {
+var glaze_ai_steering_components_Steering = function(behaviors,params,calculationMethod) {
 	if(calculationMethod == null) calculationMethod = 0;
 	this.behaviors = behaviors;
-	this.steeringParameters = new glaze_ai_steering_SteeringAgentParameters();
+	this.steeringParameters = params == null?glaze_ai_steering_SteeringAgentParameters.DEFAULT_STEERING_PARAMS:params;
 	this.hasChanged = true;
 };
 glaze_ai_steering_components_Steering.__name__ = ["glaze","ai","steering","components","Steering"];
@@ -2272,6 +2300,7 @@ glaze_ai_steering_components_Steering.prototype = {
 	}
 	,removeBehaviour: function(behavior) {
 		HxOverrides.remove(this.behaviors,behavior);
+		this.hasChanged = true;
 	}
 	,__class__: glaze_ai_steering_components_Steering
 };
@@ -5292,6 +5321,9 @@ glaze_geom_Vector2.prototype = {
 		var a = angle * (Math.PI / 180);
 		this.x = Math.cos(a);
 		this.y = Math.sin(a);
+	}
+	,heading: function() {
+		return Math.atan2(this.y,this.x);
 	}
 	,distSqrd: function(v) {
 		var dX = this.x - v.x;
@@ -13572,11 +13604,11 @@ exile_ExileFilters.SOLID_OBJECT_GROUP = 1;
 exile_components_Bee.NAME = "Bee";
 exile_components_Bee.ID = 35;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 24;
+exile_components_BeeHive.ID = 26;
 exile_components_Bird.NAME = "Bird";
 exile_components_Bird.ID = 41;
 exile_components_BirdNest.NAME = "BirdNest";
-exile_components_BirdNest.ID = 12;
+exile_components_BirdNest.ID = 14;
 exile_components_Chicken.NAME = "Chicken";
 exile_components_Chicken.ID = 16;
 exile_components_Door.NAME = "Door";
@@ -13594,7 +13626,7 @@ exile_components_Projectile.ID = 42;
 exile_components_Rabbit.NAME = "Rabbit";
 exile_components_Rabbit.ID = 9;
 exile_components_Teleporter.NAME = "Teleporter";
-exile_components_Teleporter.ID = 25;
+exile_components_Teleporter.ID = 27;
 exile_entities_weapon_HandGrenadeFactory.count = 0;
 exile_util_CharacterController2.BASE_FORCE = 600;
 exile_util_CharacterController2.WALK_FORCE = 1200.;
@@ -13605,7 +13637,13 @@ exile_util_CharacterController2.MAX_BURN = 3000.;
 exile_util_CharacterController2.BOOST_FACTOR = 1.4;
 glaze_EngineConstants.TILE_SIZE = 16;
 glaze_ai_faction_components_Personality.NAME = "Personality";
-glaze_ai_faction_components_Personality.ID = 6;
+glaze_ai_faction_components_Personality.ID = 8;
+glaze_ai_steering_SteeringAgentParameters.default_scale = .2;
+glaze_ai_steering_SteeringAgentParameters.heavy_scale = 5;
+glaze_ai_steering_SteeringAgentParameters.default_maxAcceleration = 100;
+glaze_ai_steering_SteeringAgentParameters.default_maxSteeringForcePerStep = 100;
+glaze_ai_steering_SteeringAgentParameters.DEFAULT_STEERING_PARAMS = new glaze_ai_steering_SteeringAgentParameters(20.,20.);
+glaze_ai_steering_SteeringAgentParameters.HEAVY_STEERING_PARAMS = new glaze_ai_steering_SteeringAgentParameters(500.,500.);
 glaze_ai_steering_SteeringBehavior.CALCULATE_SUM = 0;
 glaze_ai_steering_SteeringBehavior.CALCULATE_SPEED = 1;
 glaze_ai_steering_SteeringBehavior.CALCULATE_ACCURACY = 2;
@@ -13668,9 +13706,9 @@ glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
 glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
 glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
-glaze_ai_steering_components_Steering.ID = 21;
+glaze_ai_steering_components_Steering.ID = 23;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 9;
+glaze_animation_components_SpriteAnimation.ID = 11;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = (function($this) {
 	var $r;
@@ -13683,53 +13721,53 @@ glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_Active.NAME = "Active";
 glaze_engine_components_Active.ID = 31;
 glaze_engine_components_Age.NAME = "Age";
-glaze_engine_components_Age.ID = 20;
+glaze_engine_components_Age.ID = 22;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_CollidableSwitch.ID = 7;
 glaze_engine_components_Destroy.NAME = "Destroy";
 glaze_engine_components_Destroy.ID = 19;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 19;
+glaze_engine_components_Display.ID = 21;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
-glaze_engine_components_EnvironmentForce.ID = 5;
+glaze_engine_components_EnvironmentForce.ID = 7;
 glaze_engine_components_Extents.NAME = "Extents";
-glaze_engine_components_Extents.ID = 23;
+glaze_engine_components_Extents.ID = 25;
 glaze_engine_components_Fixed.NAME = "Fixed";
 glaze_engine_components_Fixed.ID = 17;
 glaze_engine_components_Health.NAME = "Health";
 glaze_engine_components_Health.ID = 28;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 26;
+glaze_engine_components_Held.ID = 28;
 glaze_engine_components_Holdable.NAME = "Holdable";
-glaze_engine_components_Holdable.ID = 4;
+glaze_engine_components_Holdable.ID = 6;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 8;
+glaze_engine_components_Holder.ID = 10;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 7;
+glaze_engine_components_Inventory.ID = 9;
 glaze_engine_components_Moveable.NAME = "Moveable";
 glaze_engine_components_Moveable.ID = 27;
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 18;
+glaze_engine_components_ParticleEmitters.ID = 20;
 glaze_engine_components_Position.NAME = "Position";
-glaze_engine_components_Position.ID = 22;
+glaze_engine_components_Position.ID = 24;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 17;
+glaze_engine_components_Script.ID = 19;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 10;
+glaze_engine_components_State.ID = 12;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 4;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 11;
+glaze_engine_components_TileDisplay.ID = 13;
 glaze_engine_components_Viewable.NAME = "Viewable";
-glaze_engine_components_Viewable.ID = 13;
+glaze_engine_components_Viewable.ID = 15;
 glaze_engine_components_Water.NAME = "Water";
-glaze_engine_components_Water.ID = 2;
+glaze_engine_components_Water.ID = 4;
 glaze_engine_components_Wind.NAME = "Wind";
-glaze_engine_components_Wind.ID = 3;
+glaze_engine_components_Wind.ID = 5;
 glaze_engine_factories_tmx_ForceFactory.FORCE_SCALE = 0.01;
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
-glaze_lighting_components_Light.ID = 16;
+glaze_lighting_components_Light.ID = 18;
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_particle_PointSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_physics_Body.SLEEP_BIAS = 0.99332805041467;
@@ -13752,13 +13790,13 @@ glaze_physics_collision_Map.ROUNDUP = .5;
 glaze_physics_collision_broadphase_uniformgrid_UniformGrid.RIGHT = 1;
 glaze_physics_collision_broadphase_uniformgrid_UniformGrid.DOWN = 2;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
-glaze_physics_components_ContactRouter.ID = 1;
+glaze_physics_components_ContactRouter.ID = 3;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
-glaze_physics_components_PhysicsBody.ID = 15;
+glaze_physics_components_PhysicsBody.ID = 17;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 14;
+glaze_physics_components_PhysicsCollision.ID = 16;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
-glaze_physics_components_PhysicsConstraints.ID = 0;
+glaze_physics_components_PhysicsConstraints.ID = 2;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_FRAGMENT_SHADER = ["precision mediump float;","varying vec4 vColor;","void main() {","gl_FragColor = vColor;","}"];
 glaze_render_renderers_webgl_PointSpriteRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","attribute vec2 position;","attribute float size;","attribute vec2 tilePosition;","attribute vec2 tileDimension;","attribute vec2 colour;","varying vec2 vTilePos;","varying vec2 tileDim;","void main() {","vTilePos = tilePosition;","tileDim = tileDimension;","gl_PointSize = size;","gl_Position = vec4( position.x / projectionVector.x -1.0, position.y / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];

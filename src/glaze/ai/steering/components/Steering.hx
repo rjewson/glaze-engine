@@ -18,9 +18,9 @@ class Steering implements IComponent {
     public var steeringParameters:SteeringAgentParameters;
     public var hasChanged:Bool;
 
-	public function new(behaviors:Array<Behavior>,calculationMethod:Int = CALCULATE_SUM) {
+	public function new(behaviors:Array<Behavior>, params:SteeringAgentParameters = null,calculationMethod:Int = CALCULATE_SUM) {
 		this.behaviors = behaviors;
-		this.steeringParameters = new SteeringAgentParameters();
+		this.steeringParameters = params==null ? SteeringAgentParameters.DEFAULT_STEERING_PARAMS : params;
 		this.hasChanged = true;
 	}
 
@@ -31,6 +31,7 @@ class Steering implements IComponent {
 	
 	public function removeBehaviour(behavior:Behavior) {
 		behaviors.remove(behavior);
+		hasChanged = true;
 	}
 
 

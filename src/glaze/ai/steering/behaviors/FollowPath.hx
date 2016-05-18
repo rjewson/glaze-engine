@@ -9,36 +9,26 @@ class FollowPath extends Behavior
 {
 
 	public var path:Array<Node>;
-	public var seekDistSq : Float;
+	public var loop:Bool;
+	public var seekDist : Float;
 	
 	var currentIndex:Int;
 	
-	public function new(path : Array<Node>, seekDistSq : Float = 256) {
+	public function new(path : Array<Node>, loop:Bool=false, seekDist : Float = 32) {
 		super(SteeringSettings.followPathWeight, SteeringSettings.followPathPriority);
 		
 		this.path = path;
-		this.seekDistSq = seekDistSq;
+		this.loop = loop;
+		this.seekDist = seekDist;
 		
 		currentIndex = 0;
 	}
 
-	override public function calculate(agent:Body,result:Vector2) {
-		if (currentIndex==path.length)
+	override public function calculate(agent:Body,params:SteeringAgentParameters,result:Vector2) {
+		if (loop&&currentIndex==path.length)
 			return;
-		trace(currentIndex);
-		if (!Seek.calc(agent,result,path[currentIndex].position,seekDistSq)) {
+		if (!Seek.calc(agent,params,result,path[currentIndex].position,seekDist)) {
 			currentIndex++;
-		}
-		// var d = path[ currentIndex ].distanceSqrd(agent.averageCenter) ;
-		// if ( d < seekDistSq) {
-		// 	currentIndex++;
-		// 	if (currentIndex == path.length) {
-		// 		steering.removeBehaviour(this);
-		// 		return new Vector2();
-		// 	}
-		// }
-		
-		// return Seek.calc(agent, path[currentIndex]);
 	}
 	
 }

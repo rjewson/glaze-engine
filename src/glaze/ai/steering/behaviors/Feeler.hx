@@ -40,10 +40,17 @@ class Feeler
 		distToClosestIP = Math.POSITIVE_INFINITY;
 		tip.copy(unitDirection);
 		base.copy(position);
-		if (angle != 0)
-			tip.rotateEquals(angle);
+		if (angle != 0) {
+			var a = Math.atan2(unitDirection.y,unitDirection.x);
+			a+=angle;
+			tip.x = Math.cos(a);
+  			tip.y = Math.sin(a);
+  		}
 		tip.multEquals(length);
 		tip.plusEquals(base);
+		
+		glaze.debug.DebugEngine.DrawParticle(tip.x,tip.y,4,255,0,0);
+
 	}
 	
 	public function TestSegment(a:Vector2, b:Vector2, normal:Vector2):Void {
@@ -57,6 +64,7 @@ class Feeler
 	
 	public function CalculateForce(force:Vector2):Void {
 		if (distToClosestIP != Math.POSITIVE_INFINITY) {
+			glaze.debug.DebugEngine.DrawParticle(closestIP.x,closestIP.y,4,255,255,255);
 			// var sf =  normal.mult( tip.minus( closestIP ).length() );
 			var sf = tip.clone();
 			sf.minusEquals(closestIP);
