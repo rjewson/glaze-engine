@@ -8,14 +8,16 @@ import exile.ExileFilters;
 import exile.systems.BeeHiveSystem;
 import exile.systems.BeeSystem;
 import exile.systems.BirdNestSystem;
+import exile.systems.BirdSystem;
 import exile.systems.ChickenSystem;
 import exile.systems.DoorSystem;
 import exile.systems.GrenadeSystem;   
 import exile.systems.GunTurretSystem;
 import exile.systems.MaggotSystem;  
 import exile.systems.PlayerSystem;
-import exile.systems.RabbitSystem;      
+import exile.systems.RabbitSystem;         
 import exile.systems.TeleporterSystem;        
+import glaze.ai.behaviortree.BehaviorTree;
 import glaze.ai.faction.components.Personality;
 import glaze.ai.faction.Faction;
 import glaze.ai.faction.FactionRelationship;
@@ -46,6 +48,7 @@ import glaze.engine.factories.tmx.ForceFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.tmx.WaterFactory;
+import glaze.engine.systems.AISystem;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.CollidableSwitchSystem;
 import glaze.engine.systems.DestroySystem;
@@ -135,6 +138,10 @@ class GameTestA extends GameEngine {
 
     public var TS:Int = glaze.EngineConstants.TILE_SIZE;
    
+    public var fsm:glaze.util.FlxFSM<Entity>;  
+    public var lwfsm:glaze.ai.stackfsm.LWStackFSM<Entity>;
+    // public var pool:glaze.util.Pool;   
+
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
         loadAssets([
@@ -166,7 +173,11 @@ class GameTestA extends GameEngine {
         //     trace(bs.toString());
         //     trace(bs.containsAll(mustHave));        
         // } 
-   
+// testBT();
+
+        BehaviorTree.initialize();
+        BehaviorTree.registerScript("bird",CompileTime.readJsonFile("test.json"));
+
         engine.config.tileSize = 16;
  
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
@@ -204,12 +215,12 @@ class GameTestA extends GameEngine {
         var foreground2 = glaze.tmx.TmxLayer.LayerToCoordTexture(tmxMap.getLayer("Foreground2"));
       
         var collisionData = glaze.tmx.TmxLayer.LayerToCollisionData(tmxMap.getLayer("Collision"),glaze.EngineConstants.TILE_SIZE);
-        
+
         var tileMap = new TileMap(Std.int(glaze.EngineConstants.TILE_SIZE/2    ),2);
         tileMap.SetTileRenderLayer([2,1]);
         tileMap.SetTileRenderLayer([0]);
         renderSystem.renderer.AddRenderer(tileMap);
-         
+        
         tileMap.SetTileLayerFromData(foreground2,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f2",1,1); 
         tileMap.SetTileLayerFromData(foreground1,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"f1",1,1);
         tileMap.SetTileLayerFromData(background,renderSystem.textureManager.baseTextures.get(TILE_SPRITE_SHEET),"bg",1,1);
@@ -222,8 +233,7 @@ class GameTestA extends GameEngine {
 
         renderSystem.itemContainer.addChild(tileMap.renderLayers[0].sprite);
         // renderSystem.itemContainer.addChild(tileMap.renderLayers[1].sprite);
-        renderSystem.camera.addChild(tileMap.renderLayers[1].sprite);
-                                                                                             
+        renderSystem.camera.addChild(tileMap.renderLayers[1].sprite);                                                                           
 
         blockParticleEngine = new BlockSpriteParticleEngine(4000,1000/60,collisionData);
         renderSystem.renderer.AddRenderer(blockParticleEngine.renderer);
@@ -285,7 +295,9 @@ class GameTestA extends GameEngine {
         //This one
         // var lightSystem = new glaze.lighting.systems.PointLightingSystem(map);
         // renderSystem.renderer.AddRenderer(lightSystem.renderer);  
-       
+        
+        //aiphase.addSystem(new AISystem());  
+
         aiphase.addSystem(new BehaviourSystem());  
         aiphase.addSystem(new StateSystem(messageBus));  
         aiphase.addSystem(new CollidableSwitchSystem(messageBus));  
@@ -295,6 +307,8 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new BeeSystem(broadphase));  
 
         aiphase.addSystem(new BirdNestSystem());                                                 
+        aiphase.addSystem(new BirdSystem(broadphase));  
+
         aiphase.addSystem(new GunTurretSystem());                                                 
 
 
@@ -370,9 +384,7 @@ class GameTestA extends GameEngine {
 
         player = engine.createEntity([ 
             new Player(),
-            // new Position(300,180), 
             mapPosition(33.5,38.5),
- 
             new Extents(7,21), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
@@ -518,6 +530,29 @@ class GameTestA extends GameEngine {
         // bee.getComponent(glaze.ai.steering.components.Steering).behaviors.push(new glaze.ai.steering.behaviors.FollowPath(route));
     }
  
+    public function testBT() {
+        js.Lib.debug();
+
+        var bt = new glaze.ai.behaviortree.branch.Sequence();
+        // bt.addChild(new glaze.ai.behaviortree.leaf.Logger("start"));        
+        // bt.addChild(new glaze.ai.behaviortree.leaf.Failure(3));
+        // bt.addChild(new glaze.ai.behaviortree.leaf.Success(4));
+        var seq = new glaze.ai.behaviortree.branch.Monitor();
+        bt.addChild(seq);
+        seq.addChild(new glaze.ai.behaviortree.leaf.Logger("message 1"));
+        seq.addChild(new glaze.ai.behaviortree.leaf.Logger("message 2"));
+        seq.addChild(new glaze.ai.behaviortree.leaf.Logger("message 3"));
+
+        bt.addChild(new glaze.ai.behaviortree.leaf.Logger("done"));
+
+        var btc = new glaze.ai.behaviortree.BehaviorContext(new Entity(null,null));
+        for (i in 0...15) {
+            trace("tick:"+i);
+            bt.tick(btc);
+        }
+        js.Lib.debug();
+    }
+
     public function createTurret() { 
 
         var filter = new Filter();

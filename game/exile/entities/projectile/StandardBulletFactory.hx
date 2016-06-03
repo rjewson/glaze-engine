@@ -32,7 +32,7 @@ class StandardBulletFactory {
         bulletBody.setBounces(3);     
         bulletBody.globalForceFactor = 1;//0.5;
         bulletBody.isBullet = true;
-        bulletBody.maxScalarVelocity = 1000;
+        bulletBody.maxScalarVelocity = 10000;
 
         filter.categoryBits |= exile.ExileFilters.PROJECTILE_CAT;
         filter.maskBits     |= exile.ExileFilters.PROJECTILE_COLLIDABLE_CAT;
@@ -74,12 +74,12 @@ class StandardBulletFactory {
             new Projectile({ttl:1000,bounce:3,power:10,range:32}),
             new Health(10,10,0),
             new Age(1000),
-            new Active()
+            new Active(),
             // new Script(behavior),
-            // new Steering([
-            //     new Seek(new Vector2(0,0))
-            //     // new Wander()
-            //     ])
+            new glaze.ai.steering.components.Steering([
+                // new Seek(new Vector2(0,0))
+                new glaze.ai.steering.behaviors.Wander(55,80,0.3)
+                ])
         ],"StandardBullet");              
                 
         glaze.util.Ballistics.calcProjectileVelocity(bulletBody,targetPosition,2500);        

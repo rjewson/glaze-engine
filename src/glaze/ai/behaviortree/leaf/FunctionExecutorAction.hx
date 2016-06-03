@@ -1,9 +1,14 @@
-package glaze.ai.behaviortree;
+package glaze.ai.behaviortree.leaf;
+
+import glaze.ai.behaviortree.Behavior;
+import glaze.ai.behaviortree.BehaviorContext;
+import glaze.ai.behaviortree.BehaviorStatus;
+
 
 /**
  * An action specifies a function to be called when updating
  */
-class Action extends Behavior
+class FunctionExecutorAction extends Behavior
 {
 
 	/**

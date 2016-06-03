@@ -1,4 +1,10 @@
-package glaze.ai.behaviortree;
+package glaze.ai.behaviortree.branch;
+
+import glaze.ai.behaviortree.Composite;
+import glaze.ai.behaviortree.Behavior;
+import glaze.ai.behaviortree.BehaviorContext;
+import glaze.ai.behaviortree.BehaviorStatus;
+
 
 /**
  * A selector chooses the first behavior that doesn't fail

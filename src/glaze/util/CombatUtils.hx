@@ -9,6 +9,7 @@ import glaze.engine.components.Destroy;
 import glaze.engine.components.Health;
 import glaze.geom.Vector2;
 import glaze.physics.collision.broadphase.IBroadphase;
+import glaze.physics.collision.Ray;
 import glaze.physics.components.PhysicsBody;
 import glaze.util.BroadphaseAreaQuery;
 
@@ -22,6 +23,7 @@ class CombatUtils {
 
 	public static var bfAreaQuery:glaze.util.BroadphaseAreaQuery;
 	public static var broadphase:IBroadphase;
+    public static var ray:Ray;
     public static var referenceEntity:Entity;
 
 	public function new() {
@@ -31,15 +33,27 @@ class CombatUtils {
 	public static function setBroadphase(bf:IBroadphase) {
 		CombatUtils.broadphase = bf;
 		CombatUtils.bfAreaQuery = new BroadphaseAreaQuery(bf);
+        CombatUtils.ray = new Ray();
 	}
 
+    public static function canSee(start:Vector2,end:Vector2,range:Float):Bool {
+        if (start.distSqrd(end)>=range*range)
+            return false;
+        ray.initalize(start,end,0,null);
+        broadphase.CastRay(ray,null,false,false);
+        return !ray.hit;
+    }
 
     public static function searchSortAndFilter(position:Vector2,radius:Float,referenceEntity:Entity,filterOptions:EntityFilterOptions):EntityCollection {
         CombatUtils.referenceEntity = referenceEntity;
         CombatUtils.bfAreaQuery.query(position,radius,referenceEntity,true);
         CombatUtils.bfAreaQuery.entityCollection.entities.sort(glaze.ds.EntityCollectionItem.SortClosestFirst);
         CombatUtils.bfAreaQuery.entityCollection.filter(FilterItems);
-        CombatUtils.bfAreaQuery.entityCollection.filter(FilterEnemyFactions);
+        if (filterOptions==EntityFilterOptions.ENEMY)
+            CombatUtils.bfAreaQuery.entityCollection.filter(FilterEnemyFactions);
+        else if (filterOptions==EntityFilterOptions.FRIENDLY)
+            CombatUtils.bfAreaQuery.entityCollection.filter(FilterFriendlyFactions);
+
         return CombatUtils.bfAreaQuery.entityCollection;
     }
 
@@ -57,6 +71,17 @@ class CombatUtils {
             return false;
         return refFaction.faction.compareTo(faction.faction).status<0;
     }
+
+    public static function FilterFriendlyFactions(eci:EntityCollectionItem):Bool {
+        var faction = eci.entity.getComponent(Personality);
+        if (faction==null)
+            return false;
+        var refFaction = CombatUtils.referenceEntity.getComponent(Personality);
+        if (refFaction==null)
+            return false;
+        return refFaction.faction.compareTo(faction.faction).status>0;
+    }
+
 
 	public static function explode(position:Vector2,radius:Float,power:Float,sourceEntity:Entity) {
 	    CombatUtils.bfAreaQuery.query(position,radius,sourceEntity,true);

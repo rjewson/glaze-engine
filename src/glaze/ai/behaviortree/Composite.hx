@@ -6,41 +6,29 @@ package glaze.ai.behaviortree;
 class Composite extends Behavior
 {
 
-	/**
-	 * Composite constructor
-	 */
-	public function new()
-	{
+	private var children:List<Behavior>;
+
+	public function new() {
 		super();
 		children = new List<Behavior>();
 	}
 
-	/**
-	 * Adds a child behavior to the composite
-	 * @param child The behavior to add
-	 */
-	public inline function addChild(child:Behavior)
-	{
+	override public function addChild(child:Behavior) {
 		children.add(child);
 	}
 
-	/**
-	 * Removes a child behavior from the composite
-	 * @param child The behavior to remove
-	 */
-	public inline function removeChild(child:Behavior)
-	{
+	override public function removeChild(child:Behavior) {
 		children.remove(child);
 	}
 
-	/**
-	 * Removes all children from the composite
-	 */
-	public inline function removeAll()
-	{
+	public function removeAll() {
 		children.clear();
 	}
 
-	private var children:List<Behavior>;
+	override public function reset():Void {
+		for (child in children)
+			child.reset();
+	}
+
 
 }

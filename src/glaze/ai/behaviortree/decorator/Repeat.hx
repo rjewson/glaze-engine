@@ -1,4 +1,6 @@
-package glaze.ai.behaviortree;
+package glaze.ai.behaviortree.decorator;
+
+import glaze.ai.behaviortree.Decorator;
 
 /**
  * A repeat node will rerun the same behavior up to a certain number of iterations
@@ -16,9 +18,9 @@ class Repeat extends Decorator
 	 * @param child The behavior to repeat
 	 * @param count The number of times to repeat
 	 */
-	public function new(child:Behavior, count:Int = 0)
+	public function new(count:Int = 0)
 	{
-		super(child);
+		super();
 		this.count = count;
 	}
 

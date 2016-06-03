@@ -1,0 +1,19 @@
+{
+	"name":"blah2",
+	"import":{
+		"localname":"qualified.name",
+		"localname2":"qualified.name2"
+	},
+	"tree":{
+		"type":"repeat",
+		"params":[0],
+		"children":[
+			{
+				"type":"sequence",
+				"params":null,
+				"children":[
+				]
+			}
+		]
+	}
+}

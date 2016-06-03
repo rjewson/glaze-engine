@@ -1,0 +1,43 @@
+{
+	"name":"blah test",
+	"import":{
+		"localname":"qualified.name",
+		"localname2":"qualified.name2"
+	},
+	"debug":1,
+	"tree":{
+		"type":"repeat",
+		"description":"Main outside Repeat:forever",
+		"params":[0],
+		"children":[
+			{
+				"type":"sequence",
+				"children":[
+					{	"type":"CopyContextData","params":["home","target"],"description":"Copy 'home' to 'target"},
+					{	"type":"WanderToTarget","params":[128]},
+					{	"type":"RepeatUntilSuccess",
+						"children":[
+							{	"type":"sequence",
+								"children":[
+									{"type":"delay","params":[1000]},
+									{"type":"FindTarget"}
+								]
+							}
+						]
+					},
+					{	"type":"SeekTarget"},
+					{	"type":"RepeatUntilFail",
+						"children":[
+							{	"type":"sequence",
+								"children":[
+									{"type":"delay","params":[1000]},
+									{"type":"CanSee"}
+								]
+							}
+						]
+					}
+				]
+			}
+		]
+	}
+}

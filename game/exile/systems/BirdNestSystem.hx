@@ -76,7 +76,7 @@ class BirdNestSystem extends System {
 		// }
 
 		while (target!=null) {
-			trace(target.entity.name);
+			// trace(target.enticty.name);
 			if (target!=null)
 				return target.entity;
 			target = target.next;
@@ -90,8 +90,9 @@ class BirdNestSystem extends System {
 			var bird = exile.entities.creatures.BirdFactory.create(
 				engine,
 				entity.getComponent(Position).clone(),
-				target.getComponent(Position)
-			);
+				entity.getComponent(Position),
+				entity
+   			);
 			nest.birds.push(bird);
 		}				
 	}

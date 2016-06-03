@@ -1,4 +1,9 @@
-package glaze.ai.behaviortree;
+package glaze.ai.behaviortree.branch;
+
+import glaze.ai.behaviortree.Composite;
+import glaze.ai.behaviortree.Behavior;
+import glaze.ai.behaviortree.BehaviorContext;
+import glaze.ai.behaviortree.BehaviorStatus;
 
 /**
  * List of policy types
@@ -15,6 +20,9 @@ enum Policy
 class Parallel extends Composite
 {
 
+	private var _successPolicy:Policy;
+	private var _failurePolicy:Policy;
+
 	/**
 	 * Parallel constructor
 	 * @param success The policy for success
@@ -27,6 +35,11 @@ class Parallel extends Composite
 		_failurePolicy = failure;
 	}
 
+	override private function initialize(context:BehaviorContext)
+	{
+	}
+
+
 	override private function update(context:BehaviorContext):BehaviorStatus
 	{
 		var successCount:Int = 0,
@@ -34,6 +47,7 @@ class Parallel extends Composite
 
 		for (child in children)
 		{
+			trace("check term");
 			if (!child.terminated)
 			{
 				child.tick(context);
@@ -59,11 +73,13 @@ class Parallel extends Composite
 
 		if (_failurePolicy == RequireAll && failureCount == children.length)
 		{
+			trace("Parallel Failed");
 			return Failure;
 		}
 
 		if (_successPolicy == RequireAll && successCount == children.length)
 		{
+			trace("Parallel Success");
 			return Success;
 		}
 
@@ -78,10 +94,8 @@ class Parallel extends Composite
 			{
 				child.abort();
 			}
+			child.reset();
 		}
 	}
-
-	private var _successPolicy:Policy;
-	private var _failurePolicy:Policy;
 
 }

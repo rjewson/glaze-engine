@@ -6,12 +6,15 @@ package glaze.ai.behaviortree;
 class Decorator extends Behavior
 {
 
-	public function new(child:Behavior)
-	{
+	private var child:Behavior;
+
+	public function new() {
 		super();
-		this.child = child;
+		addChild(child);
 	}
 
-	private var child:Behavior;
+	override public function addChild(child:Behavior) {
+		this.child = child;
+	}
 
 }

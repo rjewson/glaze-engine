@@ -45,12 +45,13 @@ class SteeringSystem extends System {
     private function runningSum(steering:Steering,agent:Body) {
         totalForce.setTo(0,0);
         for (behavior in steering.behaviors) {
+            if (!behavior.active)
+                continue;
             behaviorForce.setTo(0,0);
             behavior.calculate(agent,steering.steeringParameters,behaviorForce);
             behaviorForce.multEquals(behavior.weight);
             totalForce.plusEquals(behaviorForce);
          }
-        // js.Lib.debug();
         totalForce.clampScalar(steering.steeringParameters.maxAcceleration);
     }
 

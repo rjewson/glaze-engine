@@ -6,9 +6,13 @@ class IntervalDelay {
 	public var intervalTime:Float;
 	public var intervals:Float;
 
-	public function new(intervalTime:Float)
+	public function new(intervalTime:Float = 0)
 	{
-	    this.current = 0;
+	    reset(intervalTime);
+	}
+
+	public function reset(intervalTime:Float = 0) {
+		this.current = 0;
 	    this.intervalTime = intervalTime;
 	    this.intervals = 0;
 	}

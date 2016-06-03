@@ -34,5 +34,13 @@ class Steering implements IComponent {
 		hasChanged = true;
 	}
 
+	public function getBehaviour(type:Class<Behavior>):Behavior {
+		for (behavior in behaviors) {
+			if (Std.is(behavior,type)) {
+				return behavior;
+			}
+		}
+		return null;
+	}
 
 }

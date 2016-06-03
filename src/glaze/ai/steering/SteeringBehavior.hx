@@ -10,6 +10,8 @@ import glaze.geom.Vector2;
  * @author rje
  */
 
+// NOT IN USE SEE THE SYSTEM
+
 class SteeringBehavior 
 {
 	public static inline var CALCULATE_SUM:Int = 0;

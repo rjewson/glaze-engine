@@ -8,6 +8,9 @@ class Behavior
 	 */
 	private var status(default, null):BehaviorStatus;
 
+	public var description:String;
+	public var debugLevel:Int = 0;
+
 	/**
 	 * Behavior constructor
 	 */
@@ -72,6 +75,11 @@ class Behavior
 	 */
 	public function tick(context:BehaviorContext):BehaviorStatus
 	{
+		if (debugLevel>0)
+			trace("BT Log:"+description);
+		if (debugLevel>1)
+			js.Lib.debug();
+		
 		if (status != Running)
 		{
 			initialize(context);
@@ -85,6 +93,12 @@ class Behavior
 		}
 
 		return status;
+	}
+
+	public function addChild(child:Behavior) {
+	}
+
+	public function removeChild(child:Behavior) {
 	}
 
 }

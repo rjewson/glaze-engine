@@ -35,7 +35,7 @@ class BirdFactory {
 	public function new() {
 	} 
 
-	public static function create(engine:Engine,position:Position,follow:Position):Entity {
+	public static function create(engine:Engine,position:Position,follow:Position,nest:Entity):Entity {
 
         var birdBody = new Body(new Material());
         birdBody.setMass(1);
@@ -47,7 +47,7 @@ class BirdFactory {
 
         var bird = engine.createEntity([
             position, 
-            new Bird(),
+            new Bird(nest),
             new Extents((4)*1,(4)*1),
             new Display("bird"), 
             new PhysicsBody(birdBody,false), 
@@ -57,11 +57,11 @@ class BirdFactory {
             new glaze.animation.components.SpriteAnimation("bird",["fly"],"fly"),
             // new Light(64,1,1,1,255,255,0),
             new Steering([
-                // new Wander(55,80,0.3) //ok
-                new Arrival(follow.coords,128)
-                // new Seek(follow.coords,32)
+                new Wander(55,80,0.3) //ok
+                ,new Arrival(follow.coords,256)
+                //,new Seek(follow.coords,32)
                 // new Arrival(follow.coords,128,32)
-                // ,new WallAvoidance(map,60)
+                ,new WallAvoidance(map,60)
                 ]),
             new Age(10000),
             new Health(10,10,0),

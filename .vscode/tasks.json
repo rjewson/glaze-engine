@@ -1,0 +1,16 @@
+{
+    "version": "0.1.0",
+    "command": "haxe",
+    "isShellCommand": true,
+    "showOutput": "always",
+    "args": [
+    ],
+    "tasks": [
+        {
+            "taskName": "Build",
+            "suppressTaskName": true,
+            "isBuildCommand": true,
+            "args": ["build.hxml"]
+        }
+    ]
+}
