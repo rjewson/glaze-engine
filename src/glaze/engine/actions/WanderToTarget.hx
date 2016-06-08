@@ -32,7 +32,7 @@ class WanderToTarget extends Behavior {
         var arrival:Arrival = cast steering.getBehaviour(Arrival);
         arrival.target = target;
         arrival.arrivalZone = arrivalZone;
-
+ 
         return Success;
     }
 

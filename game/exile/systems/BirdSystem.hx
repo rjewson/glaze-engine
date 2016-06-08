@@ -11,6 +11,7 @@ import glaze.ai.behaviortree.decorator.RepeatUntilSuccess;
 import glaze.ai.steering.behaviors.Arrival;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
+import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.actions.CanSee;
@@ -19,14 +20,18 @@ import glaze.engine.actions.FindTarget;
 import glaze.engine.actions.SeekTarget;
 import glaze.engine.components.Age;
 import glaze.engine.components.Destroy;
+import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
 import glaze.engine.components.Position;
 import glaze.engine.states.LogState;
+import glaze.physics.Body;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.collision.Contact;
+import glaze.physics.collision.Map;
 import glaze.physics.components.PhysicsCollision;
 import glaze.ai.stackfsm.LWStackFSM;
+import glaze.physics.Material;
 
 class BirdSystem extends System {
 
@@ -125,60 +130,45 @@ class BirdSystem extends System {
 
     }
 
-    // function CreateAI():Behavior {
 
-    //     var birdScript = BehaviorTree.createScript("bird");
-    //     return birdScript;
+    public static function create(engine:Engine,position:Position,follow:Position,nest:Entity):Entity {
 
-    //     //Set target data
-    //     //Set home data
-    //     var mainSeq = new Sequence();
-    //     var rep = new glaze.ai.behaviortree.decorator.Repeat(0);
-    //     rep.addChild(mainSeq);
-    //     mainSeq.addChild(new glaze.ai.behaviortree.leaf.CopyContextData("home","target"));
-    //     mainSeq.addChild(new glaze.engine.actions.WanderToTarget(128));
+        var birdBody = new Body(new Material());
+        birdBody.setMass(1);
+        birdBody.setBounces(0);     
+        birdBody.globalForceFactor = 0.0;
+        birdBody.maxScalarVelocity = 200; 
 
-    //     var succSeq = new Sequence();
-    //     succSeq.addChild(new Delay(1000));
-    //     succSeq.addChild(new FindTarget());
-    //     var repSucc = new RepeatUntilSuccess();
-    //     repSucc.addChild(succSeq);
-    //     mainSeq.addChild(repSucc);
+        var map:Map = cast engine.config.map;
 
-    //     mainSeq.addChild(new SeekTarget());
+        var bird = engine.createEntity([
+            position, 
+            new Bird(nest),
+            new Extents((4)*1,(4)*1),
+            new glaze.engine.components.Display("bird"), 
+            new glaze.physics.components.PhysicsBody(birdBody,false), 
+            new glaze.engine.components.Moveable(),
+            new PhysicsCollision(false,null,[]),  
+            new glaze.animation.components.SpriteAnimation("bird",["fly"],"fly"),
+            // new Light(64,1,1,1,255,255,0),
+            new Steering([
+                new Wander(55,80,0.3) //ok
+                ,new Arrival(follow.coords,256)
+                //,new Seek(follow.coords,32)
+                // new Arrival(follow.coords,128,32)
+                ,new glaze.ai.steering.behaviors.WallAvoidance(map,60)
+                ]),
+            new Age(10000),
+            new Health(10,10,0),
+            new glaze.engine.components.Active()
+        ],"bird"); 
 
-    //     var failSeq = new Sequence();
-    //     failSeq.addChild(new Delay(1000));
-    //     failSeq.addChild(new CanSee());
-    //     var repFail = new RepeatUntilFail();
-    //     repFail.addChild(failSeq);
-    //     mainSeq.addChild(repFail);
- 
-    //     return rep;
+        return bird;        
+    }
 
-    // }
-
-/*
-
-
-    set (home)
-    repeat
-        sequence
-            set target (home)
-            wander (to target) (always sucess)
-            repeat until sucess
-                sequence
-                    delay
-                    can see enemy? set target
-            chase (target)
-            repeat until failure
-                sequence
-                    can see (target)
-                    delay
-
-        
-
-*/
+    public static function destroy(entity:Entity) {
+        trace("bang");  
+    }
 
 
 }

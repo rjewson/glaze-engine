@@ -53,6 +53,7 @@ import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.CollidableSwitchSystem;
 import glaze.engine.systems.DestroySystem;
 import glaze.engine.systems.InventorySystem;
+import glaze.engine.systems.LifecycleSystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.StateSystem;
@@ -172,8 +173,13 @@ class GameTestA extends GameEngine {
         //     bs.set(i);
         //     trace(bs.toString());
         //     trace(bs.containsAll(mustHave));        
-        // } 
-// testBT();
+        // }        
+// testBT(); 
+        var owner = engine.createEntity();
+        var dfsm = new glaze.ai.fsm.DefaultStateMachine(owner);
+        dfsm.changeState(new glaze.ai.fsm.DefaultStateMachine.TestState());
+
+        // var lsm = new glaze.ai.fsm.LightStateMachine(owner,["test"=>function(e:Entity){}]);
 
         BehaviorTree.initialize();
         BehaviorTree.registerScript("bird",CompileTime.readJsonFile("test.json"));
@@ -249,6 +255,7 @@ class GameTestA extends GameEngine {
 
         var map = new Map(collisionData);   
         exile.entities.creatures.BeeFactory.map = map; 
+        corephase.addSystem(new LifecycleSystem());
         corephase.addSystem(new PhysicsUpdateSystem());
         corephase.addSystem(new SteeringSystem());
     

@@ -10,13 +10,16 @@ import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Active;
 import glaze.engine.components.Age;
+import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
+import glaze.engine.components.LifeCycle;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script; 
+import glaze.engine.core.EngineLifecycle;
 import glaze.lighting.components.Light;
 import glaze.physics.Body;
 import glaze.physics.collision.Map;
@@ -30,6 +33,8 @@ import glaze.render.frame.FrameList;
 class BeeFactory {
 
     public static var map:Map;
+
+    public static var BEE_LIFECYCLE = EngineLifecycle.CreateLifeCylce(onInitalize,null,onDestroy,null);
 
 	public function new() {
 	} 
@@ -45,6 +50,7 @@ class BeeFactory {
         var bee = engine.createEntity([
             position, 
             new Bee(),
+            new LifeCycle(BEE_LIFECYCLE),
             new Extents((3/2)*1,(3/2)*1),
             new Display("insects"), 
             new PhysicsBody(beeBody,true), 
@@ -65,5 +71,16 @@ class BeeFactory {
 
         return bee; 	    
 	}
+
+    public static function onInitalize(entity:Entity) {
+        trace('INIT THE BEE ${entity.name}');        
+    }
+
+    public static function onDestroy(entity:Entity) {
+        trace('DESTROY THE BEE ${entity.name}');        
+        entity.addComponent(new glaze.engine.components.ParticleEmitters([new glaze.particle.emitter.Explosion(1,200)]));
+        entity.addComponent(new Destroy(2)); 
+
+    }
 
 }

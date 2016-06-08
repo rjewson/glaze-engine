@@ -75,11 +75,11 @@ class Behavior
 	 */
 	public function tick(context:BehaviorContext):BehaviorStatus
 	{
-		if (debugLevel>0)
+		if (debugLevel>0&&description!=null)
 			trace("BT Log:"+description);
 		if (debugLevel>1)
 			js.Lib.debug();
-		
+
 		if (status != Running)
 		{
 			initialize(context);

@@ -34,14 +34,14 @@ class BeeHiveSystem extends System {
 				if (glaze.util.Random.RandomBoolean(0.01)) {
 					var newBee = BeeFactory.create(engine,entity.getComponent(Position).clone());
 					newBee.parent = entity;
-					newBee.messages.add(beeDestroyed);
+					newBee.messages.add(onDestroy);
 					beehive.bees.push(newBee);
 				}
 			}
 		}
 	}
 
-	function beeDestroyed(entity:Entity,channel:String,data:Dynamic) {
+	function onDestroy(entity:Entity,channel:String,data:Dynamic) {
 		if (channel==Entity.DESTROY) {
 			if (entity.parent!=null) {
 				var beeHive = entity.parent.getComponent(BeeHive);

@@ -67,7 +67,7 @@ GameTestA.main = function() {
 	});
 	window.document.getElementById("debug3button").addEventListener("click",function(event4) {
 		var rockbody = game.rock.map.PhysicsBody;
-		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 712, className : "GameTestA", methodName : "main"});
+		haxe_Log.trace(rockbody.body.mass,{ fileName : "GameTestA.hx", lineNumber : 719, className : "GameTestA", methodName : "main"});
 		var _this = rockbody.body;
 		var f_x = 0;
 		var f_y = -128000;
@@ -95,8 +95,9 @@ GameTestA.main = function() {
 GameTestA.__super__ = glaze_engine_core_GameEngine;
 GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 	initalize: function() {
+		new glaze_ai_fsm_DefaultStateMachine(this.engine.createEntity()).changeState(new glaze_ai_fsm_TestState());
 		glaze_ai_behaviortree_BehaviorTree.initialize();
-		glaze_ai_behaviortree_BehaviorTree.registerScript("bird","{\n\t\"name\":\"blah test\",\n\t\"import\":{\n\t\t\"localname\":\"qualified.name\",\n\t\t\"localname2\":\"qualified.name2\"\n\t},\n\t\"debug\":1,\n\t\"tree\":{\n\t\t\"type\":\"repeat\",\n\t\t\"description\":\"Main outside Repeat:forever\",\n\t\t\"params\":[0],\n\t\t\"children\":[\n\t\t\t{\n\t\t\t\t\"type\":\"sequence\",\n\t\t\t\t\"children\":[\n\t\t\t\t\t{\t\"type\":\"CopyContextData\",\"params\":[\"home\",\"target\"],\"description\":\"Copy 'home' to 'target\"},\n\t\t\t\t\t{\t\"type\":\"WanderToTarget\",\"params\":[128]},\n\t\t\t\t\t{\t\"type\":\"RepeatUntilSuccess\",\n\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t{\t\"type\":\"sequence\",\n\t\t\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t\t\t{\"type\":\"delay\",\"params\":[1000]},\n\t\t\t\t\t\t\t\t\t{\"type\":\"FindTarget\"}\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t]\n\t\t\t\t\t},\n\t\t\t\t\t{\t\"type\":\"SeekTarget\"},\n\t\t\t\t\t{\t\"type\":\"RepeatUntilFail\",\n\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t{\t\"type\":\"sequence\",\n\t\t\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t\t\t{\"type\":\"delay\",\"params\":[1000]},\n\t\t\t\t\t\t\t\t\t{\"type\":\"CanSee\"}\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t]\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}\n}");
+		glaze_ai_behaviortree_BehaviorTree.registerScript("bird","{\n\t\"name\":\"blah test\",\n\t\"import\":{\n\t\t\"localname\":\"qualified.name\",\n\t\t\"localname2\":\"qualified.name2\"\n\t},\n\t\"parameters\":{\n\t\t\"home\":\"glaze.geom.Vector2\"\n\t},\n\t\"debug\":0,\n\t\"tree\":{\n\t\t\"type\":\"repeat\",\n\t\t\"params\":[0],\n\t\t\"children\":[\n\t\t\t{\n\t\t\t\t\"type\":\"sequence\",\n\t\t\t\t\"children\":[\n\t\t\t\t\t{\t\"type\":\"CopyContextData\",\"params\":[\"home\",\"target\"],\"description\":\"Copy 'home' to 'target'\"},\n\t\t\t\t\t{\t\"type\":\"WanderToTarget\",\"params\":[128],\"description\":\"Going Home\"},\n\t\t\t\t\t{\t\"type\":\"RepeatUntilSuccess\",\n\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t{\t\"type\":\"sequence\",\n\t\t\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t\t\t{\"type\":\"delay\",\"params\":[1000]},\n\t\t\t\t\t\t\t\t\t{\"type\":\"FindTarget\",\"description\":\"Look for target\"}\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t]\n\t\t\t\t\t},\n\t\t\t\t\t{\t\"type\":\"SeekTarget\",\"description\":\"Found target, seeking\"},\n\t\t\t\t\t{\t\"type\":\"RepeatUntilFail\",\n\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t{\t\"type\":\"sequence\",\n\t\t\t\t\t\t\t\t\"children\":[\n\t\t\t\t\t\t\t\t\t{\"type\":\"delay\",\"params\":[1000]},\n\t\t\t\t\t\t\t\t\t{\"type\":\"CanSee\",\"description\":\"Still seeking\"}\n\t\t\t\t\t\t\t\t]\n\t\t\t\t\t\t\t}\n\t\t\t\t\t\t]\n\t\t\t\t\t}\n\t\t\t\t]\n\t\t\t}\n\t\t]\n\t}\n}");
 		this.engine.config.tileSize = 16;
 		var _this = this.assets.assets;
 		this.tmxMap = new glaze_tmx_TmxMap(__map_reserved["data/16map.tmx"] != null?_this.getReserved("data/16map.tmx"):_this.h["data/16map.tmx"],16);
@@ -149,6 +150,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		this.spriteParticleEngine.renderer.SetSpriteSheet((__map_reserved["data/particles.png"] != null?_this11.getReserved("data/particles.png"):_this11.h["data/particles.png"]).texture,16,16,16);
 		var map = new glaze_physics_collision_Map(collisionData);
 		exile_entities_creatures_BeeFactory.map = map;
+		corephase.addSystem(new glaze_engine_systems_LifecycleSystem());
 		corephase.addSystem(new glaze_physics_systems_PhysicsUpdateSystem());
 		corephase.addSystem(new glaze_ai_steering_systems_SteeringSystem());
 		this.engine.config.map = map;
@@ -251,7 +253,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 		var btc = new glaze_ai_behaviortree_BehaviorContext(new glaze_eco_core_Entity(null,null));
 		var _g = 0;
 		while(_g < 15) {
-			haxe_Log.trace("tick:" + _g++,{ fileName : "GameTestA.hx", lineNumber : 550, className : "GameTestA", methodName : "testBT"});
+			haxe_Log.trace("tick:" + _g++,{ fileName : "GameTestA.hx", lineNumber : 557, className : "GameTestA", methodName : "testBT"});
 			bt.tick(btc);
 		}
 		debugger;
@@ -330,7 +332,7 @@ GameTestA.prototype = $extend(glaze_engine_core_GameEngine.prototype,{
 			this.destroyChickens();
 		}
 		if(this.shakeIt > 1) {
-			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 686, className : "GameTestA", methodName : "preUpdate"});
+			haxe_Log.trace("shakeit",{ fileName : "GameTestA.hx", lineNumber : 693, className : "GameTestA", methodName : "preUpdate"});
 			var _this = this.renderSystem.camera.shake;
 			var min = -this.shakeIt;
 			var max = this.shakeIt;
@@ -910,6 +912,162 @@ exile_components_Teleporter.__interfaces__ = [glaze_eco_core_IComponent];
 exile_components_Teleporter.prototype = {
 	__class__: exile_components_Teleporter
 };
+var haxe_IMap = function() { };
+haxe_IMap.__name__ = ["haxe","IMap"];
+var haxe_ds_StringMap = function() {
+	this.h = { };
+};
+haxe_ds_StringMap.__name__ = ["haxe","ds","StringMap"];
+haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
+haxe_ds_StringMap.prototype = {
+	setReserved: function(key,value) {
+		if(this.rh == null) {
+			this.rh = { };
+		}
+		this.rh["$" + key] = value;
+	}
+	,getReserved: function(key) {
+		if(this.rh == null) {
+			return null;
+		} else {
+			return this.rh["$" + key];
+		}
+	}
+	,existsReserved: function(key) {
+		if(this.rh == null) {
+			return false;
+		}
+		return this.rh.hasOwnProperty("$" + key);
+	}
+	,remove: function(key) {
+		if(__map_reserved[key] != null) {
+			key = "$" + key;
+			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.rh[key]);
+			return true;
+		} else {
+			if(!this.h.hasOwnProperty(key)) {
+				return false;
+			}
+			delete(this.h[key]);
+			return true;
+		}
+	}
+	,keys: function() {
+		return HxOverrides.iter(this.arrayKeys());
+	}
+	,arrayKeys: function() {
+		var out = [];
+		for( var key in this.h ) {
+		if(this.h.hasOwnProperty(key)) {
+			out.push(key);
+		}
+		}
+		if(this.rh != null) {
+			for( var key in this.rh ) {
+			if(key.charCodeAt(0) == 36) {
+				out.push(key.substr(1));
+			}
+			}
+		}
+		return out;
+	}
+	,__class__: haxe_ds_StringMap
+};
+var glaze_engine_components_Destroy = function(count) {
+	this.count = count;
+};
+glaze_engine_components_Destroy.__name__ = ["glaze","engine","components","Destroy"];
+glaze_engine_components_Destroy.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_Destroy.prototype = {
+	__class__: glaze_engine_components_Destroy
+};
+var glaze_engine_core_EngineLifecycle = function() {
+};
+glaze_engine_core_EngineLifecycle.__name__ = ["glaze","engine","core","EngineLifecycle"];
+glaze_engine_core_EngineLifecycle.onInitalize = function(entity) {
+	haxe_Log.trace("INITALIZE " + entity.name,{ fileName : "EngineLifecycle.hx", lineNumber : 27, className : "glaze.engine.core.EngineLifecycle", methodName : "onInitalize"});
+};
+glaze_engine_core_EngineLifecycle.onRunning = function(entity) {
+	haxe_Log.trace("RUNNING " + entity.name,{ fileName : "EngineLifecycle.hx", lineNumber : 31, className : "glaze.engine.core.EngineLifecycle", methodName : "onRunning"});
+};
+glaze_engine_core_EngineLifecycle.onDestroy = function(entity) {
+	haxe_Log.trace("DESTROY " + entity.name,{ fileName : "EngineLifecycle.hx", lineNumber : 35, className : "glaze.engine.core.EngineLifecycle", methodName : "onDestroy"});
+	entity.addComponent(new glaze_engine_components_Destroy(1));
+};
+glaze_engine_core_EngineLifecycle.onCleanup = function(entity) {
+	haxe_Log.trace("CLEANUP " + entity.name,{ fileName : "EngineLifecycle.hx", lineNumber : 40, className : "glaze.engine.core.EngineLifecycle", methodName : "onCleanup"});
+};
+glaze_engine_core_EngineLifecycle.CreateLifeCylce = function(_onInitalize,_onRunning,_onDestroy,_onCleanup) {
+	var _g = new haxe_ds_StringMap();
+	var value = _onInitalize != null?_onInitalize:glaze_engine_core_EngineLifecycle.onInitalize;
+	if(__map_reserved.initalize != null) {
+		_g.setReserved("initalize",value);
+	} else {
+		_g.h["initalize"] = value;
+	}
+	var value1 = _onRunning != null?_onRunning:glaze_engine_core_EngineLifecycle.onRunning;
+	if(__map_reserved.running != null) {
+		_g.setReserved("running",value1);
+	} else {
+		_g.h["running"] = value1;
+	}
+	var value2 = _onDestroy != null?_onDestroy:glaze_engine_core_EngineLifecycle.onDestroy;
+	if(__map_reserved.destroy != null) {
+		_g.setReserved("destroy",value2);
+	} else {
+		_g.h["destroy"] = value2;
+	}
+	var value3 = _onCleanup != null?_onCleanup:glaze_engine_core_EngineLifecycle.onCleanup;
+	if(__map_reserved.cleanup != null) {
+		_g.setReserved("cleanup",value3);
+	} else {
+		_g.h["cleanup"] = value3;
+	}
+	return _g;
+};
+glaze_engine_core_EngineLifecycle.prototype = {
+	__class__: glaze_engine_core_EngineLifecycle
+};
+var glaze_particle_emitter_IParticleEmitter = function() { };
+glaze_particle_emitter_IParticleEmitter.__name__ = ["glaze","particle","emitter","IParticleEmitter"];
+glaze_particle_emitter_IParticleEmitter.prototype = {
+	__class__: glaze_particle_emitter_IParticleEmitter
+};
+var glaze_particle_emitter_Explosion = function(mass,power) {
+	this.mass = mass;
+	this.power = power;
+};
+glaze_particle_emitter_Explosion.__name__ = ["glaze","particle","emitter","Explosion"];
+glaze_particle_emitter_Explosion.__interfaces__ = [glaze_particle_emitter_IParticleEmitter];
+glaze_particle_emitter_Explosion.prototype = {
+	update: function(time,entity,engine,spriteEngine) {
+		var position = entity.map.Position.coords;
+		var _g1 = 0;
+		var _g = this.mass;
+		while(_g1 < _g) {
+			++_g1;
+			var max = Math.PI * 2;
+			var angle = Math.random() * max;
+			var max1 = this.power * 2;
+			var p = Math.random() * max1;
+			var vx = Math.cos(angle) * p;
+			var vy = Math.sin(angle) * p;
+			engine.EmitParticle(position.x,position.y,vx,vy,0,1,Math.floor(Math.random() * 150 + 50),0.99,false,true,null,4,255,255,0,0);
+		}
+	}
+	,__class__: glaze_particle_emitter_Explosion
+};
+var glaze_engine_components_ParticleEmitters = function(emitters) {
+	this.emitters = emitters;
+};
+glaze_engine_components_ParticleEmitters.__name__ = ["glaze","engine","components","ParticleEmitters"];
+glaze_engine_components_ParticleEmitters.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_ParticleEmitters.prototype = {
+	__class__: glaze_engine_components_ParticleEmitters
+};
 var exile_entities_creatures_BeeFactory = function() {
 };
 exile_entities_creatures_BeeFactory.__name__ = ["exile","entities","creatures","BeeFactory"];
@@ -920,15 +1078,24 @@ exile_entities_creatures_BeeFactory.create = function(engine,position) {
 	beeBody.globalForceFactor = 0.0;
 	beeBody.maxScalarVelocity = 200;
 	var tmp = new exile_components_Bee();
-	var tmp1 = new glaze_engine_components_Extents(1.5,1.5);
-	var tmp2 = new glaze_engine_components_Display("insects");
-	var tmp3 = new glaze_physics_components_PhysicsBody(beeBody,true);
-	var tmp4 = new glaze_engine_components_Moveable();
-	var tmp5 = new glaze_physics_components_PhysicsCollision(false,null,[]);
-	var tmp6 = new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly");
-	var tmp7 = new glaze_ai_steering_behaviors_Wander(80,40,143.5);
+	var tmp1 = new glaze_engine_components_LifeCycle(exile_entities_creatures_BeeFactory.BEE_LIFECYCLE);
+	var tmp2 = new glaze_engine_components_Extents(1.5,1.5);
+	var tmp3 = new glaze_engine_components_Display("insects");
+	var tmp4 = new glaze_physics_components_PhysicsBody(beeBody,true);
+	var tmp5 = new glaze_engine_components_Moveable();
+	var tmp6 = new glaze_physics_components_PhysicsCollision(false,null,[]);
+	var tmp7 = new glaze_animation_components_SpriteAnimation("insects",["firefly"],"firefly");
+	var tmp8 = new glaze_ai_steering_behaviors_Wander(80,40,143.5);
 	var _this = position.coords;
-	return engine.createEntity([position,tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,new glaze_ai_steering_components_Steering([tmp7,new glaze_ai_steering_behaviors_Seek(new glaze_geom_Vector2(_this.x,_this.y),32)],glaze_ai_steering_SteeringAgentParameters.HEAVY_STEERING_PARAMS),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+	return engine.createEntity([position,tmp,tmp1,tmp2,tmp3,tmp4,tmp5,tmp6,tmp7,new glaze_ai_steering_components_Steering([tmp8,new glaze_ai_steering_behaviors_Seek(new glaze_geom_Vector2(_this.x,_this.y),32)],glaze_ai_steering_SteeringAgentParameters.HEAVY_STEERING_PARAMS),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bee");
+};
+exile_entities_creatures_BeeFactory.onInitalize = function(entity) {
+	haxe_Log.trace("INIT THE BEE " + entity.name,{ fileName : "BeeFactory.hx", lineNumber : 76, className : "exile.entities.creatures.BeeFactory", methodName : "onInitalize"});
+};
+exile_entities_creatures_BeeFactory.onDestroy = function(entity) {
+	haxe_Log.trace("DESTROY THE BEE " + entity.name,{ fileName : "BeeFactory.hx", lineNumber : 80, className : "exile.entities.creatures.BeeFactory", methodName : "onDestroy"});
+	entity.addComponent(new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_Explosion(1,200)]));
+	entity.addComponent(new glaze_engine_components_Destroy(2));
 };
 exile_entities_creatures_BeeFactory.prototype = {
 	__class__: exile_entities_creatures_BeeFactory
@@ -1067,13 +1234,13 @@ exile_systems_BeeHiveSystem.prototype = $extend(glaze_eco_core_System.prototype,
 				if(Math.random() < 0.01) {
 					var newBee = exile_entities_creatures_BeeFactory.create(this.engine,entity.map.Position.clone());
 					newBee.parent = entity;
-					newBee.messages.add($bind(this,this.beeDestroyed));
+					newBee.messages.add($bind(this,this.onDestroy));
 					beehive.bees.push(newBee);
 				}
 			}
 		}
 	}
-	,beeDestroyed: function(entity,channel,data) {
+	,onDestroy: function(entity,channel,data) {
 		if(channel == "destroy") {
 			if(entity.parent != null) {
 				HxOverrides.remove(entity.parent.map.BeeHive.bees,entity);
@@ -1095,18 +1262,6 @@ exile_systems_BeeSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	,entityRemoved: function(entity) {
 	}
 	,update: function(timestamp,delta) {
-		var _g = 0;
-		var _g1 = this.view.entities;
-		while(_g < _g1.length) {
-			var entity = _g1[_g];
-			++_g;
-			var health = entity.map.Health;
-			var age = entity.map.Age;
-			if(health.currentHealth <= 0 || age.age > age.ttl) {
-				entity.addComponent(new glaze_engine_components_ParticleEmitters([new glaze_particle_emitter_Explosion(1,200)]));
-				entity.addComponent(new glaze_engine_components_Destroy(2));
-			}
-		}
 	}
 	,__class__: exile_systems_BeeSystem
 });
@@ -1174,6 +1329,18 @@ var exile_systems_BirdSystem = function(broadphase) {
 	this.bfAreaQuery = new glaze_util_BroadphaseAreaQuery(broadphase);
 };
 exile_systems_BirdSystem.__name__ = ["exile","systems","BirdSystem"];
+exile_systems_BirdSystem.create = function(engine,position,follow,nest) {
+	var birdBody = new glaze_physics_Body(new glaze_physics_Material());
+	birdBody.setMass(1);
+	birdBody.setBounces(0);
+	birdBody.globalForceFactor = 0.0;
+	birdBody.maxScalarVelocity = 200;
+	var map = engine.config.map;
+	return engine.createEntity([position,new exile_components_Bird(nest),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(55,80,0.3),new glaze_ai_steering_behaviors_Arrival(follow.coords,256),new glaze_ai_steering_behaviors_WallAvoidance(map,60)]),new glaze_engine_components_Age(10000),new glaze_engine_components_Health(10,10,0),new glaze_engine_components_Active()],"bird");
+};
+exile_systems_BirdSystem.destroy = function(entity) {
+	haxe_Log.trace("bang",{ fileName : "BirdSystem.hx", lineNumber : 170, className : "exile.systems.BirdSystem", methodName : "destroy"});
+};
 exile_systems_BirdSystem.__super__ = glaze_eco_core_System;
 exile_systems_BirdSystem.prototype = $extend(glaze_eco_core_System.prototype,{
 	entityAdded: function(entity) {
@@ -1895,7 +2062,7 @@ glaze_ai_behaviortree_Behavior.prototype = {
 		this.status = glaze_ai_behaviortree_BehaviorStatus.Aborted;
 	}
 	,tick: function(context) {
-		if(this.debugLevel > 0) {
+		if(this.debugLevel > 0 && this.description != null) {
 			haxe_Log.trace("BT Log:" + this.description,{ fileName : "Behavior.hx", lineNumber : 79, className : "glaze.ai.behaviortree.Behavior", methodName : "tick"});
 		}
 		if(this.debugLevel > 1) {
@@ -1944,70 +2111,6 @@ glaze_ai_behaviortree_BehaviorStatus.Failure.__enum__ = glaze_ai_behaviortree_Be
 glaze_ai_behaviortree_BehaviorStatus.Aborted = ["Aborted",4];
 glaze_ai_behaviortree_BehaviorStatus.Aborted.toString = $estr;
 glaze_ai_behaviortree_BehaviorStatus.Aborted.__enum__ = glaze_ai_behaviortree_BehaviorStatus;
-var haxe_IMap = function() { };
-haxe_IMap.__name__ = ["haxe","IMap"];
-var haxe_ds_StringMap = function() {
-	this.h = { };
-};
-haxe_ds_StringMap.__name__ = ["haxe","ds","StringMap"];
-haxe_ds_StringMap.__interfaces__ = [haxe_IMap];
-haxe_ds_StringMap.prototype = {
-	setReserved: function(key,value) {
-		if(this.rh == null) {
-			this.rh = { };
-		}
-		this.rh["$" + key] = value;
-	}
-	,getReserved: function(key) {
-		if(this.rh == null) {
-			return null;
-		} else {
-			return this.rh["$" + key];
-		}
-	}
-	,existsReserved: function(key) {
-		if(this.rh == null) {
-			return false;
-		}
-		return this.rh.hasOwnProperty("$" + key);
-	}
-	,remove: function(key) {
-		if(__map_reserved[key] != null) {
-			key = "$" + key;
-			if(this.rh == null || !this.rh.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.rh[key]);
-			return true;
-		} else {
-			if(!this.h.hasOwnProperty(key)) {
-				return false;
-			}
-			delete(this.h[key]);
-			return true;
-		}
-	}
-	,keys: function() {
-		return HxOverrides.iter(this.arrayKeys());
-	}
-	,arrayKeys: function() {
-		var out = [];
-		for( var key in this.h ) {
-		if(this.h.hasOwnProperty(key)) {
-			out.push(key);
-		}
-		}
-		if(this.rh != null) {
-			for( var key in this.rh ) {
-			if(key.charCodeAt(0) == 36) {
-				out.push(key.substr(1));
-			}
-			}
-		}
-		return out;
-	}
-	,__class__: haxe_ds_StringMap
-};
 var glaze_ai_behaviortree_Composite = function() {
 	glaze_ai_behaviortree_Behavior.call(this);
 	this.children = new List();
@@ -2610,6 +2713,74 @@ glaze_ai_faction_components_Personality.prototype = {
 		haxe_Log.trace("Damage from " + sourceEntity.name,{ fileName : "Personality.hx", lineNumber : 11, className : "glaze.ai.faction.components.Personality", methodName : "applyDamage"});
 	}
 	,__class__: glaze_ai_faction_components_Personality
+};
+var glaze_ai_fsm_DefaultStateMachine = function(owner) {
+	this.owner = owner;
+};
+glaze_ai_fsm_DefaultStateMachine.__name__ = ["glaze","ai","fsm","DefaultStateMachine"];
+glaze_ai_fsm_DefaultStateMachine.prototype = {
+	changeState: function(newState) {
+		if(newState == this.currentState) {
+			return;
+		}
+		this.previousState = this.currentState;
+		if(this.currentState != null) {
+			this.currentState.exit(this.owner);
+		}
+		this.currentState = newState;
+		if(this.currentState != null) {
+			this.currentState.enter(this.owner);
+		}
+	}
+	,update: function() {
+		if(this.globalState != null) {
+			this.globalState.update(this.owner);
+		}
+		if(this.currentState != null) {
+			this.currentState.update(this.owner);
+		}
+	}
+	,__class__: glaze_ai_fsm_DefaultStateMachine
+};
+var glaze_ai_fsm_IState = function() { };
+glaze_ai_fsm_IState.__name__ = ["glaze","ai","fsm","IState"];
+glaze_ai_fsm_IState.prototype = {
+	__class__: glaze_ai_fsm_IState
+};
+var glaze_ai_fsm_TestState = function() {
+};
+glaze_ai_fsm_TestState.__name__ = ["glaze","ai","fsm","TestState"];
+glaze_ai_fsm_TestState.__interfaces__ = [glaze_ai_fsm_IState];
+glaze_ai_fsm_TestState.prototype = {
+	enter: function(entity) {
+	}
+	,update: function(entity) {
+	}
+	,exit: function(entity) {
+	}
+	,message: function(entity,message) {
+	}
+	,__class__: glaze_ai_fsm_TestState
+};
+var glaze_ai_fsm_LightStateMachine = function(states) {
+	this.states = states;
+};
+glaze_ai_fsm_LightStateMachine.__name__ = ["glaze","ai","fsm","LightStateMachine"];
+glaze_ai_fsm_LightStateMachine.prototype = {
+	changeState: function(owner,newState) {
+		if(newState == this.currentState) {
+			return this.currentState;
+		}
+		var _this = this.states;
+		if(!(__map_reserved[newState] != null?_this.existsReserved(newState):_this.h.hasOwnProperty(newState))) {
+			return this.currentState;
+		}
+		this.currentState = newState;
+		var _this1 = this.states;
+		(__map_reserved[newState] != null?_this1.getReserved(newState):_this1.h[newState])(owner);
+		return newState;
+	}
+	,__class__: glaze_ai_fsm_LightStateMachine
 };
 var glaze_ai_navigation_IPathfinder = function() { };
 glaze_ai_navigation_IPathfinder.__name__ = ["glaze","ai","navigation","IPathfinder"];
@@ -4078,16 +4249,16 @@ glaze_ds_EntityCollection.prototype = {
 					node1.prev = node;
 				}
 			} else {
-				var node2 = _this1.tail;
+				var node11 = _this1.tail;
 				_this1.length++;
-				node.prev = node2;
-				node.next = node2.next;
-				if(node2.next == null) {
+				node.prev = node11;
+				node.next = node11.next;
+				if(node11.next == null) {
 					_this1.tail = node;
 				} else {
-					node2.next.prev = node;
+					node11.next.prev = node;
 				}
-				node2.next = node;
+				node11.next = node;
 			}
 		}
 	}
@@ -4167,10 +4338,7 @@ var glaze_eco_core_Engine = function() {
 glaze_eco_core_Engine.__name__ = ["glaze","eco","core","Engine"];
 glaze_eco_core_Engine.prototype = {
 	createEntity: function(components,name) {
-		var entity = new glaze_eco_core_Entity(this,components);
-		if(name != null) {
-			entity.name = name;
-		}
+		var entity = new glaze_eco_core_Entity(this,components,name);
 		entity.id = this.idCount++;
 		this.entities.push(entity);
 		return entity;
@@ -4217,13 +4385,14 @@ glaze_eco_core_Engine.prototype = {
 	}
 	,__class__: glaze_eco_core_Engine
 };
-var glaze_eco_core_Entity = function(engine,components) {
+var glaze_eco_core_Entity = function(engine,components,name) {
 	this.referenceCount = 0;
 	this.messages = new glaze_signals_Signal3();
 	this.children = [];
 	this.map = { };
 	this.id = 0;
 	this.engine = engine;
+	this.name = name;
 	if(components != null) {
 		this.addManyComponent(components);
 	}
@@ -4549,13 +4718,18 @@ glaze_engine_components_Active.prototype = {
 	__class__: glaze_engine_components_Active
 };
 var glaze_engine_components_Age = function(ttl) {
+	this.stateOnExpired = "destroy";
 	this.ttl = ttl;
 	this.age = 0;
 };
 glaze_engine_components_Age.__name__ = ["glaze","engine","components","Age"];
 glaze_engine_components_Age.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Age.prototype = {
-	isExpired: function() {
+	growOlder: function(tick) {
+		this.age += tick;
+		return this.age > this.ttl;
+	}
+	,isExpired: function() {
 		return this.age > this.ttl;
 	}
 	,reset: function() {
@@ -4581,14 +4755,6 @@ glaze_engine_components_CollidableSwitch.prototype = {
 		return true;
 	}
 	,__class__: glaze_engine_components_CollidableSwitch
-};
-var glaze_engine_components_Destroy = function(count) {
-	this.count = count;
-};
-glaze_engine_components_Destroy.__name__ = ["glaze","engine","components","Destroy"];
-glaze_engine_components_Destroy.__interfaces__ = [glaze_eco_core_IComponent];
-glaze_engine_components_Destroy.prototype = {
-	__class__: glaze_engine_components_Destroy
 };
 var glaze_engine_components_Display = function(frameListId,initialFrameId) {
 	this.frameListId = frameListId;
@@ -4656,6 +4822,7 @@ glaze_engine_components_Fixed.prototype = {
 	__class__: glaze_engine_components_Fixed
 };
 var glaze_engine_components_Health = function(maxHealth,currentHealth,recoveryPerSecond) {
+	this.stateOnNoHealth = "destroy";
 	this.maxHealth = maxHealth;
 	this.currentHealth = currentHealth;
 	this.recoveryPerSecond = recoveryPerSecond;
@@ -4763,20 +4930,20 @@ glaze_engine_components_Inventory.prototype = {
 	}
 	,__class__: glaze_engine_components_Inventory
 };
+var glaze_engine_components_LifeCycle = function(states) {
+	this.state = new glaze_ai_fsm_LightStateMachine(states);
+};
+glaze_engine_components_LifeCycle.__name__ = ["glaze","engine","components","LifeCycle"];
+glaze_engine_components_LifeCycle.__interfaces__ = [glaze_eco_core_IComponent];
+glaze_engine_components_LifeCycle.prototype = {
+	__class__: glaze_engine_components_LifeCycle
+};
 var glaze_engine_components_Moveable = function() {
 };
 glaze_engine_components_Moveable.__name__ = ["glaze","engine","components","Moveable"];
 glaze_engine_components_Moveable.__interfaces__ = [glaze_eco_core_IComponent];
 glaze_engine_components_Moveable.prototype = {
 	__class__: glaze_engine_components_Moveable
-};
-var glaze_engine_components_ParticleEmitters = function(emitters) {
-	this.emitters = emitters;
-};
-glaze_engine_components_ParticleEmitters.__name__ = ["glaze","engine","components","ParticleEmitters"];
-glaze_engine_components_ParticleEmitters.__interfaces__ = [glaze_eco_core_IComponent];
-glaze_engine_components_ParticleEmitters.prototype = {
-	__class__: glaze_engine_components_ParticleEmitters
 };
 var glaze_engine_components_Position = function(x,y) {
 	this.coords = new glaze_geom_Vector2(x,y);
@@ -5337,7 +5504,15 @@ glaze_engine_systems_AgeSystem.prototype = $extend(glaze_eco_core_System.prototy
 		while(_g < _g1.length) {
 			var entity = _g1[_g];
 			++_g;
-			entity.map.Age.age += delta;
+			var age = entity.map.Age;
+			if(age.growOlder(delta)) {
+				if(age.stateOnExpired != null) {
+					var lifecycle = entity.map.LifeCycle;
+					if(lifecycle != null) {
+						lifecycle.state.changeState(entity,age.stateOnExpired);
+					}
+				}
+			}
 		}
 	}
 	,__class__: glaze_engine_systems_AgeSystem
@@ -5410,6 +5585,10 @@ glaze_engine_systems_DestroySystem.prototype = $extend(glaze_eco_core_System.pro
 		while(count > 0) {
 			var entity = this.view.entities[next];
 			if(entity.map.Destroy.count-- <= 0) {
+				var lifecycle = entity.map.LifeCycle;
+				if(lifecycle != null) {
+					lifecycle.state.changeState(entity,"cleanup");
+				}
 				entity.destroy();
 			} else {
 				++next;
@@ -5436,7 +5615,14 @@ glaze_engine_systems_HealthSystem.prototype = $extend(glaze_eco_core_System.prot
 			var entity = _g1[_g];
 			++_g;
 			var health = entity.map.Health;
-			if(!(health.currentHealth <= 0)) {
+			if(health.currentHealth <= 0) {
+				if(health.stateOnNoHealth != null) {
+					var lifecycle = entity.map.LifeCycle;
+					if(lifecycle != null) {
+						lifecycle.state.changeState(entity,health.stateOnNoHealth);
+					}
+				}
+			} else {
 				health.currentHealth = Math.min(health.maxHealth,health.currentHealth + health.recoveryPerMs * delta);
 			}
 		}
@@ -5499,9 +5685,9 @@ glaze_engine_systems_HeldSystem.prototype = $extend(glaze_eco_core_System.protot
 			var v = _this.coords;
 			_this1.x = v.x;
 			_this1.y = v.y;
-			var _this2 = _this.coords;
-			_this2.x = position.x;
-			_this2.y = position.y;
+			var _this11 = _this.coords;
+			_this11.x = position.x;
+			_this11.y = position.y;
 		}
 	}
 	,callback: function(a,b,contact) {
@@ -5614,6 +5800,21 @@ glaze_engine_systems_InventorySystem.prototype = $extend(glaze_eco_core_System.p
 		return null;
 	}
 	,__class__: glaze_engine_systems_InventorySystem
+});
+var glaze_engine_systems_LifecycleSystem = function() {
+	glaze_eco_core_System.call(this,[glaze_engine_components_LifeCycle]);
+};
+glaze_engine_systems_LifecycleSystem.__name__ = ["glaze","engine","systems","LifecycleSystem"];
+glaze_engine_systems_LifecycleSystem.__super__ = glaze_eco_core_System;
+glaze_engine_systems_LifecycleSystem.prototype = $extend(glaze_eco_core_System.prototype,{
+	entityAdded: function(entity) {
+		entity.map.LifeCycle.state.changeState(entity,"initalize");
+	}
+	,entityRemoved: function(entity) {
+	}
+	,update: function(timestamp,delta) {
+	}
+	,__class__: glaze_engine_systems_LifecycleSystem
 });
 var glaze_engine_systems_ParticleSystem = function(particleEngine,spriteParticleEngine) {
 	glaze_eco_core_System.call(this,[glaze_engine_components_Position,glaze_engine_components_ParticleEmitters,glaze_engine_components_Active]);
@@ -7030,35 +7231,6 @@ glaze_particle_SpriteParticleSequence.prototype = {
 		return this.sequence.length / this.fps * 1000;
 	}
 	,__class__: glaze_particle_SpriteParticleSequence
-};
-var glaze_particle_emitter_IParticleEmitter = function() { };
-glaze_particle_emitter_IParticleEmitter.__name__ = ["glaze","particle","emitter","IParticleEmitter"];
-glaze_particle_emitter_IParticleEmitter.prototype = {
-	__class__: glaze_particle_emitter_IParticleEmitter
-};
-var glaze_particle_emitter_Explosion = function(mass,power) {
-	this.mass = mass;
-	this.power = power;
-};
-glaze_particle_emitter_Explosion.__name__ = ["glaze","particle","emitter","Explosion"];
-glaze_particle_emitter_Explosion.__interfaces__ = [glaze_particle_emitter_IParticleEmitter];
-glaze_particle_emitter_Explosion.prototype = {
-	update: function(time,entity,engine,spriteEngine) {
-		var position = entity.map.Position.coords;
-		var _g1 = 0;
-		var _g = this.mass;
-		while(_g1 < _g) {
-			++_g1;
-			var max = Math.PI * 2;
-			var angle = Math.random() * max;
-			var max1 = this.power * 2;
-			var p = Math.random() * max1;
-			var vx = Math.cos(angle) * p;
-			var vy = Math.sin(angle) * p;
-			engine.EmitParticle(position.x,position.y,vx,vy,0,1,Math.floor(Math.random() * 150 + 50),0.99,false,true,null,4,255,255,0,0);
-		}
-	}
-	,__class__: glaze_particle_emitter_Explosion
 };
 var glaze_particle_emitter_FireballEmitter = function(rate,speed) {
 	this.rate = rate;
@@ -16605,11 +16777,11 @@ exile_ExileFilters.SOLID_OBJECT_GROUP = 1;
 exile_components_Bee.NAME = "Bee";
 exile_components_Bee.ID = 37;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 38;
+exile_components_BeeHive.ID = 14;
 exile_components_Bird.NAME = "Bird";
-exile_components_Bird.ID = 0;
+exile_components_Bird.ID = 8;
 exile_components_BirdNest.NAME = "BirdNest";
-exile_components_BirdNest.ID = 20;
+exile_components_BirdNest.ID = 9;
 exile_components_Chicken.NAME = "Chicken";
 exile_components_Chicken.ID = 17;
 exile_components_Door.NAME = "Door";
@@ -16628,6 +16800,53 @@ exile_components_Rabbit.NAME = "Rabbit";
 exile_components_Rabbit.ID = 10;
 exile_components_Teleporter.NAME = "Teleporter";
 exile_components_Teleporter.ID = 39;
+glaze_engine_components_Destroy.NAME = "Destroy";
+glaze_engine_components_Destroy.ID = 21;
+glaze_engine_core_EngineLifecycle.INITALIZE = "initalize";
+glaze_engine_core_EngineLifecycle.RUNNING = "running";
+glaze_engine_core_EngineLifecycle.DESTROY = "destroy";
+glaze_engine_core_EngineLifecycle.CLEANUP = "cleanup";
+glaze_engine_core_EngineLifecycle.LIFECYCLE_SET = (function($this) {
+	var $r;
+	var _g = new haxe_ds_StringMap();
+	{
+		var value = glaze_engine_core_EngineLifecycle.onInitalize;
+		if(__map_reserved.initalize != null) {
+			_g.setReserved("initalize",value);
+		} else {
+			_g.h["initalize"] = value;
+		}
+	}
+	{
+		var value1 = glaze_engine_core_EngineLifecycle.onRunning;
+		if(__map_reserved.running != null) {
+			_g.setReserved("running",value1);
+		} else {
+			_g.h["running"] = value1;
+		}
+	}
+	{
+		var value2 = glaze_engine_core_EngineLifecycle.onDestroy;
+		if(__map_reserved.destroy != null) {
+			_g.setReserved("destroy",value2);
+		} else {
+			_g.h["destroy"] = value2;
+		}
+	}
+	{
+		var value3 = glaze_engine_core_EngineLifecycle.onCleanup;
+		if(__map_reserved.cleanup != null) {
+			_g.setReserved("cleanup",value3);
+		} else {
+			_g.h["cleanup"] = value3;
+		}
+	}
+	$r = _g;
+	return $r;
+}(this));
+glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
+glaze_engine_components_ParticleEmitters.ID = 12;
+exile_entities_creatures_BeeFactory.BEE_LIFECYCLE = glaze_engine_core_EngineLifecycle.CreateLifeCylce(exile_entities_creatures_BeeFactory.onInitalize,null,exile_entities_creatures_BeeFactory.onDestroy,null);
 exile_entities_weapon_HandGrenadeFactory.count = 0;
 exile_util_CharacterController2.BASE_FORCE = 600;
 exile_util_CharacterController2.WALK_FORCE = 1200.;
@@ -16636,13 +16855,14 @@ exile_util_CharacterController2.JUMP_FORCE = 18000.;
 exile_util_CharacterController2.MAX_AIR_HORIZONTAL_VELOCITY = 300.;
 exile_util_CharacterController2.MAX_BURN = 3000.;
 exile_util_CharacterController2.BOOST_FACTOR = 1.4;
+glaze_EngineConstants.TIMESTEP = 16.6666666666666679;
 glaze_EngineConstants.TILE_SIZE = 16;
 glaze_ai_behaviortree_BehaviorTree.defaultBehaviours = [glaze_ai_behaviortree_branch_Monitor,glaze_ai_behaviortree_branch_Parallel,glaze_ai_behaviortree_branch_Selector,glaze_ai_behaviortree_branch_Sequence,glaze_ai_behaviortree_decorator_Invert,glaze_ai_behaviortree_decorator_Repeat,glaze_ai_behaviortree_decorator_RepeatUntilSuccess,glaze_ai_behaviortree_decorator_RepeatUntilFail,glaze_ai_behaviortree_leaf_CopyContextData,glaze_ai_behaviortree_leaf_Failure,glaze_ai_behaviortree_leaf_FunctionExecutorAction,glaze_ai_behaviortree_leaf_Logger,glaze_ai_behaviortree_leaf_SetContextData,glaze_ai_behaviortree_leaf_Success];
 glaze_ai_behaviortree_BehaviorTree.extendedBehaviours = [glaze_engine_actions_Delay,glaze_engine_actions_CanSee,glaze_engine_actions_FindTarget,glaze_engine_actions_WanderToTarget,glaze_engine_actions_SeekTarget];
 glaze_ai_behaviortree_BehaviorTree.behaviours = new haxe_ds_StringMap();
 glaze_ai_behaviortree_BehaviorTree.scripts = new haxe_ds_StringMap();
 glaze_ai_faction_components_Personality.NAME = "Personality";
-glaze_ai_faction_components_Personality.ID = 9;
+glaze_ai_faction_components_Personality.ID = 3;
 glaze_ai_steering_SteeringAgentParameters.default_scale = .2;
 glaze_ai_steering_SteeringAgentParameters.heavy_scale = 5;
 glaze_ai_steering_SteeringAgentParameters.default_maxAcceleration = 100;
@@ -16723,11 +16943,9 @@ glaze_engine_components_AI.ID = 2;
 glaze_engine_components_Active.NAME = "Active";
 glaze_engine_components_Active.ID = 33;
 glaze_engine_components_Age.NAME = "Age";
-glaze_engine_components_Age.ID = 32;
+glaze_engine_components_Age.ID = 1;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_CollidableSwitch.ID = 8;
-glaze_engine_components_Destroy.NAME = "Destroy";
-glaze_engine_components_Destroy.ID = 21;
 glaze_engine_components_Display.NAME = "Display";
 glaze_engine_components_Display.ID = 31;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
@@ -16737,29 +16955,29 @@ glaze_engine_components_Extents.ID = 36;
 glaze_engine_components_Fixed.NAME = "Fixed";
 glaze_engine_components_Fixed.ID = 19;
 glaze_engine_components_Health.NAME = "Health";
-glaze_engine_components_Health.ID = 30;
+glaze_engine_components_Health.ID = 0;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 44;
+glaze_engine_components_Held.ID = 15;
 glaze_engine_components_Holdable.NAME = "Holdable";
 glaze_engine_components_Holdable.ID = 6;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 12;
+glaze_engine_components_Holder.ID = 5;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 11;
+glaze_engine_components_Inventory.ID = 4;
+glaze_engine_components_LifeCycle.NAME = "LifeCycle";
+glaze_engine_components_LifeCycle.ID = 13;
 glaze_engine_components_Moveable.NAME = "Moveable";
 glaze_engine_components_Moveable.ID = 29;
-glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 28;
 glaze_engine_components_Position.NAME = "Position";
 glaze_engine_components_Position.ID = 35;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 1;
+glaze_engine_components_Script.ID = 11;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 15;
+glaze_engine_components_State.ID = 6;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 5;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 16;
+glaze_engine_components_TileDisplay.ID = 7;
 glaze_engine_components_Viewable.NAME = "Viewable";
 glaze_engine_components_Viewable.ID = 23;
 glaze_engine_components_Water.NAME = "Water";
@@ -16796,7 +17014,7 @@ glaze_physics_components_ContactRouter.ID = 1;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
 glaze_physics_components_PhysicsBody.ID = 25;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 24;
+glaze_physics_components_PhysicsCollision.ID = 10;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
 glaze_physics_components_PhysicsConstraints.ID = 0;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];

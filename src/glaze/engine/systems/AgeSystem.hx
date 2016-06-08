@@ -4,6 +4,7 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Active;
 import glaze.engine.components.Age;
+import glaze.engine.components.LifeCycle;
 
 class AgeSystem extends System {
 
@@ -20,7 +21,13 @@ class AgeSystem extends System {
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
             var age = entity.getComponent(Age);
-            age.age+=delta;
+            if (age.growOlder(delta)) {
+                if (age.stateOnExpired!=null) {
+                    var lifecycle = entity.getComponent(LifeCycle);
+                    if (lifecycle!=null)
+                        lifecycle.state.changeState(entity,age.stateOnExpired);
+                }
+            }
         }
     }
 

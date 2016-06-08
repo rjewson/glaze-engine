@@ -5,7 +5,9 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Active;
 import glaze.engine.components.Destroy;
+import glaze.engine.components.LifeCycle;
 import glaze.engine.components.Script;
+import glaze.engine.core.EngineLifecycle;
 
 class DestroySystem extends System {
 
@@ -25,6 +27,10 @@ class DestroySystem extends System {
         while (count>0) {
             var entity = view.entities[next];
             if ((entity.getComponent(Destroy).count--)<=0) {
+                //Todo lifecycle stuff
+                var lifecycle = entity.getComponent(LifeCycle);
+                if (lifecycle!=null)
+                    lifecycle.state.changeState(entity,EngineLifecycle.CLEANUP);
                 entity.destroy();
             } else {
                 next++;

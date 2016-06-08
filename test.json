@@ -4,34 +4,36 @@
 		"localname":"qualified.name",
 		"localname2":"qualified.name2"
 	},
-	"debug":1,
+	"parameters":{
+		"home":"glaze.geom.Vector2"
+	},
+	"debug":0,
 	"tree":{
 		"type":"repeat",
-		"description":"Main outside Repeat:forever",
 		"params":[0],
 		"children":[
 			{
 				"type":"sequence",
 				"children":[
-					{	"type":"CopyContextData","params":["home","target"],"description":"Copy 'home' to 'target"},
-					{	"type":"WanderToTarget","params":[128]},
+					{	"type":"CopyContextData","params":["home","target"],"description":"Copy 'home' to 'target'"},
+					{	"type":"WanderToTarget","params":[128],"description":"Going Home"},
 					{	"type":"RepeatUntilSuccess",
 						"children":[
 							{	"type":"sequence",
 								"children":[
 									{"type":"delay","params":[1000]},
-									{"type":"FindTarget"}
+									{"type":"FindTarget","description":"Look for target"}
 								]
 							}
 						]
 					},
-					{	"type":"SeekTarget"},
+					{	"type":"SeekTarget","description":"Found target, seeking"},
 					{	"type":"RepeatUntilFail",
 						"children":[
 							{	"type":"sequence",
 								"children":[
 									{"type":"delay","params":[1000]},
-									{"type":"CanSee"}
+									{"type":"CanSee","description":"Still seeking"}
 								]
 							}
 						]

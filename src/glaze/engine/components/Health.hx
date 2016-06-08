@@ -1,6 +1,7 @@
 package glaze.engine.components;
 
 import glaze.eco.core.IComponent;
+import glaze.engine.core.EngineLifecycle;
 
 class Health implements IComponent {
     
@@ -8,6 +9,8 @@ class Health implements IComponent {
 	public var currentHealth:Float;
 	public var recoveryPerSecond:Float;
 	public var recoveryPerMs:Float;
+
+	public var stateOnNoHealth:String = EngineLifecycle.DESTROY;
 
 	public function new(maxHealth:Float,currentHealth:Float,recoveryPerSecond:Float):Void {
 	    this.maxHealth = maxHealth;

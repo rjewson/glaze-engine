@@ -31,14 +31,14 @@ class BeeSystem extends System {
     }
 
     override public function update(timestamp:Float,delta:Float) {
-        for (entity in view.entities) {
-            var health = entity.getComponent(Health);
-            var age = entity.getComponent(Age);
-            if (health.isDead()||age.isExpired()) {
-                entity.addComponent(new glaze.engine.components.ParticleEmitters([new glaze.particle.emitter.Explosion(1,200)]));
-                entity.addComponent(new Destroy(2)); 
-            }
-        }
+        // for (entity in view.entities) {
+        //     var health = entity.getComponent(Health);
+        //     var age = entity.getComponent(Age);
+        //     if (health.isDead()||age.isExpired()) {
+        //         entity.addComponent(new glaze.engine.components.ParticleEmitters([new glaze.particle.emitter.Explosion(1,200)]));
+        //         entity.addComponent(new Destroy(2)); 
+        //     }
+        // }
     }
 
 }

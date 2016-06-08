@@ -20,7 +20,7 @@ class GameEngine {
         this.canvas = canvas;
         loop = new GameLoop();
         loop.updateFunc = update;
-
+ 
         input = new DigitalInput();
         var rect = canvas.getBoundingClientRect();
         input.InputTarget(js.Browser.document,new Vector2(rect.left,rect.top));
