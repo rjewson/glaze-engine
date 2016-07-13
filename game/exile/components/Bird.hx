@@ -7,13 +7,13 @@ import glaze.eco.core.Entity;
 import glaze.eco.core.IComponent;
 import glaze.eco.core.Entity;
 import glaze.util.IntervalDelay;
-import glaze.ai.stackfsm.LWStackFSM;
+import glaze.ai.fsm.LightStackStateMachine;
 
 class Bird implements IComponent {
 
 	public var nest:Entity; 
 
-	public var ai:LWStackFSM<Entity>;
+	public var ai:LightStackStateMachine<Entity>;
 	public var ai2:Behavior;
 	public var ctx:BehaviorContext;
 
@@ -24,7 +24,7 @@ class Bird implements IComponent {
 
 	public function new(nest:Entity) {
 		this.nest = nest;
-		ai = new LWStackFSM<Entity>();
+		ai = new LightStackStateMachine<Entity>();
 		delay = new IntervalDelay(1000);
 		chaseCheck = new IntervalDelay(100);
 	}

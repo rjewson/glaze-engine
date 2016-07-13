@@ -24,6 +24,7 @@ class PhysicsPositionSystem extends System {
             var position = entity.getComponent(Position);
             body.updatePosition();
             position.update(body.position);
+            // position.updatePosition(entity,body.position);
         }
     }
 }

@@ -22,11 +22,8 @@ class AgeSystem extends System {
         for (entity in view.entities) {
             var age = entity.getComponent(Age);
             if (age.growOlder(delta)) {
-                if (age.stateOnExpired!=null) {
-                    var lifecycle = entity.getComponent(LifeCycle);
-                    if (lifecycle!=null)
-                        lifecycle.state.changeState(entity,age.stateOnExpired);
-                }
+                if (age.onExpire!=null)
+                    age.onExpire(entity);
             }
         }
     }

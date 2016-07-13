@@ -37,4 +37,9 @@ class LightStateMachine {
 		return newState;
 	}
 
+	public function updateState(owner:Entity) {
+		if (states.exists(currentState))
+			states.get(currentState)(owner);
+	}
+
 }

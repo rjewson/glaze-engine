@@ -7,7 +7,7 @@
 	"parameters":{
 		"home":"glaze.geom.Vector2"
 	},
-	"debug":0,
+	"debug":1,
 	"tree":{
 		"type":"repeat",
 		"params":[0],

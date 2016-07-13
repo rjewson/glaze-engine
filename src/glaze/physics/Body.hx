@@ -186,7 +186,7 @@ class Body
         return false;
     }
 
-    public function updatePosition() {
+    public inline function updatePosition() {
         if (skip||isSleeping) return;
         //Its a bullet and it hit something?
         if (isBullet) {

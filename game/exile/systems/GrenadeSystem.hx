@@ -1,6 +1,7 @@
 package exile.systems;
 
 import exile.components.Grenade;
+import glaze.ai.fsm.LightStackStateMachine;
 import glaze.eco.core.Entity;
 import glaze.eco.core.System;
 import glaze.engine.components.Active;
@@ -36,11 +37,13 @@ class GrenadeSystem extends System {
     override public function entityAdded(entity:Entity) {    
         var state = entity.getComponent(State);
         scp.registerState(state);
+
     }
 
     override public function entityRemoved(entity:Entity) {
         var state = entity.getComponent(State);
         scp.unregisterState(state);
+
     }
 
     override public function update(timestamp:Float,delta:Float) {
@@ -84,14 +87,18 @@ class GrenadeSystem extends System {
 
     public function on(state:State) {
         trace("active");
-        state.owner.addComponent(new Age(2000));
+        state.owner.addComponent(new Age(2000,null));
     }
 
     public function off(state:State) {
         trace("inactive");
-        state.owner.removeComponent(state.owner.getComponent(State));
+        state.owner.removeComponent(state.owner.getComponent(Age));
     }
 
+    function activeState(entity:Entity,fsm:LWFSME,delta:Float) {
+        var grenade = entity.getComponent(Grenade);
+        grenade.fuse-=delta;
+    }
 
 
 }

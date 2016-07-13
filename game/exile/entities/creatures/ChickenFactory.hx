@@ -9,14 +9,17 @@ import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
 import glaze.engine.components.Active;
 import glaze.engine.components.Age;
+import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
 import glaze.engine.components.Holdable;
+import glaze.engine.components.LifeCycle;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
 import glaze.engine.components.Script;
+import glaze.engine.core.EngineLifecycle.CreateLifeCylce;
 import glaze.lighting.components.Light;
 import glaze.physics.Body;
 import glaze.physics.collision.Filter;
@@ -27,6 +30,8 @@ import glaze.render.frame.Frame;
 import glaze.render.frame.FrameList;
 
 class ChickenFactory {
+
+    public static var CHICKEN_LIFECYCLE = CreateLifeCylce(null,null,onDestroy,null);
 
 	public function new() {
 	}   
@@ -46,6 +51,7 @@ class ChickenFactory {
         var chicken = engine.createEntity([
             position, 
             new Chicken(),
+            // new LifeCycle(CHICKEN_LIFECYCLE),
             new Extents(12,12),
             new Display("chicken"), 
             new PhysicsCollision(false,filter,[]),
@@ -53,11 +59,18 @@ class ChickenFactory {
             new Moveable(),
             new Holdable(),
             new SpriteAnimation("chicken",["walk"],"walk"),
-            new Health(10,10,0),
+            new Health(10,10,0,onDestroy),
             new Active()
         ],"chicken"); 
 
         return chicken; 	    
 	}
+
+    public static function onDestroy(entity:Entity) {
+        trace('DESTROY THE CHICKEN ${entity.name}');        
+        entity.addComponent(new glaze.engine.components.ParticleEmitters([new glaze.particle.emitter.Explosion(1,200)]));
+        entity.addComponent(new Destroy(2)); 
+    }
+
 
 }

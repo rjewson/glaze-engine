@@ -1,6 +1,8 @@
 package exile.entities.projectile;
 
 import exile.components.Projectile;
+import glaze.engine.components.CollisionCounter;
+import glaze.engine.components.Destroy;
 import glaze.geom.Vector2;
 import glaze.eco.core.Engine;
 import glaze.eco.core.Entity;
@@ -41,9 +43,10 @@ class PlasmaProjectileFactory {
             new Moveable(),
             new PhysicsCollision(false,filter,[]),   
             new ParticleEmitters([new glaze.particle.emitter.FireballEmitter(0,10)]),
-            new Projectile({ttl:1000,bounce:1,power:10,range:32}),
-            new Health(10,10,0),
-            new Age(1000),
+            // new Projectile({ttl:1000,bounce:1,power:10,range:32}),
+            new CollisionCounter(1,onDestroy),
+            new Health(10,10,0,onDestroy),
+            new Age(1000,onDestroy),
             new Active()
             // new Script(behavior),
             // new Steering([
@@ -65,5 +68,14 @@ class PlasmaProjectileFactory {
         return bullet;
 
 	}
+
+    public static function onDestroy(entity:Entity) {
+        if (entity.getComponent(Destroy)!=null)
+            return;
+        entity.addComponent(new Destroy(1)); 
+        entity.getComponent(glaze.engine.components.ParticleEmitters).emitters.push(new glaze.particle.emitter.Explosion(10,50));
+        glaze.util.CombatUtils.explode(entity.getComponent(Position).coords,64,10000,entity);
+    }
+
 
 }

@@ -19,7 +19,7 @@ import glaze.physics.components.PhysicsCollision;
 class BirdNestSystem extends System {
 	
     public function new() {
-        super([Position,BirdNest,Active]);
+        super([Position,BirdNest,Viewable,Active]);
     }
 
     override public function entityAdded(entity:Entity) {
@@ -41,9 +41,10 @@ class BirdNestSystem extends System {
 	}
 
 	override public function update(timestamp:Float,delta:Float) {
+
 		for (entity in view.entities) {
 			var nest = entity.getComponent(BirdNest);
-
+// trace(nest.group.members.length);
 			if (nest.intervalDelay.tick(delta)) {
 				var target = evaluateTargets(entity);
 				if (target!=null) {
@@ -86,14 +87,16 @@ class BirdNestSystem extends System {
 
 	public function releaseBird(entity:Entity,target:Entity) {
 		var nest = entity.getComponent(BirdNest);
-		if (nest.birds.length==0) {
+		if (nest.group.hasCapacity()) {
+		// if (nest.birds.length==0) {
 			var bird = exile.entities.creatures.BirdFactory.create(
 				engine,
 				entity.getComponent(Position).clone(),
 				entity.getComponent(Position),
 				entity
    			);
-			nest.birds.push(bird);
+   			nest.group.addMember(bird);
+			// nest.birds.push(bird);
 		}				
 	}
 

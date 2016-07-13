@@ -49,7 +49,7 @@ class Feeler
 		tip.multEquals(length);
 		tip.plusEquals(base);
 		
-		glaze.debug.DebugEngine.DrawParticle(tip.x,tip.y,4,255,0,0);
+		//glaze.debug.DebugEngine.DrawParticle(tip.x,tip.y,4,255,0,0);
 
 	}
 	
@@ -64,7 +64,7 @@ class Feeler
 	
 	public function CalculateForce(force:Vector2):Void {
 		if (distToClosestIP != Math.POSITIVE_INFINITY) {
-			glaze.debug.DebugEngine.DrawParticle(closestIP.x,closestIP.y,4,255,255,255);
+			//glaze.debug.DebugEngine.DrawParticle(closestIP.x,closestIP.y,4,255,255,255);
 			// var sf =  normal.mult( tip.minus( closestIP ).length() );
 			var sf = tip.clone();
 			sf.minusEquals(closestIP);

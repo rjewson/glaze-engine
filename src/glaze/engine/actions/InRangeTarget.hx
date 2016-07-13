@@ -3,12 +3,16 @@ package glaze.engine.actions;
 import glaze.ai.behaviortree.Behavior;
 import glaze.ai.behaviortree.BehaviorContext;
 import glaze.ai.behaviortree.BehaviorStatus;
+import glaze.ai.behaviortree.Decorator;
 import glaze.ai.steering.behaviors.Arrival;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
+import glaze.eco.core.Entity;
+import glaze.engine.components.Position;
 import glaze.geom.Vector2;
+import glaze.physics.components.PhysicsCollision;
 
-class SeekTarget extends Behavior {
+class InRangeTarget extends Behavior {
 
     public function new() {
         super();
@@ -19,17 +23,15 @@ class SeekTarget extends Behavior {
 
     override private function update(context:BehaviorContext):BehaviorStatus { 
 
-     	var target:Vector2 = cast Reflect.field(context.data,"target");
-    	if (target==null)
+     	var targetEntity:Entity = cast Reflect.field(context.data,"targetEntity");
+    	if (targetEntity==null)
     		return Failure;
 
-        var steering = context.entity.getComponent(Steering);
+        var targetHull = targetEntity.getComponent(PhysicsCollision);
+        var entityHull = context.entity.getComponent(PhysicsCollision);
 
-        var wander:Wander = cast steering.getBehaviour(Wander);
-        //wander.active = false;
-        var arrival:Arrival = cast steering.getBehaviour(Arrival);
-        arrival.target = target;
-        arrival.arrivalZone = 1;
+        if (!targetHull.proxy.aabb.overlap(entityHull.proxy.aabb))
+            return Failure;
 
         return Success;
 

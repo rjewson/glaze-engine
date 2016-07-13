@@ -16,3 +16,17 @@ Mass:
 Chicken
 Area:
 	12*12 = 576
+
+
+How to entities DIE or GET REMOVED!
+
+Health = 0
+	death animation
+	death response
+	remove entity
+
+Expire Age = 0   << What does this mean?
+
+
+Cleaned up e.g. out of view and transient
+	remove entity

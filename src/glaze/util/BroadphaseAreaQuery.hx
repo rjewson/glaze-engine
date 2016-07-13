@@ -43,7 +43,7 @@ class BroadphaseAreaQuery {
         if (filterEntity!=null&&bfproxy.entity==filterEntity)
             return;
 		
-        var distance = bfproxy.aabb.position.distSqrd(aabb.position);
+        var distance = bfproxy.aabb.position.distSqrd(aabb.position) + glaze.util.Maths.ZERO_TOLERANCE;
 
 		if (distance>RAYCAST_THRESHOLD && visibleCheck) {
 			ray.initalize(aabb.position,bfproxy.entity.getComponent(Position).coords,0,null);

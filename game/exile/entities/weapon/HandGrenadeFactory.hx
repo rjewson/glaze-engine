@@ -37,7 +37,7 @@ class HandGrenadeFactory {
             new Holdable(),
             new Storeable(),
             new Grenade(),
-            new Health(100,100,0),
+            new Health(100,100,0,null),
             new State(['off','on'],0,[]),
             new Active()
         ],"grenade"+(count++)); 

@@ -11,6 +11,8 @@ class Behavior
 	public var description:String;
 	public var debugLevel:Int = 0;
 
+	public var owner(default,default):Behavior;
+
 	/**
 	 * Behavior constructor
 	 */
@@ -77,8 +79,8 @@ class Behavior
 	{
 		if (debugLevel>0&&description!=null)
 			trace("BT Log:"+description);
-		if (debugLevel>1)
-			js.Lib.debug();
+		// if (debugLevel>1)
+		// 	js.Lib.debug();
 
 		if (status != Running)
 		{
@@ -96,9 +98,11 @@ class Behavior
 	}
 
 	public function addChild(child:Behavior) {
+		child.owner = this;
 	}
 
 	public function removeChild(child:Behavior) {
+		child.owner = null;
 	}
 
 }

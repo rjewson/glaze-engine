@@ -42,16 +42,7 @@ class HolderSystem extends System {
     public function callback(a:BFProxy,b:BFProxy,contact:Contact) {   
         var holder = a.entity.getComponent(Holder);
         if (holder.activate==true) {
-            trace("hhhold");
             holder.hold(b.entity,a.entity);
-            // trace("hollld");
-            // var holdable = b.entity.getComponent(Holdable);
-            // if (holder.heldItem==null && b.entity.getComponent(Held)==null) {
-            //     var held = new Held();
-            //     held.holder = a.entity;
-            //     b.entity.addComponent(held);
-            //     holder.heldItem = b.entity;
-            // }
         }
     }
 

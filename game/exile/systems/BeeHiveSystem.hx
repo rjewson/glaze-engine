@@ -21,7 +21,7 @@ class BeeHiveSystem extends System {
 
 	override public function entityRemoved(entity:Entity) {
 		var beehive = entity.getComponent(BeeHive);
-		for (bee in beehive.bees) {
+		for (bee in beehive.group.members) {
 			bee.destroy();
 		}
 	}
@@ -30,24 +30,23 @@ class BeeHiveSystem extends System {
 		// return;
 		for (entity in view.entities) {
 			var beehive = entity.getComponent(BeeHive);
-			if (beehive.bees.length<beehive.maxBees) {
+			if (beehive.group.hasCapacity()) {
 				if (glaze.util.Random.RandomBoolean(0.01)) {
 					var newBee = BeeFactory.create(engine,entity.getComponent(Position).clone());
 					newBee.parent = entity;
-					newBee.messages.add(onDestroy);
-					beehive.bees.push(newBee);
+					beehive.group.addMember(newBee);
 				}
 			}
 		}
-	}
+	} 
 
-	function onDestroy(entity:Entity,channel:String,data:Dynamic) {
-		if (channel==Entity.DESTROY) {
-			if (entity.parent!=null) {
-				var beeHive = entity.parent.getComponent(BeeHive);
-				beeHive.bees.remove(entity);
-			}
-		}
-	}
+	// function onDestroy(entity:Entity,channel:String,data:Dynamic) {
+	// 	if (channel==Entity.DESTROY) {
+	// 		if (entity.parent!=null) {
+	// 			var beeHive = entity.parent.getComponent(BeeHive);
+	// 			beeHive.bees.remove(entity);
+	// 		}
+	// 	}
+	// }
 
 }

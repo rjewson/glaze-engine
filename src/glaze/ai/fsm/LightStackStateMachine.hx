@@ -1,12 +1,12 @@
-package glaze.ai.stackfsm;
+package glaze.ai.fsm;
 
 import glaze.eco.core.Entity;
 
-typedef LWFSMState<T> = T->LWStackFSM<T>->Float->Void;
+typedef LWFSMState<T> = T->LightStackStateMachine<T>->Float->Void;
 
-typedef LWFSME = glaze.ai.stackfsm.LWStackFSM<Entity>;
+typedef LWFSME = glaze.ai.fsm.LightStackStateMachine<Entity>;
 
-class LWStackFSM<T> {
+class LightStackStateMachine<T> {
 
 	public var stack:Array<LWFSMState<T>>;
 
@@ -27,9 +27,25 @@ class LWStackFSM<T> {
         return state;
     }
  
+    public function popAllStates() {
+        while (stack.length>0)
+            popState();
+    }
+
     public function pushState(state:LWFSMState<T>) {
         stack.push(state);
     }
+
+    public function setState(state:LWFSMState<T>) {
+        popState();
+        pushState(state);
+    }
+
+    public function resetState(state:LWFSMState<T>) {
+        popAllStates();
+        pushState(state);
+    }
+
 
 	public function getCurrentState():LWFSMState<T> {
         return stack.length > 0 ? stack[stack.length - 1] : null;

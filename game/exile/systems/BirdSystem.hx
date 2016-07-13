@@ -23,23 +23,23 @@ import glaze.engine.components.Destroy;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
 import glaze.engine.components.Position;
-import glaze.engine.states.LogState;
 import glaze.physics.Body;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.collision.Contact;
 import glaze.physics.collision.Map;
 import glaze.physics.components.PhysicsCollision;
-import glaze.ai.stackfsm.LWStackFSM;
+import glaze.ai.fsm.LightStackStateMachine;
 import glaze.physics.Material;
+import glaze.util.EntityUtils;
 
 class BirdSystem extends System {
 
-    var broadphase:IBroadphase;
+    var broadphase:IBroadphase;   
     var bfAreaQuery:glaze.util.BroadphaseAreaQuery;
 
     public function new(broadphase:IBroadphase) {
-        super([Bird,PhysicsCollision,Health,Age,Steering]);
+        super([Bird,PhysicsCollision,Health,Steering]);
         this.broadphase = broadphase;
         bfAreaQuery = new glaze.util.BroadphaseAreaQuery(broadphase);
     }
@@ -48,12 +48,12 @@ class BirdSystem extends System {
         var bird = entity.getComponent(Bird);
         bird.ai.pushState(baseState);
 
-        bird.ai2 = BehaviorTree.createScript("bird");
+        bird.ai2 = BehaviorTree.createScript("bird");   
         bird.ctx = new BehaviorContext(entity);
         bird.ctx.data.set("home",bird.nest.getComponent(Position).coords.clone());
-    }
+    }  
 
-    override public function entityRemoved(entity:Entity) {
+    override public function entityRemoved(entity:Entity) {  
     }
 
     override public function update(timestamp:Float,delta:Float) {
@@ -158,8 +158,8 @@ class BirdSystem extends System {
                 // new Arrival(follow.coords,128,32)
                 ,new glaze.ai.steering.behaviors.WallAvoidance(map,60)
                 ]),
-            new Age(10000),
-            new Health(10,10,0),
+            new Age(10000,EntityUtils.standardDestroy),
+            new Health(10,10,0,EntityUtils.standardDestroy),
             new glaze.engine.components.Active()
         ],"bird"); 
 

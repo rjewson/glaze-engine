@@ -47,7 +47,7 @@ class RabbitFactory {
             new Moveable(),
             new Holdable(),
             new SpriteAnimation("rabbit",["idle","blink","jump","eat","listen"],"jump"),
-            new Health(10,10,0),
+            new Health(10,10,0,null),
             new Active()
             // new glaze.ai.steering.components.Steering([
             //     new glaze.ai.steering.behaviors.Wander(4,1,1)

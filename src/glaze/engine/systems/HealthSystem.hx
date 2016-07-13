@@ -23,10 +23,8 @@ class HealthSystem extends System {
         for (entity in view.entities) {
             var health = entity.getComponent(Health);
             if (health.currentHealth<=0) {
-                if (health.stateOnNoHealth!=null) {
-                    var lifecycle = entity.getComponent(LifeCycle);
-                    if (lifecycle!=null)
-                        lifecycle.state.changeState(entity,health.stateOnNoHealth);
+                if (health.onNoHealth!=null) {
+                    health.onNoHealth(entity);
                 }
             } else {
                 health.currentHealth = Math.min(health.maxHealth,health.currentHealth+(health.recoveryPerMs*delta));                

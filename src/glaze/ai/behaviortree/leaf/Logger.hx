@@ -19,7 +19,6 @@ class Logger extends Behavior
 	override private function initialize(context:BehaviorContext)
 	{
 		trace("init!");
-		// reset();
 	}
 
 	override public function update(context:BehaviorContext):BehaviorStatus

@@ -60,7 +60,8 @@ class BehaviorTree
 		glaze.engine.actions.CanSee,
 		glaze.engine.actions.FindTarget,
 		glaze.engine.actions.WanderToTarget,
-		glaze.engine.actions.SeekTarget
+		glaze.engine.actions.SeekTarget,
+		glaze.engine.actions.InRangeTarget
 	];
 
 

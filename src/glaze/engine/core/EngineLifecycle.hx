@@ -24,20 +24,20 @@ class EngineLifecycle {
 	}
 
 	public static function onInitalize(entity:Entity) {
-		trace('INITALIZE ${entity.name}');
+		// trace('INITALIZE ${entity.name}');
 	}
 
 	public static function onRunning(entity:Entity) {
-		trace('RUNNING ${entity.name}');
+		// trace('RUNNING ${entity.name}');
 	}
 
 	public static function onDestroy(entity:Entity) {
-		trace('DESTROY ${entity.name}');		
+		// trace('DESTROY ${entity.name}');		
 		entity.addComponent(new Destroy(1)); 
 	}
 
 	public static function onCleanup(entity:Entity) {
-		trace('CLEANUP ${entity.name}');
+		// trace('CLEANUP ${entity.name}');
 	}	
 
 	public static function CreateLifeCylce(_onInitalize:LifeCycleCallback=null,_onRunning:LifeCycleCallback=null,_onDestroy:LifeCycleCallback=null,_onCleanup:LifeCycleCallback=null) {

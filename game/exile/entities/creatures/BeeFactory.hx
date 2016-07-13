@@ -34,7 +34,7 @@ class BeeFactory {
 
     public static var map:Map;
 
-    public static var BEE_LIFECYCLE = EngineLifecycle.CreateLifeCylce(onInitalize,null,onDestroy,null);
+    // public static var BEE_LIFECYCLE = EngineLifecycle.CreateLifeCylce(onInitalize,null,onDestroy,null);
 
 	public function new() {
 	} 
@@ -50,7 +50,7 @@ class BeeFactory {
         var bee = engine.createEntity([
             position, 
             new Bee(),
-            new LifeCycle(BEE_LIFECYCLE),
+            // new LifeCycle(BEE_LIFECYCLE),
             new Extents((3/2)*1,(3/2)*1),
             new Display("insects"), 
             new PhysicsBody(beeBody,true), 
@@ -64,8 +64,8 @@ class BeeFactory {
                 ,new Seek(position.coords.clone(),32)
                 // ,new WallAvoidance(map,40)
                 ],SteeringAgentParameters.HEAVY_STEERING_PARAMS),
-            new Age(10000),
-            new Health(10,10,0),
+            new Age(10000,onDestroy),
+            new Health(10,10,0,onDestroy),
             new Active()
         ],"bee"); 
 
@@ -77,10 +77,10 @@ class BeeFactory {
     }
 
     public static function onDestroy(entity:Entity) {
+        // js.Lib.debug();
         trace('DESTROY THE BEE ${entity.name}');        
         entity.addComponent(new glaze.engine.components.ParticleEmitters([new glaze.particle.emitter.Explosion(1,200)]));
-        entity.addComponent(new Destroy(2)); 
-
+        entity.addComponent(new Destroy(0)); 
     }
 
 }

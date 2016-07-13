@@ -57,14 +57,14 @@ class BFProxy
             callback(this,proxy,contact);
     }
 
-    public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float,filter:Filter):BFProxy {
-        var bfproxy = new BFProxy();
-        bfproxy.aabb.extents.setTo(hw,hh);
-        bfproxy.filter = filter;
-        bfproxy.aabb.position.setTo(x,y);
-        bfproxy.isStatic = true;
-        return bfproxy;
-    }
+    // public static inline function CreateStaticFeature(x:Float,y:Float,hw:Float,hh:Float,filter:Filter):BFProxy {
+    //     var bfproxy = new BFProxy();
+    //     bfproxy.aabb.extents.setTo(hw,hh);
+    //     bfproxy.filter = filter;
+    //     bfproxy.aabb.position.setTo(x,y);
+    //     bfproxy.isStatic = true;
+    //     return bfproxy;
+    // }
 
     inline public static function HashBodyIDs(a:Int, b:Int):Int {
         return (a < b) ? (a << 16) | b : (b << 16) | a;

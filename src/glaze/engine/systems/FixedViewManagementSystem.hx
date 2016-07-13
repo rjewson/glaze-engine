@@ -10,7 +10,7 @@ import glaze.engine.managers.space.ISpaceManager;
 import glaze.engine.managers.space.RegularGridSpaceManager;
 import glaze.render.display.Camera;
 
-class ViewManagementSystem extends System {
+class FixedViewManagementSystem extends System {
 
     var camera:Camera;
     var spaceManager:ISpaceManager;

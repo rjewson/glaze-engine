@@ -2,15 +2,14 @@ package exile.components;
 
 import glaze.eco.core.Entity;
 import glaze.eco.core.IComponent;
+import glaze.util.EntityGroup;
 
 class BeeHive implements IComponent {
 
-	public var maxBees:Int;
-	public var bees:Array<Entity>;
+	public var group:EntityGroup;
 
 	public function new(maxBees:Int) {
-		this.maxBees = maxBees;
-		bees = new Array<Entity>();
+		this.group = new EntityGroup(maxBees);
 	}
 
 }

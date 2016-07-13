@@ -11,32 +11,21 @@ import glaze.ai.behaviortree.BehaviorStatus;
 class FunctionExecutorAction extends Behavior
 {
 
+	private var fn:BehaviorContext->BehaviorStatus;
+
 	/**
 	 * Action constructor
 	 * @param action the callback method when this behavior runs
 	 */
-	public function new(action:String,actionContext:Dynamic)
+	public function new(fn:BehaviorContext->BehaviorStatus)
 	{
 		super();
-		this.action = action;
-		this.actionContext = actionContext;
+		this.fn = fn;
 	}
 
 	override public function update(context:BehaviorContext):BehaviorStatus
 	{
-		var f = Reflect.field(actionContext, action);
-		if (Reflect.isFunction(f))
-		{
-			var result = Reflect.callMethod(actionContext, f, [context]);
-			if (Std.is(result, BehaviorStatus))
-			{
-				return result;
-			}
-		}
-		return Failure;
+		return fn(context);
 	}
-
-	private var action:String;
-	private var actionContext:Dynamic;
 
 }

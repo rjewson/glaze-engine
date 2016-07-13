@@ -9,8 +9,8 @@ class LifeCycle implements IComponent {
 
 	public var state:LightStateMachine;
 
-	public function new(states:LightStateSet) {
-		state = new LightStateMachine(states);
+	public function new(states:Int) {
+		// state = new LightStateMachine(states);
 	}
 
 }

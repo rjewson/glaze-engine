@@ -1,5 +1,6 @@
 package;
  
+import exile.components.BirdNest;
 import exile.components.Door;
 import exile.components.GunTurret;
 import exile.components.Player;
@@ -58,7 +59,7 @@ import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.StateSystem;
 import glaze.engine.systems.TileRenderSystem;
-import glaze.engine.systems.ViewManagementSystem;
+import glaze.engine.systems.FixedViewManagementSystem;
 import glaze.geom.Vector2;
 import glaze.particle.BlockSpriteParticleEngine;
 import glaze.particle.emitter.Explosion;
@@ -140,7 +141,7 @@ class GameTestA extends GameEngine {
     public var TS:Int = glaze.EngineConstants.TILE_SIZE;
    
     public var fsm:glaze.util.FlxFSM<Entity>;  
-    public var lwfsm:glaze.ai.stackfsm.LWStackFSM<Entity>;
+    public var lwfsm:glaze.ai.fsm.LightStackStateMachine<Entity>;
     // public var pool:glaze.util.Pool;   
 
     public function new() {
@@ -252,10 +253,10 @@ class GameTestA extends GameEngine {
         glaze.debug.DebugEngine.particleEngine = blockParticleEngine;
         renderSystem.renderer.AddRenderer(spriteParticleEngine.renderer);
         spriteParticleEngine.renderer.SetSpriteSheet(renderSystem.textureManager.baseTextures.get(PARTICLE_TEXTURE_DATA).texture,16,16,16);
-
+    
         var map = new Map(collisionData);   
         exile.entities.creatures.BeeFactory.map = map; 
-        corephase.addSystem(new LifecycleSystem());
+        // corephase.addSystem(new cycleSystem());
         corephase.addSystem(new PhysicsUpdateSystem());
         corephase.addSystem(new SteeringSystem());
     
@@ -290,8 +291,9 @@ class GameTestA extends GameEngine {
         corephase.addSystem(new glaze.engine.systems.HoldableSystem(exile.ExileFilters.HOLDABLE_CAT));
         corephase.addSystem(new glaze.engine.systems.HealthSystem());
         corephase.addSystem(new glaze.engine.systems.AgeSystem());
+        corephase.addSystem(new glaze.engine.systems.CollisionCountSystem());
                 
-        corephase.addSystem(new exile.systems.ProjectileSystem());
+        // corephase.addSystem(new exile.systems.ProjectileSystem());
                     
         /*       
          * Lighting RnD 
@@ -311,7 +313,7 @@ class GameTestA extends GameEngine {
         aiphase.addSystem(new DoorSystem());                                                  
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
-        aiphase.addSystem(new BeeSystem(broadphase));  
+        // aiphase.addSystem(new BeeSystem(broadphase));  
 
         aiphase.addSystem(new BirdNestSystem());                                                 
         aiphase.addSystem(new BirdSystem(broadphase));  
@@ -330,7 +332,7 @@ class GameTestA extends GameEngine {
 
         corephase.addSystem(new DestroySystem());
         corephase.addSystem(new PlayerSystem(input,blockParticleEngine,spriteParticleEngine));
-        corephase.addSystem(new ViewManagementSystem(renderSystem.camera));
+        corephase.addSystem(new FixedViewManagementSystem(renderSystem.camera));
 
         corephase.addSystem(new ParticleSystem(blockParticleEngine,spriteParticleEngine));
         corephase.addSystem(new AnimationSystem(renderSystem.frameListManager));
@@ -339,8 +341,8 @@ class GameTestA extends GameEngine {
         corephase.addSystem(tileRenderSystem);    
 
         // and this one
-        // corephase.addSystem(lightSystem);
         corephase.addSystem(renderSystem);    
+        // corephase.addSystem(lightSystem);
         
          
         filterSupport = new FilterSupport(engine);  
@@ -352,6 +354,7 @@ class GameTestA extends GameEngine {
         tmxFactory.parseObjectGroup("Objects");
 
         createEntities(); 
+        // dropGrenades();
  
         // exile.entities.creatures.ChickenFactory.create(engine,mapPosition(9,2));
         // exile.entities.creatures.MaggotFactory.create(engine,mapPosition(8,2));
@@ -377,7 +380,7 @@ class GameTestA extends GameEngine {
 
 
     public function createEntities() {
-
+  
         playerFilter = new Filter();
         playerFilter.categoryBits = ExileFilters.PLAYER_CAT;
         playerFilter.maskBits |= ExileFilters.PROJECTILE_CAT;
@@ -392,7 +395,7 @@ class GameTestA extends GameEngine {
         player = engine.createEntity([ 
             new Player(),
             mapPosition(33.5,38.5),
-            new Extents(7,21), 
+            new Extents(7,20), 
             new Display("player"),        
             new SpriteAnimation("player",["idle","scratch","shrug","fly","runright"],"idle"),
             new PhysicsBody(body,true), 
@@ -429,7 +432,7 @@ class GameTestA extends GameEngine {
             new CollidableSwitch(false,1000,["doorA"]),
             new Active(),    
             new TileDisplay("switchOff")
-        ],"turret");        
+        ],"Door Switch");        
           
         engine.createEntity([ 
             mapPosition(3,23),
@@ -468,10 +471,21 @@ class GameTestA extends GameEngine {
 
         engine.createEntity([
             mapPosition(34,30),
-            new exile.components.BirdNest(1),
+            new Extents(7,7), 
+            new Fixed(),
+            new BirdNest(5),
             new Active(),
             new Personality(nestFaction)
-        ],"birdsnest");
+        ],"birdsnest");        
+
+        engine.createEntity([
+            mapPosition(19,96),
+            new Extents(7,7),
+            new Fixed(),
+            new BirdNest(5),
+            new Active(),
+            new Personality(nestFaction)
+        ],"birdsnest2");
 
         engine.createEntity([
             mapPosition(9,4),
@@ -479,7 +493,7 @@ class GameTestA extends GameEngine {
             new Display("items","water_container"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(), 
-            new PhysicsBody(new Body(Material.NORMAL),false),
+            new PhysicsBody(new Body(Material.NORMAL),true),
             new Holdable(),
             new Active()
         ],"water_container");         
@@ -614,11 +628,11 @@ class GameTestA extends GameEngine {
     public function dropGrenades() {
         var spread = 50;
         exile.entities.weapon.HandGrenadeFactory.create(engine,350,150);
-        // exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*1,150);
-        // exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*2,150);
-        // exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*3,150);
-        // exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*4,150);
-        // exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*5,150);        
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*1,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*2,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*3,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*4,150);
+        exile.entities.weapon.HandGrenadeFactory.create(engine,350+spread*5,150);        
     }
 
     public function flyChickens() {

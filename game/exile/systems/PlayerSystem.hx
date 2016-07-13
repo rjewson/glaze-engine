@@ -142,6 +142,7 @@ class PlayerSystem extends System {
             inventory
         ],"playerHolder");
         player.addChildEntity(playerHolder);
+        player.addChildEntity(playerLight);
 
         playerFilter = entity.getComponent(PhysicsCollision).proxy.filter;
 
@@ -150,6 +151,7 @@ class PlayerSystem extends System {
     }
 
     override public function entityRemoved(entity:Entity) {
+        js.Lib.debug();  
     }
 
     override public function update(timestamp:Float,delta:Float) {
@@ -192,8 +194,12 @@ class PlayerSystem extends System {
         
         holder.activate = input.JustPressed(72);
         // trace("x");
+
         if (input.JustPressed(74)) {
-            // js.Lib.debug();
+            //Drop Item 'J'
+            var item = holder.drop();
+        } else if (input.JustPressed(75)) {
+            //Throw Item 'K'
             var item = holder.drop();
             if (item!=null) {
                 glaze.util.Ballistics.calcProjectileVelocity(item.getComponent(PhysicsBody).body,input.ViewCorrectedMousePosition(),700);        
@@ -237,7 +243,7 @@ class PlayerSystem extends System {
 
         if (characterController.burn>0) {
             var ttl = 280;
-            var offsetx = position.coords.x-(6*position.direction.x);
+            var offsetx = position.coords.x-(8*position.direction.x);
             var velocity =  200 + glaze.util.Random.RandomInteger(-150,150);// + physicsBody.body.velocity.y;
             var count = Math.floor( (characterController.burn+500)/1000);
             if (count>0)

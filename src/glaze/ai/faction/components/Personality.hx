@@ -11,4 +11,9 @@ class Personality implements IComponent {
 		trace('Damage from ${sourceEntity.name}');
 	}
 
+	public function clone():Personality
+	{
+	    return new Personality(this.faction);
+	}
+
 }

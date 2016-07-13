@@ -1,5 +1,6 @@
 package glaze.engine.components;
 
+import glaze.eco.core.Entity;
 import glaze.eco.core.IComponent;
 import glaze.geom.Vector2;
 
@@ -9,10 +10,18 @@ class Position implements IComponent {
     public var prevCoords:Vector2;
     public var direction:Vector2;
 
+    public var updatePosition:Entity->Vector2->Void; //update(entity,position)
+
     public function new(x:Float,y:Float) {
         coords = new Vector2(x,y);
         prevCoords = new Vector2(x,y);
         direction = new Vector2(1,1);
+        updatePosition = internalSetPosition;
+    }
+
+    function internalSetPosition(entity:Entity,position:Vector2) {
+        prevCoords.copy(coords);
+        coords.copy(position);        
     }
 
     inline public function update(position:Vector2) {

@@ -4,6 +4,7 @@ import glaze.eco.core.System;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;
 import glaze.engine.components.Position;
+import glaze.geom.Vector2;
 import glaze.physics.collision.BFProxy;
 import glaze.physics.collision.broadphase.IBroadphase;
 import glaze.physics.components.PhysicsBody;
@@ -25,6 +26,8 @@ class PhysicsStaticSystem extends System {
         var extents = entity.getComponent(Extents);
         var position = entity.getComponent(Position);
 
+        position.updatePosition = setPosition;
+
         collision.proxy.aabb.extents.copy(extents.halfWidths);
         collision.proxy.entity = entity;
         collision.proxy.isStatic = true;
@@ -38,5 +41,12 @@ class PhysicsStaticSystem extends System {
     }
 
     override public function update(timestamp:Float,delta:Float) {
+    }
+
+    public function setPosition(entity:Entity,position:Vector2) {
+        var bfp = entity.getComponent(PhysicsCollision).proxy;
+        broadphase.removeProxy(bfp);
+        bfp.aabb.position = entity.getComponent(Position).coords;
+        broadphase.addProxy(bfp);
     }
 }
