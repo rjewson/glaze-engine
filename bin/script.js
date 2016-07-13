@@ -909,7 +909,7 @@ exile_entities_creatures_BirdFactory.create = function(engine,position,follow,ne
 	birdBody.globalForceFactor = 0.0;
 	birdBody.maxScalarVelocity = 200;
 	var map = engine.config.map;
-	return engine.createEntity([position,new exile_components_Bird(nest),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),nest.map.Personality.clone(),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(55,80,0.3),new glaze_ai_steering_behaviors_Arrival(follow.coords,256),new glaze_ai_steering_behaviors_WallAvoidance(map,60),new glaze_ai_steering_behaviors_Seperation(nest.map.BirdNest.group.members,20)]),new glaze_engine_components_Age(5000,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Health(10,10,0,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Active()],"bird");
+	return engine.createEntity([position,new exile_components_Bird(nest),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),nest.map.Personality.clone(),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(55,80,0.3),new glaze_ai_steering_behaviors_Arrival(follow.coords,256),new glaze_ai_steering_behaviors_WallAvoidance(map,60),new glaze_ai_steering_behaviors_Seperation(nest.map.BirdNest.group.members,20)]),new glaze_engine_components_Age(15000,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Health(10,10,0,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Active()],"bird");
 };
 exile_entities_creatures_BirdFactory.prototype = {
 	__class__: exile_entities_creatures_BirdFactory
@@ -2621,11 +2621,11 @@ glaze_engine_actions_SeekTarget.prototype = $extend(glaze_ai_behaviortree_Behavi
 	,__class__: glaze_engine_actions_SeekTarget
 });
 var glaze_engine_actions_InRangeTarget = function() {
-	glaze_ai_behaviortree_Decorator.call(this);
+	glaze_ai_behaviortree_Behavior.call(this);
 };
 glaze_engine_actions_InRangeTarget.__name__ = ["glaze","engine","actions","InRangeTarget"];
-glaze_engine_actions_InRangeTarget.__super__ = glaze_ai_behaviortree_Decorator;
-glaze_engine_actions_InRangeTarget.prototype = $extend(glaze_ai_behaviortree_Decorator.prototype,{
+glaze_engine_actions_InRangeTarget.__super__ = glaze_ai_behaviortree_Behavior;
+glaze_engine_actions_InRangeTarget.prototype = $extend(glaze_ai_behaviortree_Behavior.prototype,{
 	initialize: function(context) {
 	}
 	,update: function(context) {

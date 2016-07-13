@@ -68,7 +68,7 @@ class BirdFactory {
                 ,new WallAvoidance(map,60)
                 ,new glaze.ai.steering.behaviors.Seperation(nest.getComponent(BirdNest).group.members,20)
                 ]),
-            new Age(5000,EntityUtils.standardDestroy),
+            new Age(15000,EntityUtils.standardDestroy),
             new Health(10,10,0,EntityUtils.standardDestroy),
             new Active()
         ],"bird"); 
