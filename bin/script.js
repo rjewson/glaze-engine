@@ -1417,7 +1417,7 @@ exile_systems_BirdSystem.create = function(engine,position,follow,nest) {
 	return engine.createEntity([position,new exile_components_Bird(nest),new glaze_engine_components_Extents(4,4),new glaze_engine_components_Display("bird"),new glaze_physics_components_PhysicsBody(birdBody,false),new glaze_engine_components_Moveable(),new glaze_physics_components_PhysicsCollision(false,null,[]),new glaze_animation_components_SpriteAnimation("bird",["fly"],"fly"),new glaze_ai_steering_components_Steering([new glaze_ai_steering_behaviors_Wander(55,80,0.3),new glaze_ai_steering_behaviors_Arrival(follow.coords,256),new glaze_ai_steering_behaviors_WallAvoidance(map,60)]),new glaze_engine_components_Age(10000,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Health(10,10,0,glaze_util_EntityUtils.standardDestroy),new glaze_engine_components_Active()],"bird");
 };
 exile_systems_BirdSystem.destroy = function(entity) {
-	haxe_Log.trace("bang",{ fileName : "BirdSystem.hx", lineNumber : 170, className : "exile.systems.BirdSystem", methodName : "destroy"});
+	haxe_Log.trace("bang",{ fileName : "BirdSystem.hx", lineNumber : 169, className : "exile.systems.BirdSystem", methodName : "destroy"});
 };
 exile_systems_BirdSystem.__super__ = glaze_eco_core_System;
 exile_systems_BirdSystem.prototype = $extend(glaze_eco_core_System.prototype,{
@@ -4327,16 +4327,16 @@ glaze_ds_EntityCollection.prototype = {
 					node1.prev = node;
 				}
 			} else {
-				var node11 = _this1.tail;
+				var node2 = _this1.tail;
 				_this1.length++;
-				node.prev = node11;
-				node.next = node11.next;
-				if(node11.next == null) {
+				node.prev = node2;
+				node.next = node2.next;
+				if(node2.next == null) {
 					_this1.tail = node;
 				} else {
-					node11.next.prev = node;
+					node2.next.prev = node;
 				}
-				node11.next = node;
+				node2.next = node;
 			}
 		}
 	}
@@ -12096,11 +12096,11 @@ var glaze_tmx_TmxMap = function(data,realTileSize) {
 		if(!(__map_reserved[key] != null?_this1.existsReserved(key):_this1.h.hasOwnProperty(key))) {
 			_this._keys.push(key);
 		}
-		var _this11 = _this._map;
+		var _this2 = _this._map;
 		if(__map_reserved[key] != null) {
-			_this11.setReserved(key,value);
+			_this2.setReserved(key,value);
 		} else {
-			_this11.h[key] = value;
+			_this2.h[key] = value;
 		}
 	}
 	var _g_head3 = source.nodes.resolve("objectgroup").h;
@@ -12108,18 +12108,18 @@ var glaze_tmx_TmxMap = function(data,realTileSize) {
 		var val3 = _g_head3.item;
 		_g_head3 = _g_head3.next;
 		var node2 = val3;
-		var _this2 = this.objectGroups;
+		var _this3 = this.objectGroups;
 		var key1 = node2.att.resolve("name");
 		var value1 = new glaze_tmx_TmxObjectGroup(node2,this);
-		var _this3 = _this2._map;
-		if(!(__map_reserved[key1] != null?_this3.existsReserved(key1):_this3.h.hasOwnProperty(key1))) {
-			_this2._keys.push(key1);
+		var _this4 = _this3._map;
+		if(!(__map_reserved[key1] != null?_this4.existsReserved(key1):_this4.h.hasOwnProperty(key1))) {
+			_this3._keys.push(key1);
 		}
-		var _this12 = _this2._map;
+		var _this5 = _this3._map;
 		if(__map_reserved[key1] != null) {
-			_this12.setReserved(key1,value1);
+			_this5.setReserved(key1,value1);
 		} else {
-			_this12.h[key1] = value1;
+			_this5.h[key1] = value1;
 		}
 	}
 };
@@ -16909,33 +16909,33 @@ exile_ExileFilters.TURRET_GROUP = -3;
 exile_ExileFilters.BIRD_GROUP = -3;
 exile_ExileFilters.SOLID_OBJECT_GROUP = 1;
 exile_components_Bee.NAME = "Bee";
-exile_components_Bee.ID = 37;
+exile_components_Bee.ID = 35;
 exile_components_BeeHive.NAME = "BeeHive";
-exile_components_BeeHive.ID = 2;
+exile_components_BeeHive.ID = 36;
 exile_components_Bird.NAME = "Bird";
-exile_components_Bird.ID = 1;
+exile_components_Bird.ID = 18;
 exile_components_BirdNest.NAME = "BirdNest";
-exile_components_BirdNest.ID = 1;
+exile_components_BirdNest.ID = 41;
 exile_components_Chicken.NAME = "Chicken";
 exile_components_Chicken.ID = 17;
 exile_components_Door.NAME = "Door";
-exile_components_Door.ID = 42;
+exile_components_Door.ID = 40;
 exile_components_Grenade.NAME = "Grenade";
-exile_components_Grenade.ID = 9;
+exile_components_Grenade.ID = 20;
 exile_components_GunTurret.NAME = "GunTurret";
-exile_components_GunTurret.ID = 41;
+exile_components_GunTurret.ID = 39;
 exile_components_Maggot.NAME = "Maggot";
 exile_components_Maggot.ID = 14;
 exile_components_Player.NAME = "Player";
-exile_components_Player.ID = 40;
+exile_components_Player.ID = 38;
 exile_components_Projectile.NAME = "Projectile";
-exile_components_Projectile.ID = 43;
+exile_components_Projectile.ID = 45;
 exile_components_Rabbit.NAME = "Rabbit";
 exile_components_Rabbit.ID = 10;
 exile_components_Teleporter.NAME = "Teleporter";
-exile_components_Teleporter.ID = 39;
+exile_components_Teleporter.ID = 37;
 glaze_engine_components_Destroy.NAME = "Destroy";
-glaze_engine_components_Destroy.ID = 21;
+glaze_engine_components_Destroy.ID = 43;
 glaze_engine_core_EngineLifecycle.INITALIZE = "initalize";
 glaze_engine_core_EngineLifecycle.RUNNING = "running";
 glaze_engine_core_EngineLifecycle.DESTROY = "destroy";
@@ -16979,7 +16979,7 @@ glaze_engine_core_EngineLifecycle.LIFECYCLE_SET = (function($this) {
 	return $r;
 }(this));
 glaze_engine_components_ParticleEmitters.NAME = "ParticleEmitters";
-glaze_engine_components_ParticleEmitters.ID = 12;
+glaze_engine_components_ParticleEmitters.ID = 26;
 exile_entities_creatures_ChickenFactory.CHICKEN_LIFECYCLE = glaze_engine_core_EngineLifecycle.CreateLifeCylce(null,null,exile_entities_creatures_ChickenFactory.onDestroy,null);
 exile_entities_projectile_StandardBulletFactory.BULLET_LIFECYCLE = glaze_engine_core_EngineLifecycle.CreateLifeCylce(null,null,exile_entities_projectile_StandardBulletFactory.onDestroy,null);
 exile_entities_weapon_HandGrenadeFactory.count = 0;
@@ -16997,7 +16997,7 @@ glaze_ai_behaviortree_BehaviorTree.extendedBehaviours = [glaze_engine_actions_De
 glaze_ai_behaviortree_BehaviorTree.behaviours = new haxe_ds_StringMap();
 glaze_ai_behaviortree_BehaviorTree.scripts = new haxe_ds_StringMap();
 glaze_ai_faction_components_Personality.NAME = "Personality";
-glaze_ai_faction_components_Personality.ID = 0;
+glaze_ai_faction_components_Personality.ID = 9;
 glaze_ai_steering_SteeringAgentParameters.default_scale = .2;
 glaze_ai_steering_SteeringAgentParameters.heavy_scale = 5;
 glaze_ai_steering_SteeringAgentParameters.default_maxAcceleration = 100;
@@ -17066,9 +17066,9 @@ glaze_ai_steering_components_Steering.CALCULATE_SUM = 0;
 glaze_ai_steering_components_Steering.CALCULATE_SPEED = 1;
 glaze_ai_steering_components_Steering.CALCULATE_ACCURACY = 2;
 glaze_ai_steering_components_Steering.NAME = "Steering";
-glaze_ai_steering_components_Steering.ID = 36;
+glaze_ai_steering_components_Steering.ID = 33;
 glaze_animation_components_SpriteAnimation.NAME = "SpriteAnimation";
-glaze_animation_components_SpriteAnimation.ID = 0;
+glaze_animation_components_SpriteAnimation.ID = 13;
 glaze_core_GameLoop.MIN_DELTA = 16.6666666766666687;
 glaze_ds_EntityCollection.itempool = new glaze_ds_DLL();
 glaze_eco_core_Entity.DESTROY = "destroy";
@@ -17076,47 +17076,47 @@ glaze_eco_core_Phase.DEFAULT_TIME_DELTA = 16.6666666666666679;
 glaze_engine_components_AI.NAME = "AI";
 glaze_engine_components_AI.ID = 2;
 glaze_engine_components_Active.NAME = "Active";
-glaze_engine_components_Active.ID = 33;
+glaze_engine_components_Active.ID = 32;
 glaze_engine_components_Age.NAME = "Age";
-glaze_engine_components_Age.ID = 15;
+glaze_engine_components_Age.ID = 31;
 glaze_engine_components_CollidableSwitch.NAME = "CollidableSwitch";
 glaze_engine_components_CollidableSwitch.ID = 8;
 glaze_engine_components_CollisionCounter.NAME = "CollisionCounter";
-glaze_engine_components_CollisionCounter.ID = 0;
+glaze_engine_components_CollisionCounter.ID = 44;
 glaze_engine_components_Display.NAME = "Display";
-glaze_engine_components_Display.ID = 2;
+glaze_engine_components_Display.ID = 30;
 glaze_engine_components_EnvironmentForce.NAME = "EnvironmentForce";
 glaze_engine_components_EnvironmentForce.ID = 7;
 glaze_engine_components_Extents.NAME = "Extents";
-glaze_engine_components_Extents.ID = 36;
+glaze_engine_components_Extents.ID = 34;
 glaze_engine_components_Fixed.NAME = "Fixed";
 glaze_engine_components_Fixed.ID = 19;
 glaze_engine_components_Health.NAME = "Health";
-glaze_engine_components_Health.ID = 14;
+glaze_engine_components_Health.ID = 29;
 glaze_engine_components_Held.NAME = "Held";
-glaze_engine_components_Held.ID = 19;
+glaze_engine_components_Held.ID = 46;
 glaze_engine_components_Holdable.NAME = "Holdable";
 glaze_engine_components_Holdable.ID = 6;
 glaze_engine_components_Holder.NAME = "Holder";
-glaze_engine_components_Holder.ID = 4;
+glaze_engine_components_Holder.ID = 12;
 glaze_engine_components_Inventory.NAME = "Inventory";
-glaze_engine_components_Inventory.ID = 3;
+glaze_engine_components_Inventory.ID = 11;
 glaze_engine_components_LifeCycle.NAME = "LifeCycle";
-glaze_engine_components_LifeCycle.ID = 13;
+glaze_engine_components_LifeCycle.ID = 28;
 glaze_engine_components_Moveable.NAME = "Moveable";
-glaze_engine_components_Moveable.ID = 29;
+glaze_engine_components_Moveable.ID = 27;
 glaze_engine_components_Position.NAME = "Position";
-glaze_engine_components_Position.ID = 16;
+glaze_engine_components_Position.ID = 42;
 glaze_engine_components_Script.NAME = "Script";
-glaze_engine_components_Script.ID = 2;
+glaze_engine_components_Script.ID = 25;
 glaze_engine_components_State.NAME = "State";
-glaze_engine_components_State.ID = 5;
+glaze_engine_components_State.ID = 15;
 glaze_engine_components_Storeable.NAME = "Storeable";
 glaze_engine_components_Storeable.ID = 5;
 glaze_engine_components_TileDisplay.NAME = "TileDisplay";
-glaze_engine_components_TileDisplay.ID = 1;
+glaze_engine_components_TileDisplay.ID = 16;
 glaze_engine_components_Viewable.NAME = "Viewable";
-glaze_engine_components_Viewable.ID = 23;
+glaze_engine_components_Viewable.ID = 21;
 glaze_engine_components_Water.NAME = "Water";
 glaze_engine_components_Water.ID = 3;
 glaze_engine_components_Wind.NAME = "Wind";
@@ -17124,7 +17124,7 @@ glaze_engine_components_Wind.ID = 4;
 glaze_engine_factories_tmx_ForceFactory.FORCE_SCALE = 0.01;
 glaze_geom_Vector2.ZERO_TOLERANCE = 1e-08;
 glaze_lighting_components_Light.NAME = "Light";
-glaze_lighting_components_Light.ID = 26;
+glaze_lighting_components_Light.ID = 24;
 glaze_particle_BlockSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_particle_PointSpriteParticle.INV_ALPHA = 0.00392156862745098;
 glaze_physics_Body.SLEEP_BIAS = 0.99332805041467;
@@ -17149,9 +17149,9 @@ glaze_physics_collision_broadphase_uniformgrid_UniformGrid.DOWN = 2;
 glaze_physics_components_ContactRouter.NAME = "ContactRouter";
 glaze_physics_components_ContactRouter.ID = 1;
 glaze_physics_components_PhysicsBody.NAME = "PhysicsBody";
-glaze_physics_components_PhysicsBody.ID = 30;
+glaze_physics_components_PhysicsBody.ID = 23;
 glaze_physics_components_PhysicsCollision.NAME = "PhysicsCollision";
-glaze_physics_components_PhysicsCollision.ID = 10;
+glaze_physics_components_PhysicsCollision.ID = 22;
 glaze_physics_components_PhysicsConstraints.NAME = "PhysicsConstraints";
 glaze_physics_components_PhysicsConstraints.ID = 0;
 glaze_render_renderers_webgl_PointSpriteLightMapRenderer.SPRITE_VERTEX_SHADER = ["precision mediump float;","uniform vec2 projectionVector;","uniform vec2 cameraPosition;","attribute vec2 position;","attribute float size;","attribute vec4 colour;","varying vec4 vColor;","void main() {","gl_PointSize = size;","vColor = colour;","gl_Position = vec4( (cameraPosition.x + position.x) / projectionVector.x -1.0, (cameraPosition.y + position.y) / -projectionVector.y + 1.0 , 0.0, 1.0);","}"];

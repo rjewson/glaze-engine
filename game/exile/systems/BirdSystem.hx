@@ -162,7 +162,6 @@ class BirdSystem extends System {
             new Health(10,10,0,EntityUtils.standardDestroy),
             new glaze.engine.components.Active()
         ],"bird"); 
-
         return bird;        
     }
 

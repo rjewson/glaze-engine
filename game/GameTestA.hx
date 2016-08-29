@@ -254,7 +254,7 @@ class GameTestA extends GameEngine {
         renderSystem.renderer.AddRenderer(spriteParticleEngine.renderer);
         spriteParticleEngine.renderer.SetSpriteSheet(renderSystem.textureManager.baseTextures.get(PARTICLE_TEXTURE_DATA).texture,16,16,16);
     
-        var map = new Map(collisionData);   
+        var map = new Map(collisionData);
         exile.entities.creatures.BeeFactory.map = map; 
         // corephase.addSystem(new cycleSystem());
         corephase.addSystem(new PhysicsUpdateSystem());
