@@ -12,7 +12,7 @@ class TileDisplay implements IComponent {
     public var tileFrameId(default, set):String;
     public var onChange:Void->Void;
 
-    public function new(tileFrameId:String) {
+    public function new(tileFrameId:String = "") {
     	this.tileFrameId = tileFrameId;
     }
 

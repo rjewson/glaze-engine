@@ -8,6 +8,7 @@ class Ballistics {
 
 	public static function calcProjectileVelocity(body:Body,target:Vector2,velocity:Float) {
  		var vel = target.clone();
+                 
         vel.minusEquals(body.position);
         vel.normalize();
         vel.multEquals(velocity); 

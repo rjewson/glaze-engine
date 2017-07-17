@@ -1,6 +1,5 @@
 package exile.components;
 
-import glaze.eco.core.Entity;
 import glaze.eco.core.IComponent;
 import glaze.util.EntityGroup;
 

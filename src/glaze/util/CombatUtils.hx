@@ -40,7 +40,7 @@ class CombatUtils {
         if (start.distSqrd(end)>=range*range)
             return false;
         ray.initalize(start,end,0,null);
-        trace("looking",start,end);
+        // trace("looking",start,end);
         broadphase.CastRay(ray,null,false,false);
         return !ray.hit;
     }
@@ -95,8 +95,8 @@ class CombatUtils {
 
                 if (health!=null || body!=null) {
                     var effect = (radius/Math.sqrt(item.distance))*power;
-                    trace(item.distance);
-                    trace('e=$effect');
+                    // trace(item.distance);
+                    // trace('e=$effect');
                     if (health!=null) {
                         health.applyDamage(effect);
                     }

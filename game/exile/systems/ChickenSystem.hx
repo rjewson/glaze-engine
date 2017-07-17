@@ -30,6 +30,7 @@ class ChickenSystem extends System {
         for (entity in view.entities) {
             var dist:Float = 1000*1000;
             var body = entity.getComponent(PhysicsBody).body;
+            
             var dir = 0;
             if (scaredOfPosition!=null) {
                 dist = body.position.distSqrd(scaredOfPosition.coords);

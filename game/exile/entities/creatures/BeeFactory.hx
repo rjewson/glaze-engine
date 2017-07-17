@@ -2,7 +2,6 @@ package exile.entities.creatures;
 
 import exile.components.Bee;
 import glaze.ai.steering.behaviors.Seek;
-import glaze.ai.steering.behaviors.WallAvoidance;
 import glaze.ai.steering.behaviors.Wander;
 import glaze.ai.steering.components.Steering;
 import glaze.ai.steering.SteeringAgentParameters;
@@ -14,21 +13,14 @@ import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Health;
-import glaze.engine.components.LifeCycle;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
-import glaze.engine.components.Script; 
-import glaze.engine.core.EngineLifecycle;
-import glaze.lighting.components.Light;
 import glaze.physics.Body;
 import glaze.physics.collision.Map;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.Material;
-import glaze.physics.systems.PhysicsCollisionSystem;
-import glaze.render.frame.Frame;
-import glaze.render.frame.FrameList;
 
 class BeeFactory {
 

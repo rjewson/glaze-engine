@@ -31,7 +31,7 @@ class RabbitFactory {
 	} 
 
 	public static function create(engine:Engine,position:Position):Entity {
-
+        var v = new Vector2();
         var rabbitBody = new Body(Material.NORMAL);
         rabbitBody.setBounces(3);     
         rabbitBody.maxScalarVelocity = 1000; 

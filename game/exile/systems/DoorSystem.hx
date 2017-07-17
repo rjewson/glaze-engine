@@ -6,7 +6,6 @@ import glaze.eco.core.System;
 import glaze.engine.components.TileDisplay;
 import glaze.engine.components.State;
 import glaze.physics.components.PhysicsCollision;
-import glaze.render.frame.FrameList;
 import glaze.util.StateChangeProxy;
 
 class DoorSystem extends System {

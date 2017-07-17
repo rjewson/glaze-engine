@@ -1,6 +1,5 @@
 package exile.entities.projectile;
 
-import exile.components.Projectile;
 import glaze.engine.components.CollisionCounter;
 import glaze.engine.components.Destroy;
 import glaze.geom.Vector2;
@@ -14,13 +13,11 @@ import glaze.engine.components.Health;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
-import glaze.lighting.components.Light;
 import glaze.physics.Body;
 import glaze.physics.Material;
 import glaze.physics.collision.Filter;
 import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
-import glaze.render.frame.FrameList;
 
 class PlasmaProjectileFactory {
 	

@@ -2,8 +2,6 @@ package exile.systems;
 
 import exile.components.BeeHive;
 import exile.entities.creatures.BeeFactory;
-import glaze.eco.core.Entity;
-import glaze.eco.core.System;
 import glaze.engine.components.Active;
 import glaze.engine.components.Display;
 import glaze.engine.components.Position;

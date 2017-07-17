@@ -41,3 +41,5 @@ haxelib install compiletime
 * Open the bin/index.html to see the game.  You'll need to serve this via a proper HTTP server (not just the file system).
 
 https://waffle.io/rjewson/glaze-engine
+
+python -m SimpleHTTPServer

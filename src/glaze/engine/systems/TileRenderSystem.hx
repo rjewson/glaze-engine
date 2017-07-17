@@ -88,7 +88,8 @@ class TileRenderSystem extends System {
             var entity = updates.pop();
             var position = entity.getComponent(Position);
             var tileDisplay = entity.getComponent(TileDisplay);
-            tileMap.updateMap(map.data.Index(position.coords.x),map.data.Index(position.coords.y),frames.get(tileDisplay.tileFrameId));
+            if (tileDisplay.tileFrameId!="")
+                tileMap.updateMap(map.data.Index(position.coords.x),map.data.Index(position.coords.y),frames.get(tileDisplay.tileFrameId));
             
             trace(tileDisplay);
         }

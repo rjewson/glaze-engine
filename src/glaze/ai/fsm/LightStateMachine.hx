@@ -1,9 +1,10 @@
 package glaze.ai.fsm;
 
-import glaze.ai.fsm.IState;
 import glaze.eco.core.Entity;
+import glaze.signals.Signal1;
 
-typedef LightStateSet = Map<String,Entity->Void>;
+// typedef StateHandler = Entity -> Void;
+typedef LightStateSet = Map<String, Entity -> Void>;
 
 /*
 	The LightStateMachine takes a common (singelton for example) list of functions, 1 per state referenced by a string ID
@@ -18,9 +19,12 @@ class LightStateMachine {
 	public var states:LightStateSet;
 
 	public var currentState(default,null):String;
+	public var previousState(default,null):String;
 	
-	public function new(states:LightStateSet) {
+	public function new(states:LightStateSet, initialState:String) {
 		this.states = states;
+		this.currentState = initialState;
+		this.previousState = initialState;
 	}
 
 	public function changeState(owner:Entity,newState:String):String {
@@ -30,11 +34,12 @@ class LightStateMachine {
 		if (!states.exists(newState))
 			return currentState;
 
+		previousState = currentState;
 		currentState = newState;
 
 		states.get(newState)(owner);
 
-		return newState;
+		return currentState;
 	}
 
 	public function updateState(owner:Entity) {

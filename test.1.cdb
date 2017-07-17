@@ -1,0 +1,142 @@
+{
+	"sheets": [
+		{
+			"name": "entities",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "1",
+					"name": "description"
+				}
+			],
+			"lines": [
+				{
+					"id": "HallDoor",
+					"description": ""
+				},
+				{
+					"id": "HallDoorSwitch",
+					"description": ""
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "states",
+			"columns": [
+				{
+					"typeStr": "0",
+					"name": "id"
+				},
+				{
+					"typeStr": "9:StateType",
+					"name": "value"
+				}
+			],
+			"lines": [
+				{
+					"id": "DoorAState",
+					"value": [
+						0
+					]
+				},
+				{
+					"id": "GlobalAState"
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "switches",
+			"columns": [
+				{
+					"typeStr": "6:entities",
+					"name": "entity"
+				},
+				{
+					"typeStr": "5:collision",
+					"name": "trigger"
+				},
+				{
+					"typeStr": "3",
+					"name": "frequency"
+				},
+				{
+					"typeStr": "6:states",
+					"name": "state"
+				}
+			],
+			"lines": [
+				{
+					"entity": "HallDoorSwitch",
+					"trigger": 0,
+					"frequency": 500,
+					"state": "DoorAState"
+				},
+				{
+					"entity": "HallDoor",
+					"trigger": 0,
+					"frequency": 1000,
+					"state": "DoorAState"
+				}
+			],
+			"separators": [],
+			"props": {}
+		},
+		{
+			"name": "doors",
+			"columns": [
+				{
+					"typeStr": "6:entities",
+					"name": "entity"
+				},
+				{
+					"typeStr": "3",
+					"name": "health"
+				},
+				{
+					"typeStr": "6:states",
+					"name": "state"
+				}
+			],
+			"lines": [
+				{
+					"entity": "HallDoor",
+					"health": 1000,
+					"state": "DoorAState"
+				}
+			],
+			"separators": [],
+			"props": {}
+		}
+	],
+	"customTypes": [
+		{
+			"name": "StateType",
+			"cases": [
+				{
+					"name": "On",
+					"args": []
+				},
+				{
+					"name": "Off",
+					"args": []
+				},
+				{
+					"name": "True",
+					"args": []
+				},
+				{
+					"name": "False",
+					"args": []
+				}
+			]
+		}
+	],
+	"compress": false
+}

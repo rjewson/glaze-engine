@@ -47,7 +47,6 @@ class BirdSystem extends System {
     override public function entityAdded(entity:Entity) {   
         var bird = entity.getComponent(Bird);
         bird.ai.pushState(baseState);
-
         bird.ai2 = BehaviorTree.createScript("bird");   
         bird.ctx = new BehaviorContext(entity);
         bird.ctx.data.set("home",bird.nest.getComponent(Position).coords.clone());

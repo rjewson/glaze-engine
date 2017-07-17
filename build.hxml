@@ -2,11 +2,15 @@
 -cp src
 -cp test
 -cp game
+-cp data
 -lib glaze-core
 -lib glaze-render
 -lib glaze-eco
 -lib compiletime
 -lib actuate
+-lib tink_state
+-lib castle
+# -resource test.cdb
 -main GameTestA
 #-debug
 #--no-traces

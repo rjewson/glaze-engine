@@ -2,7 +2,6 @@
 package exile.util;
 
 import glaze.core.DigitalInput;
-import glaze.geom.Vector2;
 import glaze.physics.Body;
 
 class CharacterController 
@@ -15,7 +14,7 @@ class CharacterController
 
     private var jumpUnit:Vector2 = new Vector2();
 
-    private static inline var WALK_FORCE:Float = 2000;
+    private static inline var WALK_pFORCE:Float = 2000;
     private static inline var AIR_CONTROL_FORCE:Float = 10;
     private static inline var JUMP_FORCE:Float = 70000;
 

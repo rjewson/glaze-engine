@@ -30,7 +30,10 @@ class PhysicsUpdateSystem extends System {
 
     override public function update(timestamp:Float,delta:Float) {
         for (entity in view.entities) {
-            entity.getComponent(PhysicsBody).body.update(delta/1000,globalForce,globalDamping);
+            var position = entity.getComponent(Position);
+            var physics = entity.getComponent(PhysicsBody);
+            physics.body.update(delta/1000,globalForce,globalDamping);
+            position.direction.x = physics.body.velocity.x>0?1:-1;
         }
 
     }

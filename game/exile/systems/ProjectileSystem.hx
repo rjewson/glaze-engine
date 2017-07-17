@@ -25,7 +25,7 @@ class ProjectileSystem extends System {
 
         var collision = entity.getComponent(PhysicsCollision);
         collision.proxy.contactCallbacks.push(callback);
-    
+        var x = new V2();
     }
 
     override public function entityRemoved(entity:Entity) {

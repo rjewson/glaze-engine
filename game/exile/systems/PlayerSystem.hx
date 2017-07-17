@@ -117,6 +117,7 @@ class PlayerSystem extends System {
 
         // physicsBody.body.setMass(880);
         physicsBody.body.usesStairs = true;
+        // physicsBody.body.isBullet = true;
         
         characterController = new CharacterController2(input,physicsBody.body);
 

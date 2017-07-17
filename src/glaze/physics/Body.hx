@@ -57,7 +57,7 @@ class Body
    
     public var inWater:Bool = false;
     public var inWaterPrev:Bool = false;
-    public var usesStairs:Bool = false;
+    public var usesStairs:Bool = true;
     public var collideOneWay:Bool = true;
 
     public var totalBounceCount:Int = 0;

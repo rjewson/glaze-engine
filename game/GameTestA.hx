@@ -7,7 +7,6 @@ import exile.components.Player;
 import exile.components.Teleporter;
 import exile.ExileFilters;
 import exile.systems.BeeHiveSystem;
-import exile.systems.BeeSystem;
 import exile.systems.BirdNestSystem;
 import exile.systems.BirdSystem;
 import exile.systems.ChickenSystem;
@@ -22,7 +21,6 @@ import glaze.ai.behaviortree.BehaviorTree;
 import glaze.ai.faction.components.Personality;
 import glaze.ai.faction.Faction;
 import glaze.ai.faction.FactionRelationship;
-import glaze.ai.navigation.AStar;
 import glaze.ai.steering.systems.SteeringSystem; 
 import glaze.animation.components.SpriteAnimation;
 import glaze.animation.systems.AnimationSystem;
@@ -32,32 +30,28 @@ import glaze.engine.components.Active;
 import glaze.engine.components.CollidableSwitch;
 import glaze.engine.components.Destroy;
 import glaze.engine.components.Display;
-import glaze.engine.components.EnvironmentForce;
 import glaze.engine.components.Extents;
 import glaze.engine.components.Fixed;      
 import glaze.engine.components.Holdable;
 import glaze.engine.components.Moveable;
 import glaze.engine.components.ParticleEmitters;
 import glaze.engine.components.Position;
-import glaze.engine.components.Script;
 import glaze.engine.components.State;
-import glaze.engine.components.Storeable;
 import glaze.engine.components.TileDisplay;
-import glaze.engine.components.Wind;
 import glaze.engine.core.GameEngine;
 import glaze.engine.factories.tmx.ForceFactory;
 import glaze.engine.factories.TMXFactory;
 import glaze.engine.factories.tmx.LightFactory;
 import glaze.engine.factories.tmx.WaterFactory;
-import glaze.engine.systems.AISystem;
 import glaze.engine.systems.BehaviourSystem;
 import glaze.engine.systems.CollidableSwitchSystem;
 import glaze.engine.systems.DestroySystem;
 import glaze.engine.systems.InventorySystem;
-import glaze.engine.systems.LifecycleSystem;
 import glaze.engine.systems.ParticleSystem;
 import glaze.engine.systems.RenderSystem;
 import glaze.engine.systems.StateSystem;
+// import glaze.engine.systems.ECStateSystem;
+
 import glaze.engine.systems.TileRenderSystem;
 import glaze.engine.systems.FixedViewManagementSystem;
 import glaze.geom.Vector2;
@@ -66,7 +60,6 @@ import glaze.particle.emitter.Explosion;
 import glaze.particle.PointSpriteParticleEngine;
 import glaze.particle.SpriteParticleManager;
 import glaze.physics.Body;
-import glaze.physics.collision.broadphase.uniformgrid.UniformGrid;
 import glaze.physics.collision.Intersect;
 import glaze.physics.Material;
 import glaze.physics.collision.Filter;
@@ -76,7 +69,6 @@ import glaze.physics.components.PhysicsBody;
 import glaze.physics.components.PhysicsCollision;
 import glaze.physics.systems.ContactRouterSystem;
 import glaze.physics.systems.PhysicsCollisionSystem;
-import glaze.physics.systems.PhysicsConstraintSystem;
 import glaze.physics.systems.PhysicsMoveableSystem;
 import glaze.physics.systems.PhysicsPositionSystem;
 import glaze.physics.systems.PhysicsStaticSystem;
@@ -89,10 +81,13 @@ import glaze.util.Random.RandomInteger;
 import js.Browser;
 import js.html.CanvasElement;
 
+// import tink.state.Promised;
+import tink.state.Observable;
+// import tink.state.State;
+
 class GameTestA extends GameEngine {
      
     public static inline var MAP_DATA:String = "data/16map.tmx";
-
     public static inline var TEXTURE_CONFIG:String = "data/sprites.json";
     public static inline var TEXTURE_DATA:String = "data/sprites.png";
     public static inline var FRAMES_CONFIG:String = "data/frames.json";
@@ -101,7 +96,6 @@ class GameTestA extends GameEngine {
     public static inline var PARTICLE_TEXTURE_DATA:String = "data/particles.png";
     public static inline var PARTICLE_FRAMES_CONFIG:String = "data/particleFrames.json";
     public static inline var TILE_FRAMES_CONFIG:String = "data/tileFrames.json";
-
 
     // public static inline var COL_SPRITE_SHEET:String = "data/superSet.png";
     // public static inline var TILE_SPRITE_SHEET_1:String = "data/superSet.png";
@@ -113,7 +107,6 @@ class GameTestA extends GameEngine {
     // public static inline var TILE_SPRITE_SHEET:String = "data/spelunky-tiles.png";
     // public static inline var TILE_MAP_DATA_1:String = "data/spelunky0.png";
     // public static inline var TILE_MAP_DATA_2:String = "data/spelunky1.png";
-  
     var tmxMap:TmxMap;
     var player:Entity;
     var playerFilter:Filter;
@@ -124,6 +117,8 @@ class GameTestA extends GameEngine {
     var blockParticleEngine:BlockSpriteParticleEngine;
     var spriteParticleEngine:PointSpriteParticleEngine;
     var playerFaction:Faction;
+
+    var slide:Entity;
 
     public var nf:Intersect;
     public var broadphase:glaze.physics.collision.broadphase.IBroadphase;
@@ -143,7 +138,7 @@ class GameTestA extends GameEngine {
     public var fsm:glaze.util.FlxFSM<Entity>;  
     public var lwfsm:glaze.ai.fsm.LightStackStateMachine<Entity>;
     // public var pool:glaze.util.Pool;   
-
+public var xf:Dynamic->Void;
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
         loadAssets([
@@ -163,8 +158,99 @@ class GameTestA extends GameEngine {
         ]);
     }
   
+public static function throttle(callback : Void -> Void, delayms : Int, leading = false) {
+    var waiting = false;
+    function poll() {
+      waiting = true;
+      delay(callback, delayms);
+    }
+    return function() {
+        if(leading) {
+          leading = false;
+          callback();
+          return;
+        }
+        if(waiting)
+          return;
+        poll();
+    };
+  }
+
+    public static function cancel(id:Int):Void->Void {
+        return untyped __js__('clearTimeout');
+    }
+
+    public static function delay(callback : Void -> Void, delayms : Int) {
+        return cancel.bind(untyped __js__('setTimeout')(callback, delayms));
+    }
+
+    public static function limit(callback : Dynamic -> Void, delayms : Int, leading = false):Dynamic -> Void {
+        var lastTime = .0;
+        return function(p:Dynamic) {
+            var now = haxe.Timer.stamp()*1000;
+            if (now-lastTime < delayms) 
+                return;
+            lastTime = now;
+            callback(p);
+        }
+    };
+ 
+ /*
+
+collision
+'eventxyz':data => channelxyz
+<listsent
+
+ */
+
     override public function initalize() {
-              
+        
+        // trace(haxe.Timer.stamp());
+        // js.Lib.debug();
+
+        // dat.Data.load("{}");
+        Test.load();
+
+        var doorAState = new tink.state.State(true);
+        
+        var switchX = Observable.auto(
+            function() {
+                return doorAState.value;
+            }
+        );
+        var doorA = Observable.auto(
+            function() {
+                return doorAState.value;
+            }
+        );
+
+        doorAState.observe().bind(function(v) {
+            // js.Lib.debug();
+            trace(v);
+        });
+
+        trace(switchX.value,doorA.value);
+
+        var updater = limit(doorAState.set,10000);
+
+        doorAState.set(false);
+            
+        trace(switchX.value,doorA.value);
+
+        updater(true);
+        trace(switchX.value,doorA.value);
+        updater(false);
+        trace(switchX.value,doorA.value);
+
+
+        xf = limit(function(p:Dynamic):Void{
+            trace('called');
+            // js.Lib.debug();
+
+        },1000);
+    // xf = function() {
+    //     trace('x');
+    // }
         // var bs = new glaze.ds.BitSet(32);                
  
         // var mustHave =  new glaze.ds.BitSet(32);
@@ -183,12 +269,15 @@ class GameTestA extends GameEngine {
         // var lsm = new glaze.ai.fsm.LightStateMachine(owner,["test"=>function(e:Entity){}]);
 
         BehaviorTree.initialize();
-        BehaviorTree.registerScript("bird",CompileTime.readJsonFile("test.json"));
+        BehaviorTree.registerScript("bird",CompileTime.readJsonFile("/Users/richard.jewson/Workspace/glaze/glaze-engine/test.json"));
 
         engine.config.tileSize = 16;
  
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
-   
+
+        var factory = new glaze.engine.factories.tmxcastle.TmxCastleFactory(tmxMap);
+        factory.registerFactory(exile.entities.items.DoorFactory);
+        factory.parse("Objects");
 
         // tmxMap.tilesets[0].set_image(assets.assets.get(COL_SPRITE_SHEET));
         // tmxMap.tilesets[1].set_image(assets.assets.get(TILE_SPRITE_SHEET_1));
@@ -309,17 +398,19 @@ class GameTestA extends GameEngine {
 
         aiphase.addSystem(new BehaviourSystem());  
         aiphase.addSystem(new StateSystem(messageBus));  
+        // aiphase.addSystem(new ECStateSystem(messageBus));  
+
         aiphase.addSystem(new CollidableSwitchSystem(messageBus));  
         aiphase.addSystem(new DoorSystem());                                                  
         aiphase.addSystem(new TeleporterSystem());                                                 
         aiphase.addSystem(new BeeHiveSystem());                                                 
         // aiphase.addSystem(new BeeSystem(broadphase));  
-
         aiphase.addSystem(new BirdNestSystem());                                                 
         aiphase.addSystem(new BirdSystem(broadphase));  
 
         aiphase.addSystem(new GunTurretSystem());                                                 
 
+        aiphase.addSystem(new exile.systems.WaterHolderSystem());
 
         chickenSystem = new ChickenSystem(blockParticleEngine);
         aiphase.addSystem(chickenSystem); 
@@ -412,6 +503,16 @@ class GameTestA extends GameEngine {
 
         createTurret();    
 
+        //  slide = engine.createEntity([
+        //     mapPosition(36,55),
+        //     new Extents(50,8),  
+        //     // new Display("door"), 
+        //     new Display("items","water_container"), 
+        //     new PhysicsCollision(false,null,[]),
+        //     new Fixed(),      
+        //     new Active()
+        // ],"slide");      
+
         door = engine.createEntity([
             mapPosition(9.5,23.5),
             new Extents(3,34),  
@@ -419,11 +520,13 @@ class GameTestA extends GameEngine {
             new TileDisplay("doorClosed"),
             new PhysicsCollision(false,null,[]),
             new Fixed(),      
-            new Door(false,""),
+            new Door("door",false,""),
             new State(['closed','open'],0,["doorA"]),
             new Active()
         ],"door");        
- 
+
+        // var newDoor = exile.entities.items.DoorFactory.create(engine,mapPosition(5.5,23.5));
+
         var doorSwitch = engine.createEntity([
             mapPosition(10.5,18.5),
             new Extents(8,8),
@@ -495,6 +598,7 @@ class GameTestA extends GameEngine {
             new Moveable(), 
             new PhysicsBody(new Body(Material.NORMAL),true),
             new Holdable(),
+            new exile.components.WaterHolder(10),
             new Active()
         ],"water_container");         
 
@@ -615,7 +719,7 @@ class GameTestA extends GameEngine {
 
         var bullet = exile.entities.projectile.StandardBulletFactory.create(engine,new Position(pos.x,pos.y),filter,target);
         // glaze.util.Ballistics.calcProjectileVelocity(bullet.getComponent(PhysicsBody).body,target,velocity);        
-    }    
+    } 
     
     function fireBulletAtEntity(context:glaze.ai.behaviortree.BehaviorContext) {
         var ec:glaze.ds.EntityCollection = untyped context.data.ec;
@@ -666,7 +770,17 @@ class GameTestA extends GameEngine {
             killChickens = false;         
         }    
     }          
+
     override public function preUpdate() {   
+        xf(1);
+        //576,880
+        //var c = ((Math.PI*2)/1000) * engine.timestamp%1000;
+        //c=Math.sin(c);
+        // var np = slide.getComponent(Position).coords.clone();
+        //var np = slide.getComponent(Position).coords.y +=c>0?4:-4;//clone();
+
+        // np.y = 880 + 1;
+        // slide.getComponent(Position).update(np);
         // if (Std.is(chickenSystem,ChickenSystem)) {
         //     trace("it is");
         // }
