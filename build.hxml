@@ -2,7 +2,6 @@
 -cp src
 -cp test
 -cp game
--cp data
 -lib glaze-core
 -lib glaze-render
 -lib glaze-eco

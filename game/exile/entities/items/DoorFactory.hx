@@ -34,42 +34,28 @@ class DoorFactory {
         }
     ];
 
-    public function new() {
+    private function new() {
     }
 
     public static var create:Array<IComponent>->Array<IComponent> = function(components) {
-        // var extents = components.
-        return [];
-        // return [
-        //     new Extents(3,34),
-        //     new TileDisplay(),
-        //     new PhysicsCollision(false,null,[]),
-        //     new Fixed(),     
-        //     new Door("door"),
-        //     new ECState(states),
-        //     new SyncGlobalState("globalStateID"), // Dynamic -> String
-        //     new Active()
-        // ];
-    }
-/*
-    public static function create(engine:Engine,position:Position):Entity {
-
-        var door = engine.createEntity([
-            position,
-            new Extents(3,34),  
-            // new Display("door"), 
+        var extents:Extents = cast components[2];
+        extents.halfWidths.y/=2;
+        return components.concat([
+            // new TileDisplay(),
+            // new PhysicsCollision(false,null,[]),
+            // new Fixed(),     
+            // new Door("door"),
+            // new ECState(states),
+            // // new SyncGlobalState("globalStateID"), // Dynamic -> String
+            // new Active()
             new TileDisplay("doorClosed"),
             new PhysicsCollision(false,null,[]),
             new Fixed(),      
             new Door("door",false,""),
             new State(['closed','open'],0,["doorA"]),
             new ECState(states,"open",["open","close"]),
-            // new MessageToState(["channel1","channelx"],["msgopen"=>"open","msgclose"=>"close","inc"=>"$increment"]),
             new Active()
-        ],"door");  
-
-        return door;
+        ]);
 
     }
-*/
 }

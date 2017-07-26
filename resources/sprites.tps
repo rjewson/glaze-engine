@@ -2,9 +2,9 @@
 <data version="1.0">
     <struct type="Settings">
         <key>fileFormatVersion</key>
-        <int>3</int>
+        <int>4</int>
         <key>texturePackerVersion</key>
-        <string>4.0.1</string>
+        <string>4.4.0</string>
         <key>fileName</key>
         <string>/Users/richard.jewson/Workspace/glaze/glaze-engine/resources/sprites.tps</string>
         <key>autoSDSettings</key>
@@ -29,8 +29,6 @@
         </array>
         <key>allowRotation</key>
         <false/>
-        <key>premultiplyAlpha</key>
-        <false/>
         <key>shapeDebug</key>
         <false/>
         <key>dpi</key>
@@ -49,6 +47,8 @@
         <uint>32768</uint>
         <key>etc1CompressionQuality</key>
         <enum type="SettingsBase::Etc1CompressionQuality">ETC1_QUALITY_LOW_PERCEPTUAL</enum>
+        <key>etc2CompressionQuality</key>
+        <enum type="SettingsBase::Etc2CompressionQuality">ETC2_QUALITY_LOW_PERCEPTUAL</enum>
         <key>dxtCompressionMode</key>
         <enum type="SettingsBase::DxtCompressionMode">DXT_PERCEPTUAL</enum>
         <key>jxrColorFormat</key>
@@ -81,6 +81,8 @@
         <uint>101</uint>
         <key>textureSubPath</key>
         <string></string>
+        <key>atfFormats</key>
+        <string></string>
         <key>textureFormat</key>
         <enum type="SettingsBase::TextureFormat">png</enum>
         <key>borderPadding</key>
@@ -99,8 +101,6 @@
             <key>height</key>
             <int>-1</int>
         </QSize>
-        <key>reduceBorderArtifacts</key>
-        <false/>
         <key>algorithmSettings</key>
         <struct type="AlgorithmSettings">
             <key>algorithm</key>
@@ -110,8 +110,6 @@
             <key>sizeConstraints</key>
             <enum type="AlgorithmSettings::SizeConstraints">POT</enum>
             <key>forceSquared</key>
-            <false/>
-            <key>forceWordAligned</key>
             <false/>
             <key>maxRects</key>
             <struct type="AlgorithmMaxRectsSettings">
@@ -124,6 +122,11 @@
                 <enum type="AlgorithmBasicSettings::SortBy">Best</enum>
                 <key>order</key>
                 <enum type="AlgorithmBasicSettings::Order">Ascending</enum>
+            </struct>
+            <key>polygon</key>
+            <struct type="AlgorithmPolygonSettings">
+                <key>alignToGrid</key>
+                <uint>1</uint>
             </struct>
         </struct>
         <key>andEngine</key>
@@ -156,6 +159,8 @@
         <false/>
         <key>outputFormat</key>
         <enum type="SettingsBase::OutputFormat">RGBA8888</enum>
+        <key>alphaHandling</key>
+        <enum type="SettingsBase::AlphaHandling">ClearTransparentPixels</enum>
         <key>contentProtection</key>
         <struct type="ContentProtection">
             <key>key</key>
@@ -167,7 +172,7 @@
         <false/>
         <key>prependSmartFolderName</key>
         <false/>
-        <key>cleanTransparentPixels</key>
+        <key>autodetectAnimations</key>
         <true/>
         <key>globalSpriteSettings</key>
         <struct type="SpriteSettings">
@@ -187,9 +192,392 @@
             <int>200</int>
             <key>heuristicMask</key>
             <false/>
-            <key>pivotPoint</key>
-            <enum type="SpriteSettings::PivotPoint">Center</enum>
+            <key>defaultPivotPoint</key>
+            <point_f>0.5,0.5</point_f>
+            <key>writePivotPoints</key>
+            <false/>
         </struct>
+        <key>individualSpriteSettings</key>
+        <map type="IndividualSpriteSettingsMap">
+            <key type="filename">sprites/bat/bat00.png</key>
+            <key type="filename">sprites/bat/bat01.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,3,8,6</rect>
+                <key>scale9Paddings</key>
+                <rect>4,3,8,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/bird/bird2/frame1.png</key>
+            <key type="filename">sprites/bird/bird2/frame10.png</key>
+            <key type="filename">sprites/bird/bird2/frame11.png</key>
+            <key type="filename">sprites/bird/bird2/frame12.png</key>
+            <key type="filename">sprites/bird/bird2/frame13.png</key>
+            <key type="filename">sprites/bird/bird2/frame14.png</key>
+            <key type="filename">sprites/bird/bird2/frame15.png</key>
+            <key type="filename">sprites/bird/bird2/frame16.png</key>
+            <key type="filename">sprites/bird/bird2/frame17.png</key>
+            <key type="filename">sprites/bird/bird2/frame18.png</key>
+            <key type="filename">sprites/bird/bird2/frame19.png</key>
+            <key type="filename">sprites/bird/bird2/frame2.png</key>
+            <key type="filename">sprites/bird/bird2/frame20.png</key>
+            <key type="filename">sprites/bird/bird2/frame3.png</key>
+            <key type="filename">sprites/bird/bird2/frame4.png</key>
+            <key type="filename">sprites/bird/bird2/frame5.png</key>
+            <key type="filename">sprites/bird/bird2/frame6.png</key>
+            <key type="filename">sprites/bird/bird2/frame7.png</key>
+            <key type="filename">sprites/bird/bird2/frame8.png</key>
+            <key type="filename">sprites/bird/bird2/frame9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,6,5</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,6,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/bird/raven1.png</key>
+            <key type="filename">sprites/bird/raven2.png</key>
+            <key type="filename">sprites/bird/raven3.png</key>
+            <key type="filename">sprites/bird/raven4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,3,9,6</rect>
+                <key>scale9Paddings</key>
+                <rect>5,3,9,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/blob/green1.png</key>
+            <key type="filename">sprites/blob/green2.png</key>
+            <key type="filename">sprites/blob/green3.png</key>
+            <key type="filename">sprites/blob/green4.png</key>
+            <key type="filename">sprites/blob/green5.png</key>
+            <key type="filename">sprites/blob/green6.png</key>
+            <key type="filename">sprites/maggot/maggot1.png</key>
+            <key type="filename">sprites/maggot/maggot2.png</key>
+            <key type="filename">sprites/maggot/maggot3.png</key>
+            <key type="filename">sprites/maggot/maggot4.png</key>
+            <key type="filename">sprites/maggot/maggot5.png</key>
+            <key type="filename">sprites/maggot/maggot6.png</key>
+            <key type="filename">sprites/maggot/maggot7.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,2,8,5</rect>
+                <key>scale9Paddings</key>
+                <rect>4,2,8,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/chicken/frame-001.png</key>
+            <key type="filename">sprites/chicken/frame-002.png</key>
+            <key type="filename">sprites/chicken/frame-003.png</key>
+            <key type="filename">sprites/chicken/frame-004.png</key>
+            <key type="filename">sprites/chicken/frame-005.png</key>
+            <key type="filename">sprites/chicken/frame-006.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,4,7,7</rect>
+                <key>scale9Paddings</key>
+                <rect>3,4,7,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/fish/fish1.png</key>
+            <key type="filename">sprites/fish/fish2.png</key>
+            <key type="filename">sprites/jumpything/frame1.png</key>
+            <key type="filename">sprites/jumpything/frame2.png</key>
+            <key type="filename">sprites/rabbit/frame1.png</key>
+            <key type="filename">sprites/rabbit/frame10.png</key>
+            <key type="filename">sprites/rabbit/frame11.png</key>
+            <key type="filename">sprites/rabbit/frame12.png</key>
+            <key type="filename">sprites/rabbit/frame13.png</key>
+            <key type="filename">sprites/rabbit/frame14.png</key>
+            <key type="filename">sprites/rabbit/frame15.png</key>
+            <key type="filename">sprites/rabbit/frame16.png</key>
+            <key type="filename">sprites/rabbit/frame2.png</key>
+            <key type="filename">sprites/rabbit/frame3.png</key>
+            <key type="filename">sprites/rabbit/frame4.png</key>
+            <key type="filename">sprites/rabbit/frame5.png</key>
+            <key type="filename">sprites/rabbit/frame6.png</key>
+            <key type="filename">sprites/rabbit/frame7.png</key>
+            <key type="filename">sprites/rabbit/frame8.png</key>
+            <key type="filename">sprites/rabbit/frame9.png</key>
+            <key type="filename">sprites/zombie/zombie1.png</key>
+            <key type="filename">sprites/zombie/zombie2.png</key>
+            <key type="filename">sprites/zombie/zombie3.png</key>
+            <key type="filename">sprites/zombie/zombie4.png</key>
+            <key type="filename">sprites/zombie/zombie5.png</key>
+            <key type="filename">sprites/zombie/zombie6.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9Paddings</key>
+                <rect>4,4,8,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/fish2/fish1.png</key>
+            <key type="filename">sprites/fish2/fish2.png</key>
+            <key type="filename">sprites/fish2/fish3.png</key>
+            <key type="filename">sprites/fish2/fish4.png</key>
+            <key type="filename">sprites/insects/firefly/frame1.png</key>
+            <key type="filename">sprites/insects/firefly/frame2.png</key>
+            <key type="filename">sprites/insects/firefly/frame3.png</key>
+            <key type="filename">sprites/insects/firefly/frame4.png</key>
+            <key type="filename">sprites/items/egg.png</key>
+            <key type="filename">sprites/projectiles/fireball.png</key>
+            <key type="filename">sprites/projectiles/projectile1.png</key>
+            <key type="filename">sprites/rock.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,4,4</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,4,4</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/grenade/basic1.png</key>
+            <key type="filename">sprites/grenade/basic2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,3,4,5</rect>
+                <key>scale9Paddings</key>
+                <rect>2,3,4,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/insects/bee/frame1.png</key>
+            <key type="filename">sprites/insects/bee/frame2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,2,3,3</rect>
+                <key>scale9Paddings</key>
+                <rect>2,2,3,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/insects/nest.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,4,6,7</rect>
+                <key>scale9Paddings</key>
+                <rect>3,4,6,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/insects/wasp/frame1.png</key>
+            <key type="filename">sprites/insects/wasp/frame2.png</key>
+            <key type="filename">sprites/insects/wasp/frame3.png</key>
+            <key type="filename">sprites/insects/wasp/frame4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>1,1,3,3</rect>
+                <key>scale9Paddings</key>
+                <rect>1,1,3,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/items/balls1.png</key>
+            <key type="filename">sprites/items/balls2.png</key>
+            <key type="filename">sprites/items/balls3.png</key>
+            <key type="filename">sprites/items/balls4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,3,5,5</rect>
+                <key>scale9Paddings</key>
+                <rect>2,3,5,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/items/water_container.png</key>
+            <key type="filename">sprites/items/water_container_full.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9Paddings</key>
+                <rect>2,4,3,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/items/water_container2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,3,5,7</rect>
+                <key>scale9Paddings</key>
+                <rect>3,3,5,7</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/mouse/mouse1.png</key>
+            <key type="filename">sprites/mouse/mouse2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,2,6,3</rect>
+                <key>scale9Paddings</key>
+                <rect>3,2,6,3</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/player3/frame1.png</key>
+            <key type="filename">sprites/player3/frame10.png</key>
+            <key type="filename">sprites/player3/frame11.png</key>
+            <key type="filename">sprites/player3/frame12.png</key>
+            <key type="filename">sprites/player3/frame13.png</key>
+            <key type="filename">sprites/player3/frame14.png</key>
+            <key type="filename">sprites/player3/frame15.png</key>
+            <key type="filename">sprites/player3/frame16.png</key>
+            <key type="filename">sprites/player3/frame17.png</key>
+            <key type="filename">sprites/player3/frame18.png</key>
+            <key type="filename">sprites/player3/frame19.png</key>
+            <key type="filename">sprites/player3/frame2.png</key>
+            <key type="filename">sprites/player3/frame20.png</key>
+            <key type="filename">sprites/player3/frame3.png</key>
+            <key type="filename">sprites/player3/frame4.png</key>
+            <key type="filename">sprites/player3/frame5.png</key>
+            <key type="filename">sprites/player3/frame6.png</key>
+            <key type="filename">sprites/player3/frame7.png</key>
+            <key type="filename">sprites/player3/frame8.png</key>
+            <key type="filename">sprites/player3/frame9.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,6,9,11</rect>
+                <key>scale9Paddings</key>
+                <rect>5,6,9,11</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/robot_exile.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>3,4,6,8</rect>
+                <key>scale9Paddings</key>
+                <rect>3,4,6,8</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/weapons/gun1.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,3,11,6</rect>
+                <key>scale9Paddings</key>
+                <rect>5,3,11,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/weapons/gun2.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>5,2,10,5</rect>
+                <key>scale9Paddings</key>
+                <rect>5,2,10,5</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/weapons/gun3.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>6,3,11,6</rect>
+                <key>scale9Paddings</key>
+                <rect>6,3,11,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+            <key type="filename">sprites/weapons/gun4.png</key>
+            <struct type="IndividualSpriteSettings">
+                <key>pivotPoint</key>
+                <point_f>0.5,0.5</point_f>
+                <key>scale9Enabled</key>
+                <false/>
+                <key>scale9Borders</key>
+                <rect>4,3,9,6</rect>
+                <key>scale9Paddings</key>
+                <rect>4,3,9,6</rect>
+                <key>scale9FromFile</key>
+                <false/>
+            </struct>
+        </map>
         <key>fileList</key>
         <array>
             <filename>sprites</filename>
@@ -214,5 +602,7 @@
         <string></string>
         <key>normalMapSheetFileName</key>
         <filename></filename>
+        <key>exporterProperties</key>
+        <map type="ExporterProperties"/>
     </struct>
 </data>

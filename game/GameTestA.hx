@@ -138,7 +138,7 @@ class GameTestA extends GameEngine {
     public var fsm:glaze.util.FlxFSM<Entity>;  
     public var lwfsm:glaze.ai.fsm.LightStackStateMachine<Entity>;
     // public var pool:glaze.util.Pool;   
-public var xf:Dynamic->Void;
+    public var xf:Dynamic->Void;
     public function new() {
         super(cast(Browser.document.getElementById("view"),CanvasElement));
         loadAssets([
@@ -209,7 +209,9 @@ collision
         // js.Lib.debug();
 
         // dat.Data.load("{}");
-        Test.load();
+        //Test.load();
+
+        dat.Data.load(CompileTime.readJsonFile("test.cdb"));
 
         var doorAState = new tink.state.State(true);
         
@@ -275,7 +277,7 @@ collision
  
         tmxMap = new glaze.tmx.TmxMap(assets.assets.get(MAP_DATA),glaze.EngineConstants.TILE_SIZE);
 
-        var factory = new glaze.engine.factories.tmxcastle.TmxCastleFactory(tmxMap);
+        var factory = new exile.factory.TmxCastleFactory(engine,tmxMap);
         factory.registerFactory(exile.entities.items.DoorFactory);
         factory.parse("Objects");
 
@@ -512,18 +514,19 @@ collision
         //     new Fixed(),      
         //     new Active()
         // ],"slide");      
-
-        door = engine.createEntity([
-            mapPosition(9.5,23.5),
-            new Extents(3,34),  
-            // new Display("door"), 
-            new TileDisplay("doorClosed"),
-            new PhysicsCollision(false,null,[]),
-            new Fixed(),      
-            new Door("door",false,""),
-            new State(['closed','open'],0,["doorA"]),
-            new Active()
-        ],"door");        
+//72,176
+//9.5*16 = 152 23.5*16 = 376
+        // door = engine.createEntity([
+        //     mapPosition(9.5,23.5),
+        //     new Extents(3,24),  
+        //     // new Display("door"), 
+        //     new TileDisplay("doorClosed"),
+        //     new PhysicsCollision(false,null,[]),
+        //     new Fixed(),      
+        //     new Door("door",false,""),
+        //     new State(['closed','open'],0,["doorA"]),
+        //     new Active()
+        // ],"door");        
 
         // var newDoor = exile.entities.items.DoorFactory.create(engine,mapPosition(5.5,23.5));
 
@@ -591,9 +594,9 @@ collision
         ],"birdsnest2");
 
         engine.createEntity([
-            mapPosition(9,4),
+            mapPosition(25,57),
             new Extents(6,14),
-            new Display("items","water_container"), 
+            new Display("items","water_container_full"), 
             new PhysicsCollision(false,new Filter(),[]),
             new Moveable(), 
             new PhysicsBody(new Body(Material.NORMAL),true),

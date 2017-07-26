@@ -70,9 +70,10 @@ class HeldSystem extends System {
 
             // entity.getComponent(Position).coords.copy(holderPos);
             // entity.getComponent(PhysicsBody).body.position.copy(holderPos);
-            entity.getComponent(PhysicsBody).body.setStaticPosition(holderPos.coords.x+(holderPos.direction.x*4),holderPos.coords.y); //position.copy(holderPos);
+            var body = entity.getComponent(PhysicsBody).body;
+            body.setStaticPosition(holderPos.coords.x+(holderPos.direction.x*4),holderPos.coords.y); //position.copy(holderPos);
             //entity.getComponent(PhysicsBody).body.position.copy(entity.getComponent(PhysicsBody).body.position);
-            entity.getComponent(Position).update(entity.getComponent(PhysicsBody).body.position);
+            entity.getComponent(Position).update(body.position);
         }
 
     }

@@ -1,4 +1,4 @@
-package glaze.engine.factories.tmxcastle;
+package exile.factory;
 
 import glaze.eco.core.IComponent;
 import glaze.tmx.TmxMap;
@@ -6,6 +6,7 @@ import glaze.tmx.TmxObject;
 import glaze.eco.core.Engine;
 import glaze.engine.components.Position;
 import glaze.engine.components.Extents;
+import dat.Data;
 
 typedef Components = Array<IComponent>;
 
@@ -24,6 +25,7 @@ class TmxCastleFactory {
         this.engine = engine;
         this.tmxMap = tmxMap;
         factories = new Map<String,ComponentFactory>();
+        dat.Data.StateType.On.getName();
     }
 
     public function parse(groupName:String) {

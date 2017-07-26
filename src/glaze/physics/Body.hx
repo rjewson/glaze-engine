@@ -21,6 +21,7 @@ class Body
 
     public var velocity:Vector2 = new Vector2();
     public var originalVelocity:Vector2 = new Vector2();
+    public var previousVelocity:Vector2 = new Vector2();
 
     public var contactNormal:Vector2 = new Vector2();
     public var prevContactNormal:Vector2 = new Vector2();
@@ -96,6 +97,8 @@ class Body
         motion = (SLEEP_BIAS * motion) + ((1 - SLEEP_BIAS) * velocity.lengthSqrd());
         motion = Math.min(motion,10*SLEEP_EPSILON);
         canSleep = motion<SLEEP_EPSILON;
+
+        previousVelocity.copy(velocity);
 
         //Add global forces to local ones
         forces.plusMultEquals(globalForces,globalForceFactor);

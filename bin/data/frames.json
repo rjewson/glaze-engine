@@ -55,7 +55,8 @@
 			{ "id":"heavyblaster",	"name":"weapons/gun2.png",		"scale":{"x":2,"y":2} },
 			{ "id":"plasma",		"name":"weapons/gun3.png",		"scale":{"x":2,"y":2} },
 			{ "id":"gun4",			"name":"weapons/gun4.png",		"scale":{"x":2,"y":2} },
-			{ "id":"water_container",			"name":"items/water_container.png",		"scale":{"x":2,"y":2} }
+			{ "id":"water_container","name":"items/water_container.png",		"scale":{"x":2,"y":2} },
+			{ "id":"water_container_full","name":"items/water_container_full.png",		"scale":{"x":2,"y":2} }
 		]
 	},
 

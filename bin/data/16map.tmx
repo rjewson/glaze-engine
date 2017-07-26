@@ -73,8 +73,8 @@
    </properties>
   </object>
   <object id="14" name="Water" type="Water" x="512" y="168" width="144" height="64"/>
-  <object id="16" name="TopRoomSwitch" type="Switch" x="80" y="144" width="8" height="8"/>
-  <object id="17" name="TopRoomDoor" type="Door" x="72" y="176" width="8" height="24"/>
+  <object id="16" name="TopRoomSwitch" type="switch" x="80" y="144" width="8" height="8"/>
+  <object id="17" name="TopRoomDoor" type="door" x="72" y="176" width="8" height="24"/>
  </objectgroup>
  <objectgroup name="Waypoints" visible="0"/>
 </map>
