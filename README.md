@@ -3,10 +3,14 @@
 
 A game engine built with Haxe. 
 
+[Try the latest build here (sorry for the level design)](http://www.rjewson.com/glaze/)
+
 - Designed around the Entity-component-system archectural pattern
     - Uses glaze-eco
     - All aspects of the engine are fully integrated (physics, graphics, ai etc)
 - High performance custom 2D physics
+    - Designed to handle 1000's of concurrent bodies in realtime
+    - Hybrid ray/AABB collision scheme ensures correct contact point calculation and 0% chance of penetration
 - Efficient OpenGL/WebGL render
     - Quad Sprite renderer
     - Point Sprite renderer
@@ -16,6 +20,7 @@ A game engine built with Haxe.
 - Steering behaviours
 - Behaviour Tree
 - FSM's
+- and more
 
 Utilizes all the glaze sub projects:
 
